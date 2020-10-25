@@ -32,6 +32,9 @@ for (const file of commandFiles) {
 }
 
 client.on("ready", async () => {
+    // set db
+    client.database = await require("./utils/dbm").createDatabase();
+
     xlg.log(`Bot ${client.user.tag}(${client.user.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     // set the visible bot status
     client.user.setPresence({
@@ -54,7 +57,7 @@ client.on("message", async message => {
         if (dm) return // aborting all dm messages for now
         
         //const now = Date.now();
-        
+
         message.gprefix = config.prefix
         if (await ch(message)) return;
 

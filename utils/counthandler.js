@@ -17,6 +17,7 @@ module.exports = async (message) => {
     if (!config.currentNumber && config.currentNumber !== 0) config.currentNumber = 0;
     if (parseInt(message.content, 10) !== config.currentNumber + config.increment) {
         message.react("❌");
+        config.lastUpdatedId = message.author.id;
         config.currentNumber = 0;
         fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
             if (err) return console.log(err);
@@ -35,6 +36,7 @@ module.exports = async (message) => {
     }
     if (config.lastUpdatedId === message.author.id) {
         message.react("❌");
+        config.lastUpdatedId = message.author.id;
         config.currentNumber = 0;
         fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
             if (err) return console.log(err);
@@ -56,6 +58,7 @@ module.exports = async (message) => {
     fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
         if (err) return console.log(err);
     });
-    message.react("✔");
+    //message.react("✔");
+    message.react("☑️");
     return true;
 }
