@@ -20,7 +20,7 @@ module.exports = async (message) => {
             embed: {
                 color: 6969,
                 title: "❌ wrong number",
-                description: "the count has reset to 0",
+                description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {
                     text: "idiot"
                 }
@@ -38,7 +38,7 @@ module.exports = async (message) => {
             embed: {
                 color: 6969,
                 title: "❌ talking out of turn",
-                description: "the count has reset to 0",
+                description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {
                     text: "idiot"
                 }
@@ -47,7 +47,7 @@ module.exports = async (message) => {
         return true;
     }
     config.lastUpdatedId = message.author.id;
-    config.currentNumber++;
+    config.currentNumber += config.increment;
     fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
         if (err) return console.log(err);
     });
