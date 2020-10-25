@@ -4,6 +4,11 @@ module.exports = async (message) => {
     const config = require("../config.json");
     if (message.channel.id !== "769849916582789140") return false;
     if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
+        const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
+        const commandName = args.shift().toLowerCase()
+        const command = message.client.commands.get(commandName) ||
+            message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+        if (command) return false;
         message.delete();
         return true;
     }
@@ -18,7 +23,7 @@ module.exports = async (message) => {
         });
         message.channel.send({
             embed: {
-                color: 6969,
+                color: config.info_color,
                 title: "❌ wrong number",
                 description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {
@@ -36,7 +41,7 @@ module.exports = async (message) => {
         });
         message.channel.send({
             embed: {
-                color: 6969,
+                color: config.info_color,
                 title: "❌ talking out of turn",
                 description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {

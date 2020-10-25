@@ -33,6 +33,14 @@ for (const file of commandFiles) {
 
 client.on("ready", async () => {
     xlg.log(`Bot ${client.user.tag}(${client.user.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
+    // set the visible bot status
+    client.user.setPresence({
+        activity: {
+            name: `for ✔ nums | ${config.prefix}help`,
+            type: 'WATCHING'
+        },
+        status: 'online'
+    }).catch(xlg.error)
 })
 
 client.on("message", async message => {
@@ -44,12 +52,12 @@ client.on("message", async message => {
         if (!message.guild)
             dm = true
         if (dm) return // aborting all dm messages for now
-
+        
+        //const now = Date.now();
+        
+        message.gprefix = config.prefix
         if (await ch(message)) return;
 
-        //const now = Date.now();
-
-        message.gprefix = config.prefix
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
 
