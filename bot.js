@@ -14,6 +14,22 @@ const fs = require("fs");
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require("./config.json");
+const ch = require("./utils/counthandler");
+
+client.commands = new Discord.Collection()
+// ▼▲▼▲▼▲▼▲▼▲▼▲▼▲ for command handler
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+var commNumber = 1
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`)
+    client.commands.set(command.name, command)
+    let noName = ''
+    if (command.name === '' || command.name == null) {
+        noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m'
+    }
+    console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName)
+    commNumber++
+}
 
 client.on("ready", async () => {
     xlg.log(`Bot ${client.user.tag}(${client.user.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
@@ -21,32 +37,48 @@ client.on("ready", async () => {
 
 client.on("message", async message => {
     try {
-        if (message.author.bot) return;
+        if (message.author.bot) return; // returning if messages should not be received
         if (message.system) return;
-        if (message.channel.id !== "769849916582789140") return;
-    
-        if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
-            message.delete();
-            return;
-        }
-        //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
-        //if (parseInt(message.content, 10) !== parseInt((rmsgs.array())[1].content, 10) + 1) {
-        if (parseInt(message.content, 10) !== config.currentNumber + 1) {
-            message.react("❌");
-            config.currentNumber = 0;
-            fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
-                if (err) return console.log(err);
-            });
-            message.channel.send({
+
+        var dm = false
+        if (!message.guild)
+            dm = true
+        if (dm) return // aborting all dm messages for now
+
+        if (await ch(message)) return;
+
+        //const now = Date.now();
+
+        message.gprefix = config.prefix
+        if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
+        const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
+
+        const commandName = args.shift().toLowerCase()
+        const command = client.commands.get(commandName) ||
+            client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+
+        if (!command || !command.name) return // if command doesn't exist, stop
+        if (command.args && !args.length) {
+            let reply = `I need arguments to make that work, ${message.author}!`
+            if (command.usage) {
+                reply += `\nThe proper usage would be: \`${message.gprefix}${command.name} ${command.usage}\``
+            }
+            return message.channel.send({
                 embed: {
-                    color: 6969,
-                    description: "Count **Reset**"
+                    description: reply,
+                    footer: {
+                        text: 'tip: separate arguments with spaces'
+                    }
                 }
             })
-            return;
         }
-        config.currentNumber++;
-        message.react("✔");
+
+        try {
+            command.execute(client, message, args) // execute command function (execute())
+        } catch (error) {
+            xlg.error(error)
+            message.reply('error while executing! please ask a mod for help.')
+        }
     } catch (error) {
         xlg.error(error);
     }
