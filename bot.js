@@ -16,19 +16,19 @@ const client = new Discord.Client();
 const config = require("./config.json");
 const ch = require("./utils/counthandler");
 
-client.commands = new Discord.Collection()
+client.commands = new Discord.Collection();
 // ▼▲▼▲▼▲▼▲▼▲▼▲▼▲ for command handler
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
-var commNumber = 1
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+var commNumber = 1;
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`)
-    client.commands.set(command.name, command)
-    let noName = ''
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+    let noName = '';
     if (command.name === '' || command.name == null) {
-        noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m'
+        noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m';
     }
-    console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName)
-    commNumber++
+    console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName);
+    commNumber++;
 }
 
 client.on("ready", async () => {
@@ -51,22 +51,22 @@ client.on("message", async message => {
         if (message.author.bot) return; // returning if messages should not be received
         if (message.system) return;
 
-        var dm = false
+        var dm = false;
         if (!message.guild)
             dm = true
         if (dm) return // aborting all dm messages for now
         
         //const now = Date.now();
 
-        message.gprefix = config.prefix
+        message.gprefix = config.prefix;
         if (await ch(message)) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
-        const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
+        const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);
 
-        const commandName = args.shift().toLowerCase()
+        const commandName = args.shift().toLowerCase();
         const command = client.commands.get(commandName) ||
-            client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+            client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
         if (!command || !command.name) return // if command doesn't exist, stop
         if (command.args && !args.length) {
@@ -81,14 +81,15 @@ client.on("message", async message => {
                         text: 'tip: separate arguments with spaces'
                     }
                 }
-            })
+            });
         }
 
         try {
-            command.execute(client, message, args) // execute command function (execute())
+            let cdat = { client: client, message: message, args: args };
+            command.execute(cdat); // execute command function (execute())
         } catch (error) {
-            xlg.error(error)
-            message.reply('error while executing! please ask a mod for help.')
+            xlg.error(error);
+            message.reply('error while executing! please ask a mod for help.');
         }
     } catch (error) {
         xlg.error(error);

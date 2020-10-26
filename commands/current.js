@@ -7,7 +7,7 @@ module.exports = {
     name: "current",
     aliases: ["count"],
     description: "get the current count",
-    async execute(client, message, args) {
+    async execute({ message, args }) {
         try {
             const config = require("../config.json");
             

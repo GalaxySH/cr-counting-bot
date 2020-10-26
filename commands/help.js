@@ -5,7 +5,7 @@ const { sendError } = require("../utils/messages");
 module.exports = {
     name: "help",
     description: "stop, get help",
-    async execute(client, message) {
+    async execute({ client, message }) {
         try {
             var cmdMap = [];
             client.commands.forEach(c => {

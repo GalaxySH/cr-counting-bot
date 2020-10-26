@@ -5,8 +5,9 @@ const checkAccess = require('../utils/checkaccess');
 
 module.exports = {
     name: "count",
+    aliases: ["increment"],
     description: "set the count difference",
-    async execute(client, message, args) {
+    async execute({ message, args }) {
         try {
             const config = require("../config.json");
             // check for perms
