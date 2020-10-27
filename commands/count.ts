@@ -1,17 +1,18 @@
-const xlg = require("../xlogger");
-const fs = require("fs");
-const { sendError } = require("../utils/messages");
-const checkAccess = require('../utils/checkaccess');
+import * as xlg from '../xlogger';
+import fs from "fs";
+import { sendError } from "../utils/messages";
+import checkAccess from '../utils/checkaccess';
+import { CommandClient, ExtMessage } from '../typings';
 
 module.exports = {
     name: "count",
     aliases: ["increment"],
     description: "set the count difference",
-    async execute({ message, args }) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             const config = require("../config.json");
             // check for perms
-            if (!(await checkAccess(message, true))) return;
+            if (!(await checkAccess(message))) return;
 
             if (args.length > 0 && args.length < 2) {
                 if (/[^0-9]+/.test(args[0])) {

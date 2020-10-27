@@ -1,6 +1,6 @@
 // This line MUST be first, for discord.js to read the process envs!
 require('dotenv').config()
-const xlg = require('./xlogger')
+import * as xlg from './xlogger'
 process.on('uncaughtException', function (e) {
     xlg.log(e);
     process.exit(1);
@@ -10,13 +10,13 @@ process.on('unhandledRejection', async (reason, promise) => {
     console.error(error, "Promise:", promise);
 });
 
-const fs = require("fs");
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const config = require("./config.json");
-const ch = require("./utils/counthandler");
-
-client.commands = new Discord.Collection();
+import fs from "fs";
+import Discord from 'discord.js';
+const client: CommandClient = new Discord.Client();
+import config from "./config.json";
+import ch from "./utils/counthandler";
+import { Command, CommandClient, ExtMessage } from './typings'
+client.commands = new Discord.Collection<string, Command>();
 // ▼▲▼▲▼▲▼▲▼▲▼▲▼▲ for command handler
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 var commNumber = 1;
@@ -46,7 +46,7 @@ client.on("ready", async () => {
     }).catch(xlg.error)
 })
 
-client.on("message", async message => {
+client.on("message", async (message: ExtMessage) => {
     try {
         if (message.author.bot) return; // returning if messages should not be received
         if (message.system) return;
@@ -59,7 +59,7 @@ client.on("message", async message => {
         //const now = Date.now();
 
         message.gprefix = config.prefix;
-        if (await ch(message)) return;
+        if (await ch(client, message)) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);
@@ -85,8 +85,8 @@ client.on("message", async message => {
         }
 
         try {
-            let cdat = { client: client, message: message, args: args };
-            command.execute(cdat); // execute command function (execute())
+            //let cdat = { client: client, message: message, args: args };
+            command.execute(client, message, args); // execute command function (execute())
         } catch (error) {
             xlg.error(error);
             message.reply('error while executing! please ask a mod for help.');

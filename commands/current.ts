@@ -1,19 +1,20 @@
-const xlg = require("../xlogger");
-const fs = require("fs");
-const { sendError } = require("../utils/messages");
-const checkAccess = require('../utils/checkaccess');
+import * as xlg from '../xlogger';
+import fs from "fs";
+import { sendError } from "../utils/messages";
+import checkAccess from '../utils/checkaccess';
+import { CommandClient, ExtMessage } from '../typings';
 
 module.exports = {
     name: "current",
     aliases: ["count"],
     description: "get the current count",
-    async execute({ message, args }) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             const config = require("../config.json");
             
             if (args.length === 1) {
                 // check for perms
-                if (!(await checkAccess(message, true))) return;
+                if (!(await checkAccess(message))) return;
                 if (/[^0-9]+/.test(args[0])) {
                     message.channel.send({
                         embed: {

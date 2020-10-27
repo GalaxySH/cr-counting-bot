@@ -1,13 +1,14 @@
-const fs = require("fs");
+import fs from "fs";
+import { CommandClient, ExtMessage } from "../typings";
 
-module.exports = async (message) => {
+export = async (client: CommandClient, message: ExtMessage) => {
     const config = require("../config.json");
     if (message.channel.id !== "769849916582789140") return false;
     if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
         const commandName = args.shift().toLowerCase()
-        const command = message.client.commands.get(commandName) ||
-            message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+        const command = client.commands.get(commandName) ||
+            client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
         if (command) return false;
         message.delete();
         return true;

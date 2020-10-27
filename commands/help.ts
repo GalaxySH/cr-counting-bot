@@ -1,11 +1,12 @@
-const xlg = require('../xlogger');
-const config = require("../config.json");
+import * as xlg from '../xlogger';
+import * as config from '../config.json';
+import { CommandClient, ExtMessage } from '../typings';
 const { sendError } = require("../utils/messages");
 
 module.exports = {
     name: "help",
     description: "stop, get help",
-    async execute({ client, message }) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             var cmdMap = [];
             client.commands.forEach(c => {
