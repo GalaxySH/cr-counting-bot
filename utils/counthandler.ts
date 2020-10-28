@@ -5,8 +5,10 @@ export = async (client: CommandClient, message: ExtMessage) => {
     const config = require("../config.json");
     if (message.channel.id !== "769849916582789140") return false;
     if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
+        if (!message.gprefix || !client.commands) return;
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
-        const commandName = args.shift().toLowerCase()
+        const commandName = args.shift()?.toLowerCase()
+        if (!commandName) return;
         const command = client.commands.get(commandName) ||
             client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
         if (command) return false;

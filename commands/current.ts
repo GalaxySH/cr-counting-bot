@@ -1,8 +1,9 @@
-import * as xlg from '../xlogger';
+import xlg from '../xlogger';
 import fs from "fs";
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
 import { CommandClient, ExtMessage } from '../typings';
+import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "current",
@@ -47,6 +48,7 @@ module.exports = {
             return;
         } catch (error) {
             xlg.error(error);
+            if (!(message.channel instanceof TextChannel)) return;
             sendError(message.channel);
         }
     }

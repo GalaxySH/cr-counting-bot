@@ -1,4 +1,6 @@
-exports.sendError = (channel) => {
+import { Channel, TextChannel } from "discord.js"
+
+export function sendError(channel: TextChannel): any {
     return channel.send({
         embed: {
             color: 16711680,

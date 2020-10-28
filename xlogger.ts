@@ -1,6 +1,6 @@
 import moment from 'moment'; // require
 var now = moment().format();
-module.exports = {
+export = {
     log(e: any) {
         if (e) {
             return console.log(`[${now}]`, e.stack || e);

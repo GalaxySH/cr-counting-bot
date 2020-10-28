@@ -1,6 +1,6 @@
 // This line MUST be first, for discord.js to read the process envs!
 require('dotenv').config()
-import * as xlg from './xlogger'
+import xlg from './xlogger'
 process.on('uncaughtException', function (e) {
     xlg.log(e);
     process.exit(1);
@@ -11,7 +11,7 @@ process.on('unhandledRejection', async (reason, promise) => {
 });
 
 import fs from "fs";
-import Discord from 'discord.js';
+import Discord, { TextChannel } from 'discord.js';
 const client: CommandClient = new Discord.Client();
 //import config from "./config.json";
 import ch from "./utils/counthandler";
@@ -51,6 +51,7 @@ client.on("message", async (message: ExtMessage) => {
         if (message.author.bot) return; // returning if messages should not be received
         if (message.system) return;
 
+        //if (!(message.channel instanceof TextChannel)) return;
         var dm = false;
         if (!message.guild)
             dm = true
@@ -60,13 +61,16 @@ client.on("message", async (message: ExtMessage) => {
 
         message.gprefix = process.env.PREFIX;
         if (await ch(client, message)) return;
+        if (!client.commands || !message.gprefix) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);
+        if (!args || !args.length) return;
 
-        const commandName = args.shift().toLowerCase();
+        const commandName = args.shift()?.toLowerCase();
+        if (!commandName) return;
         const command = client.commands.get(commandName) ||
-            client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+            client.commands?.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
         if (!command || !command.name) return // if command doesn't exist, stop
         if (command.args && !args.length) {
