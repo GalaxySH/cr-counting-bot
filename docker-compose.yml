@@ -7,7 +7,7 @@ services:
         env_file: 
             - ./.env
         volumes: 
-            - ./:/stor
+            - ./:/src
         links:
             - mongo
     mongo:
