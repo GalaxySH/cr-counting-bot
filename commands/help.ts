@@ -10,11 +10,11 @@ module.exports = {
         try {
             var cmdMap = [];
             client.commands.forEach(c => {
-                cmdMap.push(`🔹 \`${config.prefix}${c.name}\`\n${c.description}`)
+                cmdMap.push(`🔹 \`${process.env.PREFIX}${c.name}\`\n${c.description}`)
             })
             message.channel.send({
                 embed: {
-                    color: config.navy_color,
+                    color: process.env.NAVY_COLOR,
                     title: "Server Commands",
                     description: cmdMap.join("\n")
                 }

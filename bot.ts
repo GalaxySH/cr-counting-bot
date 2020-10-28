@@ -13,7 +13,7 @@ process.on('unhandledRejection', async (reason, promise) => {
 import fs from "fs";
 import Discord from 'discord.js';
 const client: CommandClient = new Discord.Client();
-import config from "./config.json";
+//import config from "./config.json";
 import ch from "./utils/counthandler";
 import { Command, CommandClient, ExtMessage } from './typings'
 client.commands = new Discord.Collection<string, Command>();
@@ -35,11 +35,11 @@ client.on("ready", async () => {
     // set db
     client.database = await require("./utils/dbm").createDatabase();
 
-    xlg.log(`Bot ${client.user.tag}(${client.user.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
+    xlg.log(`Bot ${client.user?.tag}(${client.user?.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     // set the visible bot status
-    client.user.setPresence({
+    client.user?.setPresence({
         activity: {
-            name: `for ✔ nums | ${config.prefix}help`,
+            name: `for ✔ nums | ${process.env.PREFIX}help`,
             type: 'WATCHING'
         },
         status: 'online'
@@ -58,7 +58,7 @@ client.on("message", async (message: ExtMessage) => {
         
         //const now = Date.now();
 
-        message.gprefix = config.prefix;
+        message.gprefix = process.env.PREFIX;
         if (await ch(client, message)) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix

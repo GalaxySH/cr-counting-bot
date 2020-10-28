@@ -24,5 +24,5 @@ export interface CommandClient extends Discord.Client {
 }
 
 export interface ExtMessage extends Discord.Message {
-    gprefix: string
+    gprefix?: string
 }

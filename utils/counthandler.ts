@@ -25,7 +25,7 @@ export = async (client: CommandClient, message: ExtMessage) => {
         });
         message.channel.send({
             embed: {
-                color: config.info_color,
+                color: process.env.INFO_COLOR,
                 title: "❌ wrong number",
                 description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {
@@ -44,7 +44,7 @@ export = async (client: CommandClient, message: ExtMessage) => {
         });
         message.channel.send({
             embed: {
-                color: config.info_color,
+                color: process.env.INFO_COLOR,
                 title: "❌ talking out of turn",
                 description: `the count has reset to 0\nthe increment is ${config.increment}`,
                 footer: {

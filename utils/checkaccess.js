@@ -5,7 +5,7 @@ module.exports = async (message) => {
     if (message.author.id !== config.ownerID && !message.member.permissions.has("ADMINISTRATOR")) {
         message.channel.send({
             embed: {
-                color: config.fail_color,
+                color: process.env.FAIL_COLOR,
                 description: `${message.member}, you do not have permission to use this command.`
             }
         }).catch(xlg.error);

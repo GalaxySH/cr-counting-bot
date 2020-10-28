@@ -18,7 +18,7 @@ module.exports = {
                 if (/[^0-9]+/.test(args[0])) {
                     message.channel.send({
                         embed: {
-                            color: config.fail_color,
+                            color: process.env.FAIL_COLOR,
                             description: "that is not a valid number"
                         }
                     });
@@ -27,7 +27,7 @@ module.exports = {
                 if (parseInt(args[0], 10) === config.increment) {
                     message.channel.send({
                         embed: {
-                            color: config.warn_color,
+                            color: process.env.WARN_COLOR,
                             description: "that increment is already set"
                         }
                     });
@@ -40,7 +40,7 @@ module.exports = {
                 });
                 message.channel.send({
                     embed: {
-                        color: config.navy_color,
+                        color: process.env.NAVY_COLOR,
                         description: `increment set to \`${ninc}\``
                     }
                 });
@@ -53,7 +53,7 @@ module.exports = {
             });
             message.channel.send({
                 embed: {
-                    color: config.navy_color,
+                    color: process.env.NAVY_COLOR,
                     description: `increment set to \`${ninc}\``
                 }
             });

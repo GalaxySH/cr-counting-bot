@@ -18,7 +18,7 @@ module.exports = {
                 if (/[^0-9]+/.test(args[0])) {
                     message.channel.send({
                         embed: {
-                            color: config.fail_color,
+                            color: process.env.FAIL_COLOR,
                             description: "that is not a valid number"
                         }
                     });
@@ -31,7 +31,7 @@ module.exports = {
                 });
                 message.channel.send({
                     embed: {
-                        color: config.navy_color,
+                        color: process.env.NAVY_COLOR,
                         description: `count set to \`${ncount}\``
                     }
                 });
@@ -39,7 +39,7 @@ module.exports = {
             }
             message.channel.send({
                 embed: {
-                    color: config.info_color,
+                    color: process.env.INFO_COLOR,
                     title: "Current",
                     description: `the count is \`${config.currentNumber}\`\nthe increment is \`${config.increment}\``
                 }
