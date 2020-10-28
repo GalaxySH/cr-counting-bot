@@ -1,12 +1,12 @@
 {
   "prefix": "c?",
   "ownerID": "142831008901890048",
-  "currentNumber": 39,
+  "currentNumber": 148,
   "lastUpdatedId": "142831008901890048",
   "info_color": 9179980,
   "fail_color": 16711680,
   "warn_color": 16750899,
   "navy_color": 6969,
   "success_color": 4437377,
-  "increment": 7
+  "increment": 1
 }
