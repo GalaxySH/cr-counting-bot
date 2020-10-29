@@ -13,30 +13,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const xlogger_1 = __importDefault(require("../xlogger"));
-const { sendError } = require("../utils/messages");
+//import fs from "fs";
+const messages_1 = require("../utils/messages");
+const discord_js_1 = require("discord.js");
 module.exports = {
-    name: "help",
-    description: "stop, get help",
-    execute(client, message, args) {
+    name: "last",
+    description: "get the last person who counted",
+    execute(client, message) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (!client.commands)
-                    return;
-                var cmdMap = [];
-                client.commands.forEach(c => {
-                    cmdMap.push(`🔹 \`${process.env.PREFIX}${c.name}\`\n${c.description}`);
-                });
+                const config = require("../config.json");
+                // check for perms
+                //if (!(await checkAccess(message))) return;
                 message.channel.send({
                     embed: {
-                        color: process.env.NAVY_COLOR,
-                        title: "Server Commands",
-                        description: cmdMap.join("\n")
+                        color: process.env.INFO_COLOR,
+                        title: "Last Sender",
+                        description: `${(_a = message.guild) === null || _a === void 0 ? void 0 : _a.members.cache.get(config.lastUpdatedId)}`,
+                        footer: {
+                            text: `${config.currentNumber}`
+                        }
                     }
-                }).catch(xlogger_1.default.error);
+                });
+                return;
             }
             catch (error) {
                 xlogger_1.default.error(error);
-                sendError(message.channel);
+                if (!(message.channel instanceof discord_js_1.TextChannel))
+                    return;
+                messages_1.sendError(message.channel);
             }
         });
     }

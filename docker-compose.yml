@@ -6,6 +6,8 @@ services:
         build: .
         env_file: 
             - ./.env
+        volumes: 
+            - ./:/src
         links:
             - mongo
     mongo:
