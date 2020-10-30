@@ -1,6 +1,15 @@
+"use strict";
 // THANK YOU BULLETBOT, A LOT OF THE BASE FOR THESE PARSERS CAME FROM THAT REPO, THEY ARE VERY HELPFUL
 // https://www.npmjs.com/package/string-similarity
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 /**
  * Returns similarity value based on Levenshtein distance.
  * The value is between 0 and 1
@@ -22,7 +31,6 @@ function stringSimilarity(s1, s2) {
     }
     return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength.toString());
 }
-
 /**
  * helper function for stringSimilarity
  *
@@ -33,7 +41,6 @@ function stringSimilarity(s1, s2) {
 function editDistance(s1, s2) {
     s1 = s1.toLowerCase();
     s2 = s2.toLowerCase();
-
     var costs = new Array();
     for (var i = 0; i <= s1.length; i++) {
         var lastValue = i;
@@ -44,8 +51,7 @@ function editDistance(s1, s2) {
                 if (j > 0) {
                     var newValue = costs[j - 1];
                     if (s1.charAt(i - 1) != s2.charAt(j - 1))
-                        newValue = Math.min(Math.min(newValue, lastValue),
-                            costs[j]) + 1;
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                     costs[j - 1] = lastValue;
                     lastValue = newValue;
                 }
@@ -56,7 +62,6 @@ function editDistance(s1, s2) {
     }
     return costs[s2.length];
 }
-
 /**
  * Executes a RegExp on a string and returns last result of first search if successful
  *
@@ -70,7 +75,6 @@ function extractString(str, regex) {
         return undefined;
     return result[result.length - 1];
 }
-
 /**
  * Extracts the id from a string and the fetches the User
  *
@@ -79,15 +83,17 @@ function extractString(str, regex) {
  * @param {string} text Text to extract id from
  * @returns User
  */
-async function stringToUser(client, text) {
-    text = extractString(text, /<@!?(\d*)>/) || text;
-    try {
-        return await client.users.fetch(text) || undefined;
-    } catch (e) {
-        return undefined;
-    }
+function stringToUser(client, text) {
+    return __awaiter(this, void 0, void 0, function* () {
+        text = extractString(text, /<@!?(\d*)>/) || text;
+        try {
+            return (yield client.users.fetch(text)) || undefined;
+        }
+        catch (e) {
+            return undefined;
+        }
+    });
 }
-
 /**
  * Parses a string into a Role object or a String for 'everyone' or 'here'.
  * If the role name isn't accurate the function will use the stringSimilarity method.
@@ -106,7 +112,6 @@ async function stringToUser(client, text) {
  * @param {boolean} [bySimilar=true] if it should also search by similar name (default true)
  * @returns
  */
-
 /**
  * Parses string into GuildMember object.
  * If the username isn't accurate the function will use the stringSimilarity method.
@@ -125,32 +130,32 @@ async function stringToUser(client, text) {
  * @param {boolean} [bySimilar=true] if it should also search by similar username (default true)
  * @returns
  */
-async function stringToMember(guild, text, byUsername = true, byNickname = true, bySimilar = true) {
-    if (!text) return undefined;
-    text = extractString(text, /<@!?(\d*)>/) || extractString(text, /([^#@:]{2,32})#\d{4}/) || text;
-    guild.members.cache = await guild.members.fetch();
-
-    // by id
-    var member = guild.members.cache.get(text);
-    if (!member && byUsername)
-        // by username
-        member = guild.members.cache.find(x => x.user.username == text);
-    if (!member && byNickname)
-        // by nickname
-        member = guild.members.cache.find(x => x.nickname == text);
-
-    if (!member && bySimilar) {
-        // closest matching username
-        member = guild.members.cache.reduce(function (prev, curr) {
-            return (stringSimilarity(curr.user.username, text) > stringSimilarity(prev.user.username, text) ? curr : prev);
-        });
-        if (stringSimilarity(member.user.username, text) < 0.4) {
-            member = undefined;
+function stringToMember(guild, text, byUsername = true, byNickname = true, bySimilar = true) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!text)
+            return undefined;
+        text = extractString(text, /<@!?(\d*)>/) || extractString(text, /([^#@:]{2,32})#\d{4}/) || text;
+        guild.members.cache = yield guild.members.fetch();
+        // by id
+        var member = guild.members.cache.get(text);
+        if (!member && byUsername)
+            // by username
+            member = guild.members.cache.find((x) => x.user.username == text);
+        if (!member && byNickname)
+            // by nickname
+            member = guild.members.cache.find((x) => x.nickname == text);
+        if (!member && bySimilar) {
+            // closest matching username
+            member = guild.members.cache.reduce(function (prev, curr) {
+                return (stringSimilarity(curr.user.username, text) > stringSimilarity(prev.user.username, text) ? curr : prev);
+            });
+            if (stringSimilarity(member.user.username, text) < 0.4) {
+                member = undefined;
+            }
         }
-    }
-    return member;
+        return member;
+    });
 }
-
 /**
  * Parses a string into a Role object or a String for 'everyone' or 'here'.
  * If the role name isn't accurate the function will use the stringSimilarity method.
@@ -169,23 +174,19 @@ async function stringToMember(guild, text, byUsername = true, byNickname = true,
  * @param {boolean} [bySimilar=true] if it should also search by similar name (default true)
  * @returns
  */
-
 function stringToRole(guild, text, byName = true, bySimilar = true) {
-
     if (text == 'here' || text == '@here') {
         return '@here';
     }
     if (text == 'everyone' || text == '@everyone') {
         return '@everyone';
     }
-
     text = extractString(text, /<@&(\d*)>/) || text;
-
     // by id
     var role = guild.roles.cache.get(text);
     if (!role && byName) {
         // by name
-        role = guild.roles.cache.find(x => x.name == text);
+        role = guild.roles.cache.find((x) => x.name == text);
     }
     if (!role && bySimilar) {
         // closest matching name
@@ -198,7 +199,6 @@ function stringToRole(guild, text, byName = true, bySimilar = true) {
     }
     return role;
 }
-
 /**
  * Parses a string into a Channel object.
  * Can parse following input:
@@ -213,11 +213,12 @@ function stringToRole(guild, text, byName = true, bySimilar = true) {
  * @returns
  */
 function stringToChannel(guild, text, byName = true, bySimilar = true) {
-    if (!guild || !text) return null;
+    if (!guild || !text)
+        return null;
     text = extractString(text, /<#(\d*)>/) || text;
-
     let channel = guild.channels.cache.get(text);
-    if (!channel && byName) channel = guild.channels.cache.find(x => x.name == text);
+    if (!channel && byName)
+        channel = guild.channels.cache.find((x) => x.name == text);
     if (!channel && bySimilar) {
         // closest matching name
         channel = guild.channels.cache.reduce(function (prev, curr) {
@@ -229,7 +230,6 @@ function stringToChannel(guild, text, byName = true, bySimilar = true) {
     }
     return channel;
 }
-
 /**
  * Parses a string into a JSON object for Embed.
  *
@@ -242,16 +242,15 @@ function stringToEmbed(text) {
     try {
         //text = text.replace(/(\r\n|\n|\r|\t| {2,})/gm, '');
         embed = JSON.parse(text);
-    } catch (e) {
+    }
+    catch (e) {
         return null;
     }
-    return embed
+    return embed;
 }
-
 /*function timeParser() {
 
 }*/
-
 /**
  * converts milliseconds into a string. Examples:
  * - 3m 4s
@@ -264,7 +263,6 @@ function stringToEmbed(text) {
  * @returns
  */
 function durationToString(duration) {
-
     var ms = duration % 1000;
     duration = (duration - ms) / 1000;
     var seconds = duration % 60;
@@ -273,19 +271,19 @@ function durationToString(duration) {
     duration = (duration - minutes) / 60;
     var hours = duration % 24;
     var days = (duration - hours) / 24;
-
     var durationString = '';
-
-    if (days != 0) durationString += days + 'd ';
-    if (hours != 0) durationString += hours + 'h ';
-    if (minutes != 0) durationString += minutes + 'm ';
-    if (seconds != 0) durationString += seconds + 's';
-
-    if (durationString == '') durationString = '0s';
-
+    if (days != 0)
+        durationString += days + 'd ';
+    if (hours != 0)
+        durationString += hours + 'h ';
+    if (minutes != 0)
+        durationString += minutes + 'm ';
+    if (seconds != 0)
+        durationString += seconds + 's';
+    if (durationString == '')
+        durationString = '0s';
     return durationString.trim();
 }
-
 exports.stringToUser = stringToUser;
 exports.stringToRole = stringToRole;
 exports.stringToChannel = stringToChannel;

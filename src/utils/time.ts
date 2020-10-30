@@ -1,4 +1,4 @@
-const timeUnits = { second: 1000 };
+const timeUnits = { second: 1000, minute: 0, hour: 0, day: 0, normalMonth: 0 };
 timeUnits.minute = timeUnits.second * 60;
 timeUnits.hour = timeUnits.minute * 60;
 timeUnits.day = timeUnits.hour * 24;
@@ -9,13 +9,13 @@ timeUnits.normalMonth = timeUnits.day * 30;
  * @param {number} msAlive duration in milliseconds
  * @param {boolean} leadingzero whether times should have leading zeroes
  */
-function getFriendlyUptime(msAlive = 0, leadingzero = false) {
+function getFriendlyUptime(msAlive: number = 0, leadingzero: boolean = false) {
     msAlive = Math.abs(msAlive);
-    let days = Math.floor(msAlive / timeUnits.day);
-    let hours = Math.floor(msAlive / timeUnits.hour) % 24;
-    let minutes = Math.floor(msAlive / timeUnits.minute) % 60;
-    let seconds = Math.floor(msAlive / timeUnits.second) % 60;
-    let milliseconds = msAlive % 1000;
+    let days: any = Math.floor(msAlive / timeUnits.day);
+    let hours: any = Math.floor(msAlive / timeUnits.hour) % 24;
+    let minutes: any = Math.floor(msAlive / timeUnits.minute) % 60;
+    let seconds: any = Math.floor(msAlive / timeUnits.second) % 60;
+    let milliseconds: any = msAlive % 1000;
     if (leadingzero) {
         if (days < 10) {
             days = "00" + days;
@@ -49,7 +49,7 @@ function getFriendlyUptime(msAlive = 0, leadingzero = false) {
  * @param {number} timestamp1 second timestamp
  * @returns
  */
-function getDayDiff(timestamp0, timestamp1) {
+function getDayDiff(timestamp0: number, timestamp1: number) {
     return Math.round(getDurationDiff(timestamp0, timestamp1, timeUnits.day));
 }
 
@@ -61,7 +61,7 @@ function getDayDiff(timestamp0, timestamp1) {
  * @param {(number | timeUnits)} duration duration of time
  * @returns
  */
-function getDurationDiff(timestamp0, timestamp1, duration) {
+function getDurationDiff(timestamp0: number, timestamp1: number, duration: number) {
     return Math.abs(timestamp0 - timestamp1) / duration;
 }
 
@@ -76,7 +76,7 @@ function getDurationDiff(timestamp0, timestamp1, duration) {
  * @param {string} text input text
  * @returns
  */
-function stringToDuration(text) {
+function stringToDuration(text: string) {
     let ms = 0;
     let seconds = /(\d+)s/.exec(text);
     if (seconds) ms += Number(seconds[1]) * timeUnits.second;

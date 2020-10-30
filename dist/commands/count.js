@@ -18,8 +18,8 @@ const messages_1 = require("../utils/messages");
 const checkaccess_1 = __importDefault(require("../utils/checkaccess"));
 const discord_js_1 = require("discord.js");
 module.exports = {
-    name: "count",
-    aliases: ["increment"],
+    name: "increment",
+    aliases: ["count"],
     description: "set the count difference",
     execute(client, message, args) {
         return __awaiter(this, void 0, void 0, function* () {

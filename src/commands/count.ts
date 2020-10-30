@@ -6,8 +6,8 @@ import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
 module.exports = {
-    name: "count",
-    aliases: ["increment"],
+    name: "increment",
+    aliases: ["count"],
     description: "set the count difference",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
