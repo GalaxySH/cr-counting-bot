@@ -1,5 +1,13 @@
 // This line MUST be first, for discord.js to read the process envs!
 require('dotenv').config()
+console.log('Start-dir: ' + process.cwd());
+try {
+    process.chdir('dist');
+    console.log('Working-dir: ' + process.cwd());
+}
+catch (err) {
+    console.log('chdir: ' + err);
+}
 import xlg from './xlogger'
 process.on('uncaughtException', function (e) {
     xlg.log(e);
@@ -35,7 +43,7 @@ client.on("ready", async () => {
     // set db
     client.database = await require("./utils/dbm").createDatabase();
 
-    xlg.log(`Bot ${client.user?.tag}(${client.user?.id}) has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
+    xlg.log(`Bot ${client.user?.tag}(${client.user?.id}) has started, with ~${client.users.cache.size}~ users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     // set the visible bot status
     client.user?.setPresence({
         activity: {

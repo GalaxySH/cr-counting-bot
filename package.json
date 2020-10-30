@@ -16,8 +16,8 @@
   ],
   "author": "Comrade Rooskie",
   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/GalaxySH/cr-counting-bot.git"
+    "type": "git",
+    "url": "git+https://github.com/GalaxySH/cr-counting-bot.git"
   },
   "license": "ISC",
   "dependencies": {
