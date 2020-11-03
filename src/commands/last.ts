@@ -10,16 +10,20 @@ module.exports = {
     description: "get the last person who counted",
     async execute(client: CommandClient, message: ExtMessage) {
         try {
-            const config = require("../config.json");
+            let count = await client.database?.getCount(message.guild?.id);
+            if (!count || !count.count) count = { count: 0 };
+            const cc = count.count || 0;
+            const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
+            if (!lastUpdater) return false;
             // check for perms
             //if (!(await checkAccess(message))) return;
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Last Sender",
-                    description: `${message.guild?.members.cache.get(config.lastUpdatedId)}`,
+                    description: `${message.guild?.members.cache.get(lastUpdater?.lastUpdatedID || "")}`,
                     footer: {
-                        text: `${config.currentNumber}`
+                        text: `${cc}`
                     }
                 }
             });

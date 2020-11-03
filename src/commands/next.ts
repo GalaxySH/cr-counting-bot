@@ -11,14 +11,19 @@ module.exports = {
     description: "find the next number",
     async execute(client: CommandClient, message: ExtMessage) {
         try {
-            const config = require("../config.json");
+            let count = await client.database?.getCount(message.guild?.id);
+            if (!count || !count.count) count = { count: 0 };
+            const cc = count.count || 0;
+            const increment = await client.database?.getIncrement(message.guild?.id);
+            if (!increment) return;
+            const incre = increment.increment || 1;
             // check for perms
             //if (!(await checkAccess(message))) return;
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Last Sender",
-                    description: `send \`${config.currentNumber + 1}\``,
+                    description: `send \`${cc + incre}\``,
                     footer: {
                         text: "or get yoinked"
                     }

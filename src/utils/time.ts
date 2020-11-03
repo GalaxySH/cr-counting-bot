@@ -9,13 +9,13 @@ timeUnits.normalMonth = timeUnits.day * 30;
  * @param {number} msAlive duration in milliseconds
  * @param {boolean} leadingzero whether times should have leading zeroes
  */
-function getFriendlyUptime(msAlive: number = 0, leadingzero: boolean = false) {
+function getFriendlyUptime(msAlive = 0, leadingzero = false) {
     msAlive = Math.abs(msAlive);
-    let days: any = Math.floor(msAlive / timeUnits.day);
-    let hours: any = Math.floor(msAlive / timeUnits.hour) % 24;
-    let minutes: any = Math.floor(msAlive / timeUnits.minute) % 60;
-    let seconds: any = Math.floor(msAlive / timeUnits.second) % 60;
-    let milliseconds: any = msAlive % 1000;
+    let days: number | string = Math.floor(msAlive / timeUnits.day);
+    let hours: number | string = Math.floor(msAlive / timeUnits.hour) % 24;
+    let minutes: number | string = Math.floor(msAlive / timeUnits.minute) % 60;
+    let seconds: number | string = Math.floor(msAlive / timeUnits.second) % 60;
+    const milliseconds: number = msAlive % 1000;
     if (leadingzero) {
         if (days < 10) {
             days = "00" + days;
@@ -78,13 +78,13 @@ function getDurationDiff(timestamp0: number, timestamp1: number, duration: numbe
  */
 function stringToDuration(text: string) {
     let ms = 0;
-    let seconds = /(\d+)s/.exec(text);
+    const seconds = /(\d+)s/.exec(text);
     if (seconds) ms += Number(seconds[1]) * timeUnits.second;
-    let minutes = /(\d+)m/.exec(text);
+    const minutes = /(\d+)m/.exec(text);
     if (minutes) ms += Number(minutes[1]) * timeUnits.minute;
-    let hours = /(\d+)h/.exec(text);
+    const hours = /(\d+)h/.exec(text);
     if (hours) ms += Number(hours[1]) * timeUnits.hour;
-    let days = /(\d+)d/.exec(text);
+    const days = /(\d+)d/.exec(text);
     if (days) ms += Number(days[1]) * timeUnits.day;
 
     return ms;

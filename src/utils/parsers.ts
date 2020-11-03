@@ -1,6 +1,8 @@
 // THANK YOU BULLETBOT, A LOT OF THE BASE FOR THESE PARSERS CAME FROM THAT REPO, THEY ARE VERY HELPFUL
 // https://www.npmjs.com/package/string-similarity
 
+import { Channel, GuildMember, MessageEmbed, Role, User } from "discord.js";
+
 /**
  * Returns similarity value based on Levenshtein distance.
  * The value is between 0 and 1
@@ -10,13 +12,13 @@
  * @returns
  */
 function stringSimilarity(s1: string, s2: string) {
-    var longer = s1;
-    var shorter = s2;
+    let longer = s1;
+    let shorter = s2;
     if (s1.length < s2.length) {
         longer = s2;
         shorter = s1;
     }
-    var longerLength = longer.length;
+    const longerLength = longer.length;
     if (longerLength == 0) {
         return 1.0;
     }
@@ -34,15 +36,15 @@ function editDistance(s1: string, s2: string) {
     s1 = s1.toLowerCase();
     s2 = s2.toLowerCase();
 
-    var costs = new Array();
-    for (var i = 0; i <= s1.length; i++) {
-        var lastValue = i;
-        for (var j = 0; j <= s2.length; j++) {
+    const costs = [];
+    for (let i = 0; i <= s1.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= s2.length; j++) {
             if (i == 0)
                 costs[j] = j;
             else {
                 if (j > 0) {
-                    var newValue = costs[j - 1];
+                    let newValue = costs[j - 1];
                     if (s1.charAt(i - 1) != s2.charAt(j - 1))
                         newValue = Math.min(Math.min(newValue, lastValue),
                             costs[j]) + 1;
@@ -65,7 +67,7 @@ function editDistance(s1: string, s2: string) {
  * @returns
  */
 function extractString(str: any, regex: RegExp) {
-    let result = regex.exec(str);
+    const result = regex.exec(str);
     if (!result)
         return undefined;
     return result[result.length - 1];
@@ -79,7 +81,7 @@ function extractString(str: any, regex: RegExp) {
  * @param {string} text Text to extract id from
  * @returns User
  */
-async function stringToUser(client: { users: { fetch: (arg0: any) => any; }; }, text: any) {
+export async function stringToUser(client: { users: { fetch: (arg0: any) => any; }; }, text: string): Promise<User | undefined> {
     text = extractString(text, /<@!?(\d*)>/) || text;
     try {
         return await client.users.fetch(text) || undefined;
@@ -125,13 +127,13 @@ async function stringToUser(client: { users: { fetch: (arg0: any) => any; }; }, 
  * @param {boolean} [bySimilar=true] if it should also search by similar username (default true)
  * @returns
  */
-async function stringToMember(guild: { members: { cache: { get: (arg0: any) => any; find: (arg0: { (x: any): boolean; (x: any): boolean; }) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; fetch: () => any; }; }, text: any, byUsername = true, byNickname = true, bySimilar = true) {
+export async function stringToMember(guild: { members: { cache: { get: (arg0: any) => any; find: (arg0: { (x: any): boolean; (x: any): boolean; }) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; fetch: () => any; }; }, text: any, byUsername = true, byNickname = true, bySimilar = true): Promise<GuildMember | undefined> {
     if (!text) return undefined;
     text = extractString(text, /<@!?(\d*)>/) || extractString(text, /([^#@:]{2,32})#\d{4}/) || text;
     guild.members.cache = await guild.members.fetch();
 
     // by id
-    var member = guild.members.cache.get(text);
+    let member = guild.members.cache.get(text);
     if (!member && byUsername)
         // by username
         member = guild.members.cache.find((x: { user: { username: any; }; }) => x.user.username == text);
@@ -170,7 +172,7 @@ async function stringToMember(guild: { members: { cache: { get: (arg0: any) => a
  * @returns
  */
 
-function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: string, byName = true, bySimilar = true) {
+export function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: string, byName = true, bySimilar = true): Role | string {
 
     if (text == 'here' || text == '@here') {
         return '@here';
@@ -182,7 +184,7 @@ function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any; find: 
     text = extractString(text, /<@&(\d*)>/) || text;
 
     // by id
-    var role = guild.roles.cache.get(text);
+    let role = guild.roles.cache.get(text);
     if (!role && byName) {
         // by name
         role = guild.roles.cache.find((x: { name: any; }) => x.name == text);
@@ -212,15 +214,15 @@ function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any; find: 
  * @param {string} text string to parse
  * @returns
  */
-function stringToChannel(guild: { channels: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: any, byName = true, bySimilar = true) {
+export function stringToChannel(guild: { channels: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: any, byName = true, bySimilar = true): Channel | null {
     if (!guild || !text) return null;
     text = extractString(text, /<#(\d*)>/) || text;
 
     let channel = guild.channels.cache.get(text);
-    if (!channel && byName) channel = guild.channels.cache.find((x: { name: any; }) => x.name == text);
+    if (!channel && byName) channel = guild.channels.cache.find((x: { name: string; }) => x.name == text);
     if (!channel && bySimilar) {
         // closest matching name
-        channel = guild.channels.cache.reduce(function (prev: { name: any; }, curr: { name: any; }) {
+        channel = guild.channels.cache.reduce(function (prev: { name: string; }, curr: { name: string; }) {
             return (stringSimilarity(curr.name, text) > stringSimilarity(prev.name, text) ? curr : prev);
         });
         if (stringSimilarity(channel.name, text) < 0.4) {
@@ -237,8 +239,8 @@ function stringToChannel(guild: { channels: { cache: { get: (arg0: any) => any; 
  * @param {string} text string to parse
  * @returns
  */
-function stringToEmbed(text: string) {
-    var embed = null;
+export function stringToEmbed(text: string): MessageEmbed | null {
+    let embed = null;
     try {
         //text = text.replace(/(\r\n|\n|\r|\t| {2,})/gm, '');
         embed = JSON.parse(text);
@@ -263,18 +265,18 @@ function stringToEmbed(text: string) {
  * @param {number} duration duration in milliseconds
  * @returns
  */
-function durationToString(duration: number) {
+export function durationToString(duration: number): string {
 
-    var ms = duration % 1000;
+    const ms = duration % 1000;
     duration = (duration - ms) / 1000;
-    var seconds = duration % 60;
+    const seconds = duration % 60;
     duration = (duration - seconds) / 60;
-    var minutes = duration % 60;
+    const minutes = duration % 60;
     duration = (duration - minutes) / 60;
-    var hours = duration % 24;
-    var days = (duration - hours) / 24;
+    const hours = duration % 24;
+    const days = (duration - hours) / 24;
 
-    var durationString = '';
+    let durationString = '';
 
     if (days != 0) durationString += days + 'd ';
     if (hours != 0) durationString += hours + 'h ';
@@ -285,10 +287,3 @@ function durationToString(duration: number) {
 
     return durationString.trim();
 }
-
-exports.stringToUser = stringToUser;
-exports.stringToRole = stringToRole;
-exports.stringToChannel = stringToChannel;
-exports.stringToEmbed = stringToEmbed;
-exports.stringToMember = stringToMember;
-exports.durationToString = durationToString;

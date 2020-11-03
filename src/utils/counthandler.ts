@@ -1,14 +1,16 @@
-import fs from "fs";
 import { CommandClient, ExtMessage } from "../typings";
+//import fs from "fs";
 
-export = async (client: CommandClient, message: ExtMessage) => {
-    const config = require("../config.json");
-    if (message.channel.id !== "769849916582789140") return false;
+export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
+    const countChannel = await client.database?.getChannel(message.guild?.id);
+    if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND
+    if (message.channel.id !== countChannel?.countChannel) return false;
+
     if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
-        if (!message.gprefix || !client.commands) return;
+        if (!message.gprefix || !client.commands) return false;
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
         const commandName = args.shift()?.toLowerCase()
-        if (!commandName) return;
+        if (!commandName) return false;
         const command = client.commands.get(commandName) ||
             client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
         if (command) return false;
@@ -16,20 +18,21 @@ export = async (client: CommandClient, message: ExtMessage) => {
         return true;
     }
     //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
+    let count = await client.database?.getCount(message.guild?.id);
+    if (!count || !count.count) count = { count: 0 };
+    const increment = await client.database?.getIncrement(message.guild?.id);
+    if (!increment) return false;
+    const cc = count.count || 0;
+    const incre = increment.increment || 1;
     //if (parseInt(message.content, 10) !== parseInt((rmsgs.array())[1].content, 10) + 1) {
-    if (!config.currentNumber && config.currentNumber !== 0) config.currentNumber = 0;
-    if (parseInt(message.content, 10) !== config.currentNumber + config.increment) {
+    if (parseInt(message.content, 10) !== cc + incre) {
         message.react("❌");
-        config.lastUpdatedId = message.author.id;
-        config.currentNumber = 0;
-        fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
-            if (err) return console.log(err);
-        });
+        await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
         message.channel.send({
             embed: {
                 color: process.env.INFO_COLOR,
                 title: "❌ wrong number",
-                description: `the count has reset to 0\nthe increment is ${config.increment}`,
+                description: `the count has reset to 0\nthe increment is ${incre}`,
                 footer: {
                     text: "idiot"
                 }
@@ -37,18 +40,17 @@ export = async (client: CommandClient, message: ExtMessage) => {
         })
         return true;
     }
-    if (config.lastUpdatedId === message.author.id) {
+
+    const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
+    if (!lastUpdater) return false;
+    if (lastUpdater.lastUpdatedID === message.author.id) {
         message.react("❌");
-        config.lastUpdatedId = message.author.id;
-        config.currentNumber = 0;
-        fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
-            if (err) return console.log(err);
-        });
+        await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
         message.channel.send({
             embed: {
                 color: process.env.INFO_COLOR,
                 title: "❌ talking out of turn",
-                description: `the count has reset to 0\nthe increment is ${config.increment}`,
+                description: `the count has reset to 0\nthe increment is ${incre}`,
                 footer: {
                     text: "idiot"
                 }
@@ -56,11 +58,8 @@ export = async (client: CommandClient, message: ExtMessage) => {
         })
         return true;
     }
-    config.lastUpdatedId = message.author.id;
-    config.currentNumber += config.increment;
-    fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
-        if (err) return console.log(err);
-    });
+    await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
+    client.database?.updateCount(message.guild?.id || "", cc + incre);
     //message.react("✔");
     message.react("☑️");
     return true;

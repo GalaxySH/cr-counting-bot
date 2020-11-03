@@ -1,11 +1,10 @@
-const xlg = require('../xlogger');
+import xlg from '../xlogger';
 import { ExtMessage } from "../typings";
 
-export = async (message: ExtMessage) => {
-    if (!message.member) return;
-    var config = require("../config.json");
-    if (message.author.id !== config.ownerID && !message.member.permissions.has("ADMINISTRATOR")) {
-        message.channel.send({
+export = async (message: ExtMessage): Promise<boolean> => {
+    if (!message.member) return false;
+    if (message.author.id !== process.env.OWNERID && !message.member.permissions.has("ADMINISTRATOR")) {
+        await message.channel.send({
             embed: {
                 color: process.env.FAIL_COLOR,
                 description: `${message.member}, you do not have permission to use this command.`

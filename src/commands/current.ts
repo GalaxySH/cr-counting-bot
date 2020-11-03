@@ -1,5 +1,4 @@
 import xlg from '../xlogger';
-import fs from "fs";
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
 import { CommandClient, ExtMessage } from '../typings';
@@ -11,8 +10,6 @@ module.exports = {
     description: "get the current count",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
-            const config = require("../config.json");
-            
             if (args.length === 1) {
                 // check for perms
                 if (!(await checkAccess(message))) return;
@@ -25,11 +22,8 @@ module.exports = {
                     });
                     return false;
                 }
-                let ncount = parseInt(args[0], 10);
-                config.currentNumber = ncount;
-                fs.writeFile("./config.json", JSON.stringify(config, null, 2), function (err) {
-                    if (err) return console.log(err);
-                });
+                const ncount = parseInt(args[0], 10);
+                await client.database?.updateCount(message.guild?.id || "", ncount);
                 message.channel.send({
                     embed: {
                         color: process.env.NAVY_COLOR,
@@ -38,11 +32,17 @@ module.exports = {
                 });
                 return;
             }
+            // get the current count from database
+            let count = await client.database?.getCount(message.guild?.id);
+            if (!count || !count.count) count = { count: 0 };
+            const cc = count.count || 0;
+            const increment = await client.database?.getIncrement(message.guild?.id);
+            if (!increment) return;
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Current",
-                    description: `the count is \`${config.currentNumber}\`\nthe increment is \`${config.increment}\``
+                    description: `the count is \`${cc}\`\nthe increment is \`${increment.increment}\``
                 }
             });
             return;
