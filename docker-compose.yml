@@ -17,5 +17,5 @@ services:
             - ./.env
         volumes: 
             - ./data:/data/db
-        ports: 
-            - "27017:27020"
+        expose:
+            - "27024"

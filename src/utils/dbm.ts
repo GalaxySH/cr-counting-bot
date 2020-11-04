@@ -57,7 +57,7 @@ export class Database {
             const password = process.env.MONGO_INITDB_ROOT_PASSWORD;
             const database_name = process.env.MONGO_INITDB_DATABASE;
 
-            const URL = `mongodb://${username}:${password}@crmongo:27020/?authSource=admin`;
+            const URL = `mongodb://${username}:${password}@crmongo:27024/?authSource=admin`;
             const db = await MongoClient.connect(URL, {
                 useNewUrlParser: true
             });
