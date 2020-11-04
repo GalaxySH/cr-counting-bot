@@ -9,7 +9,7 @@ services:
         volumes: 
             - ./:/src
         links:
-            - crmongo
+            - mongo
     mongo:
         container_name: crmongo
         image: mongo
