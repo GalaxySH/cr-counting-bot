@@ -9,9 +9,9 @@ services:
         volumes: 
             - ./:/src
         links:
-            - mongo
+            - crmongo
     mongo:
-        container_name: mongo
+        container_name: crmongo
         image: mongo
         env_file: 
             - ./.env
