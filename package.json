@@ -1,6 +1,6 @@
 {
   "name": "cr_counting_bot",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "a bot to manage the counting channel of crs discord server",
   "main": "dist/bot.js",
   "scripts": {
