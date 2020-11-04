@@ -17,5 +17,6 @@ services:
             - ./.env
         volumes: 
             - ./data:/data/db
+        command: mongod --port 27024
         ports: 
-            - "27024:27017"
+            - "27024:27024"
