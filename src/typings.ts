@@ -41,3 +41,12 @@ export interface guildObject {
     countChannel?: string;
     lastUpdatedID?: string;
 }
+
+export interface PermLevels {
+    member: 0;
+    trustedMember: 1;
+    immune: 2;
+    mod: 3;
+    admin: 4;
+    botMaster: 5;
+}

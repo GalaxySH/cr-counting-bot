@@ -1,8 +1,9 @@
 import { GuildMember } from "discord.js";
+import { PermLevels } from "./typings";
 import xlg from "./xlogger";
 //import { getGlobalSetting, getXP } from "./dbmanager";
 
-const permLevels = {
+const permLevels: PermLevels = {
     member: 0,
     trustedMember: 1,
     immune: 2,
@@ -11,7 +12,7 @@ const permLevels = {
     botMaster: 5,
 }
 
-export async function getPermLevel(member: GuildMember) {
+export async function getPermLevel(member: GuildMember): Promise<number> {
     if (member == null) {
         return permLevels.member;
     }
