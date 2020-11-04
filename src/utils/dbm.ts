@@ -2,7 +2,7 @@ import { Db, MongoClient } from 'mongodb';
 import { guildObject } from '../typings';
 import xlg from '../xlogger';
 
-/**
+/*/**
  *
  * @param {string} UID Database login Username
  * @param {string} PASS Database login Password
@@ -24,7 +24,7 @@ import xlg from '../xlogger';
     return db.db(database_name);
 }*/
 
-let database: Db;
+/*let database: Db;
 async function handleDb() {
     try {
         const username = process.env.MONGO_INITDB_ROOT_USERNAME;
@@ -43,12 +43,12 @@ async function handleDb() {
         xlg.error(`DB Error: ${error.message}\nError: ${error.stack}`);
     }
 }
-handleDb();
+handleDb();*/
 
 export class Database {
-    db: Db;
-    constructor() {
-        this.db = database;
+    private db: Db | undefined;
+    constructor(databaseBuilder: DatabaseBuilder) {
+        this.db = databaseBuilder.db;
     }
     
     async getCount(guildID: string | undefined): Promise<guildObject | false> {
@@ -122,5 +122,42 @@ export class Database {
         }, {
             upsert: true
         });
+    }
+}
+
+export class DatabaseBuilder {
+    private readonly _username: string;
+    private readonly _password: string;
+    private readonly _database_name: string;
+    private _db?: Db;
+
+    constructor(un: string | undefined, pw: string | undefined, dn: string | undefined) {
+        this._username = un || process.env.MONGO_INITDB_ROOT_USERNAME || "";
+        this._password = pw || process.env.MONGO_INITDB_ROOT_PASSWORD || "";
+        this._database_name = dn || process.env.MONGO_INITDB_DATABASE || "";
+    }
+
+    async handleDb(): Promise<this> {
+        const username = this._username;
+        const password = this._password;
+        const database_name = this._database_name;
+
+        const URL = `mongodb://${username}:${password}@mongo:27017/?authSource=admin`;
+        const db = await MongoClient.connect(URL, {
+            useNewUrlParser: true
+        });
+
+        xlg.log('Connected to database!');
+
+        this._db = db.db(database_name);
+        return this;
+    }
+
+    build(): Database {
+        return new Database(this);
+    }
+
+    get db(): Db | undefined {
+        return this._db;
     }
 }
