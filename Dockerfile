@@ -8,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-RUN ["sudo", "chmod", "+x", "/src/scripts/wait-for-it.sh"]
+#RUN ["chmod", "+x", "/src/scripts/wait-for-it.sh"]
 
-CMD ./scripts/wait-for-it.sh crmongo:27024 -t 15 -- npm run start
+CMD chmod +x ./scripts/wait-for-it.sh && ./scripts/wait-for-it.sh crmongo:27024 -t 15 -- npm run start
