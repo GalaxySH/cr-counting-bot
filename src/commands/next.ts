@@ -22,7 +22,10 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    title: "Last Sender",
+                    author: {
+                        name: "〉〉〉〉〉〉"
+                    },
+                    title: "Next",
                     description: `send \`${cc + incre}\``,
                     footer: {
                         text: "or get yoinked"

@@ -80,6 +80,7 @@ client.on("message", async (message: ExtMessage) => {
 
         message.gprefix = process.env.PREFIX;
         if (await counthandler(client, message)) return;
+        if (!message) return;
         if (!client.commands || !message.gprefix) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix

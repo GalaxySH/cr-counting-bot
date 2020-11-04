@@ -100,6 +100,13 @@ export class Database {
         return result;
     }
     
+    async getChatAllowed(guildID: string | undefined): Promise<guildObject | false> {
+        if (!guildID || !this.db) return false;
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || { chatAllowed: false };
+        return result;
+    }
+    
     async updateCount(guildID: string, value: number): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
@@ -143,6 +150,18 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "lastUpdatedID": id }
+        }, {
+            upsert: true
+        });
+    }
+
+    async setChatAllowed(guildID: string, state: boolean): Promise<void> {
+        if (!this.db) return;
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "chatAllowed": state }
         }, {
             upsert: true
         });

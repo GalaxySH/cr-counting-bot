@@ -40,6 +40,7 @@ export interface guildObject {
     paused?: boolean;
     countChannel?: string;
     lastUpdatedID?: string;
+    chatAllowed?: boolean;
 }
 
 export interface PermLevels {

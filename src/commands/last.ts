@@ -20,11 +20,11 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    title: "Last Sender",
-                    description: `${message.guild?.members.cache.get(lastUpdater?.lastUpdatedID || "")}`,
-                    footer: {
-                        text: `${cc}`
-                    }
+                    author: {
+                        name: "〈〈〈〈〈〈"
+                    },
+                    title: "Last",
+                    description: `${message.guild?.members.cache.get(lastUpdater?.lastUpdatedID || "")}\n(with ${ cc })`
                 }
             });
             return;
