@@ -1,15 +1,16 @@
 import xlg from '../xlogger';
 //import * as config from '../config.json';
 import { CommandClient, ExtMessage } from '../typings';
-const { sendError } = require("../utils/messages");
+import { sendError } from "../utils/messages";
+import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "help",
     description: "stop, get help",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client: CommandClient, message: ExtMessage) {
         try {
             if (!client.commands) return;
-            var cmdMap: string[] = [];
+            const cmdMap: string[] = [];
             client.commands.forEach(c => {
                 cmdMap.push(`🔹 \`${process.env.PREFIX}${c.name}\`\n${c.description}`)
             })
@@ -22,6 +23,7 @@ module.exports = {
             }).catch(xlg.error);
         } catch (error) {
             xlg.error(error);
+            if (!(message.channel instanceof TextChannel)) return;
             sendError(message.channel);
         }
     }

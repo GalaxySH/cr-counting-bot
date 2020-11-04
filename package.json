@@ -1,11 +1,11 @@
 {
   "name": "cr_counting_bot",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "a bot to manage the counting channel of crs discord server",
-  "main": "bot.js",
+  "main": "dist/bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node bot.js"
+    "start": "npx tsc && node dist/bot.js"
   },
   "keywords": [
     "discord",
@@ -15,6 +15,10 @@
     "text"
   ],
   "author": "Comrade Rooskie",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GalaxySH/cr-counting-bot.git"
+  },
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.4.1",
@@ -25,8 +29,9 @@
   "devDependencies": {
     "@types/mongodb": "^3.1.31",
     "@types/node": "^14.14.5",
-    "eslint": "^7.12.0",
-    "tslint": "^6.1.3",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
+    "eslint": "^7.12.1",
     "typescript": "^4.0.5"
   }
 }

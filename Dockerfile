@@ -8,4 +8,6 @@ RUN npm install
 
 COPY . .
 
-CMD ./scripts/wait-for-it.sh mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_INITDB_DATABASE}?authSource=admin -t 30 -- npm run start
+RUN ["chmod", "+x", "./scripts/wait-for-it.sh"]
+
+CMD ./scripts/wait-for-it.sh mongo:27017 -t 15 -- npm run start

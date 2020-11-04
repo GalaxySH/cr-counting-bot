@@ -1,4 +1,4 @@
-const timeUnits = { second: 1000 };
+const timeUnits = { second: 1000, minute: 0, hour: 0, day: 0, normalMonth: 0 };
 timeUnits.minute = timeUnits.second * 60;
 timeUnits.hour = timeUnits.minute * 60;
 timeUnits.day = timeUnits.hour * 24;
@@ -11,11 +11,11 @@ timeUnits.normalMonth = timeUnits.day * 30;
  */
 function getFriendlyUptime(msAlive = 0, leadingzero = false) {
     msAlive = Math.abs(msAlive);
-    let days = Math.floor(msAlive / timeUnits.day);
-    let hours = Math.floor(msAlive / timeUnits.hour) % 24;
-    let minutes = Math.floor(msAlive / timeUnits.minute) % 60;
-    let seconds = Math.floor(msAlive / timeUnits.second) % 60;
-    let milliseconds = msAlive % 1000;
+    let days: number | string = Math.floor(msAlive / timeUnits.day);
+    let hours: number | string = Math.floor(msAlive / timeUnits.hour) % 24;
+    let minutes: number | string = Math.floor(msAlive / timeUnits.minute) % 60;
+    let seconds: number | string = Math.floor(msAlive / timeUnits.second) % 60;
+    const milliseconds: number = msAlive % 1000;
     if (leadingzero) {
         if (days < 10) {
             days = "00" + days;
@@ -49,7 +49,7 @@ function getFriendlyUptime(msAlive = 0, leadingzero = false) {
  * @param {number} timestamp1 second timestamp
  * @returns
  */
-function getDayDiff(timestamp0, timestamp1) {
+function getDayDiff(timestamp0: number, timestamp1: number) {
     return Math.round(getDurationDiff(timestamp0, timestamp1, timeUnits.day));
 }
 
@@ -61,7 +61,7 @@ function getDayDiff(timestamp0, timestamp1) {
  * @param {(number | timeUnits)} duration duration of time
  * @returns
  */
-function getDurationDiff(timestamp0, timestamp1, duration) {
+function getDurationDiff(timestamp0: number, timestamp1: number, duration: number) {
     return Math.abs(timestamp0 - timestamp1) / duration;
 }
 
@@ -76,15 +76,15 @@ function getDurationDiff(timestamp0, timestamp1, duration) {
  * @param {string} text input text
  * @returns
  */
-function stringToDuration(text) {
+function stringToDuration(text: string) {
     let ms = 0;
-    let seconds = /(\d+)s/.exec(text);
+    const seconds = /(\d+)s/.exec(text);
     if (seconds) ms += Number(seconds[1]) * timeUnits.second;
-    let minutes = /(\d+)m/.exec(text);
+    const minutes = /(\d+)m/.exec(text);
     if (minutes) ms += Number(minutes[1]) * timeUnits.minute;
-    let hours = /(\d+)h/.exec(text);
+    const hours = /(\d+)h/.exec(text);
     if (hours) ms += Number(hours[1]) * timeUnits.hour;
-    let days = /(\d+)d/.exec(text);
+    const days = /(\d+)d/.exec(text);
     if (days) ms += Number(days[1]) * timeUnits.day;
 
     return ms;
