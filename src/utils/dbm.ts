@@ -46,40 +46,62 @@ async function handleDb() {
 handleDb();*/
 
 export class Database {
-    private db: Db | undefined;
-    constructor(databaseBuilder: DatabaseBuilder) {
-        this.db = databaseBuilder.db;
+    private db?: Db;
+    constructor() {
+        this.db;
+    }
+
+    async handleDb(): Promise<this> {
+        try {
+            const username = process.env.MONGO_INITDB_ROOT_USERNAME;
+            const password = process.env.MONGO_INITDB_ROOT_PASSWORD;
+            const database_name = process.env.MONGO_INITDB_DATABASE;
+
+            const URL = `mongodb://${username}:${password}@mongo:27017/?authSource=admin`;
+            const db = await MongoClient.connect(URL, {
+                useNewUrlParser: true
+            });
+
+            xlg.log('Connected to database!');
+
+            this.db = db.db(database_name);
+            return this;
+        } catch (error) {
+            xlg.error(`DB Error: ${error.message}\nError: ${error.stack}`);
+            return this;
+        }
     }
     
     async getCount(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID) return false;
+        if (!guildID || !this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || { count: 0 };
         return result;
     }
 
     async getIncrement(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID) return false;
+        if (!guildID || !this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || { increment: 1 };
         return result;
     }
     
     async getChannel(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID) return false;
+        if (!guildID || !this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || { countChannel: "" };
         return result;
     }
     
     async getLastUpdater(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID) return false;
+        if (!guildID || !this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || { lastUpdatedID: "" };
         return result;
     }
     
     async updateCount(guildID: string, value: number): Promise<void> {
+        if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
             "guildID": guildID,
@@ -91,7 +113,7 @@ export class Database {
     }
     
     async setIncrement(guildID: string | undefined, value: number): Promise<void> {
-        if (!guildID) return;
+        if (!guildID || !this.db) return;
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
             "guildID": guildID,
@@ -103,6 +125,7 @@ export class Database {
     }
 
     async setChannel(guildID: string, channel: string): Promise<void> {
+        if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
             "guildID": guildID,
@@ -114,6 +137,7 @@ export class Database {
     }
 
     async setLastUpdater(guildID: string, id: string): Promise<void> {
+        if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
             "guildID": guildID,
@@ -125,7 +149,7 @@ export class Database {
     }
 }
 
-export class DatabaseBuilder {
+/*export class DatabaseBuilder {
     private readonly _username: string;
     private readonly _password: string;
     private readonly _database_name: string;
@@ -160,4 +184,4 @@ export class DatabaseBuilder {
     get db(): Db | undefined {
         return this._db;
     }
-}
+}*/

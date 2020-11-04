@@ -61,13 +61,14 @@ client.on("ready", async () => {
     }).catch(xlg.error)
 
     // setting up db and attaching it to the client
-    client.database = new Database();
+    client.database = await new Database().handleDb();
 })
 
 client.on("message", async (message: ExtMessage) => {
     try {
         if (message.author.bot) return; // returning if messages should not be received
         if (message.system) return;
+        if (message.embeds[0]) return; // ignoring messages with embeds
 
         //if (!(message.channel instanceof TextChannel)) return;
         let dm = false;
