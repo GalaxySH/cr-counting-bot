@@ -12,13 +12,16 @@ module.exports = {
             if (!client.commands) return;
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
-                cmdMap.push(`🔹 \`${process.env.PREFIX}${c.name}\`\n${c.description}`)
+                cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
             })
             message.channel.send({
                 embed: {
-                    color: process.env.NAVY_COLOR,
+                    color: process.env.INFO_COLOR,
                     title: "Server Commands",
-                    description: cmdMap.join("\n")
+                    description: `Use this command any time. Use the \`${message.gprefix}howto\` command to learn how to count.\n\n__**Commands**__\n${cmdMap.join("\n")}`,
+                    footer: {
+                        text: `Send ${message.gprefix}howto for instructions`
+                    }
                 }
             }).catch(xlg.error);
         } catch (error) {

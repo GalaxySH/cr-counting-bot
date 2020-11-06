@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import moment from 'moment'; // require
-var now = moment().format();
+const now = moment().format();
 export = {
-    log(e: any) {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    log(e: any): void {
         if (e) {
             return console.log(`[${now}]`, e.stack || e);
         }
     },
-    error(e: any) {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    error(e: any): void {
         if (e) {
             return console.error(`[${now}]`, e.stack || e);
         }

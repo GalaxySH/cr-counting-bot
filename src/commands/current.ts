@@ -12,7 +12,7 @@ module.exports = {
         try {
             if (args.length === 1) {
                 // check for perms
-                if (!(await checkAccess(message))) return;
+                if (!(await checkAccess(message, {ownerOnly: true}))) return;
                 if (/[^0-9]+/.test(args[0])) {
                     message.channel.send({
                         embed: {

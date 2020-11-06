@@ -24,7 +24,7 @@ module.exports = {
                         name: "〈〈〈〈〈〈"
                     },
                     title: "Last",
-                    description: `${message.guild?.members.cache.get(lastUpdater?.lastUpdatedID || "")}\n(with ${ cc })`
+                    description: `${message.guild?.members.cache.get(lastUpdater?.lastUpdatedID || "")} (${ cc })`
                 }
             });
             return;
