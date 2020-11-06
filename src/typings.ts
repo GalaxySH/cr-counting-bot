@@ -41,6 +41,7 @@ export interface guildObject {
     countChannel?: string;
     lastUpdatedID?: string;
     chatAllowed?: boolean;
+    leaderboardEligible?: boolean;
 }
 
 export interface PermLevels {
@@ -50,4 +51,9 @@ export interface PermLevels {
     mod: 3;
     admin: 4;
     botMaster: 5;
+}
+
+export interface CheckAccessOptions {
+    adminOnly?: boolean;
+    ownerOnly?: boolean;
 }
