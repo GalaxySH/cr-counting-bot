@@ -41,7 +41,7 @@ module.exports = {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Current",
-                    description: `the count is \`${count.count || 0}\`\nthe increment is \`${increment.increment || 1}\``
+                    description: `Count: \`${count.count || 0}\`\nIncrement: \`${increment.increment || 1}\``
                 }
             });
             return;
