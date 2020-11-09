@@ -35,14 +35,13 @@ module.exports = {
             // get the current count from database
             let count = await client.database?.getCount(message.guild?.id);
             if (!count || !count.count) count = { count: 0 };
-            const cc = count.count || 0;
             const increment = await client.database?.getIncrement(message.guild?.id);
             if (!increment) return;
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Current",
-                    description: `the count is \`${cc}\`\nthe increment is \`${increment.increment}\``
+                    description: `the count is \`${count.count || 0}\`\nthe increment is \`${increment.increment || 1}\``
                 }
             });
             return;

@@ -69,9 +69,6 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         //message.react("✔");
         message.react("☑️");
         return true;
-
-        // ADD SOMETHING THAT CHECKS AND SETS THE INCREMENT IF ONE DOESN"T EXIST YET
-
     } catch (error) {
         xlg.log(error);
         return false;

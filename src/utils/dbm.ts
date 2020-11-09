@@ -83,6 +83,9 @@ export class Database {
         if (!guildID || !this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || { increment: 1 };
+        if (!result.increment) {
+            await this.setIncrement(guildID, 1);
+        }
         return result;
     }
     
