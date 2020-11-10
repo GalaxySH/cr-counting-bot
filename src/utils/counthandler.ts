@@ -1,5 +1,6 @@
 import { CommandClient, ExtMessage } from "../typings";
 import xlg from "../xlogger";
+import { handleFoul } from "./foul";
 //import fs from "fs";
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
@@ -30,38 +31,14 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         const incre = increment.increment || 1;
         //if (parseInt(message.content, 10) !== parseInt((rmsgs.array())[1].content, 10) + 1) {
         if (parseInt(message.content, 10) !== cc + incre) {
-            message.react("❌");
-            await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
-            await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
-            message.channel.send({
-                embed: {
-                    color: process.env.INFO_COLOR,
-                    title: "❌ wrong number",
-                    description: `***count reset to 0***\nthe increment is ${incre}`,
-                    footer: {
-                        text: "idiot"
-                    }
-                }
-            })
+            if (!await handleFoul(client, message, "wrong number")) xlg.log("failed to handle foul: number");
             return true;
         }
     
         const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
         if (!lastUpdater) return false;
         if (lastUpdater.lastUpdatedID === message.author.id) {
-            message.react("❌");
-            await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
-            await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
-            message.channel.send({
-                embed: {
-                    color: process.env.INFO_COLOR,
-                    title: "❌ talking out of turn",
-                    description: `***count reset to 0***\nthe increment is ${incre}`,
-                    footer: {
-                        text: "idiot"
-                    }
-                }
-            })
+            if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
             return true;
         }
         await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
