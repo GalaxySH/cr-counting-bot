@@ -41,8 +41,23 @@ export interface guildObject {
     countChannel?: string;
     lastUpdatedID?: string;
     chatAllowed?: boolean;
-    leaderboardEligible?: boolean;
+    leaderboardEligible?: 0 | 1;
+    numberOfCounts?: number;
+    totalCount?: number;
+    recordNumber?: number;
+    members?: Array<{
+        id: string;
+        totalCounts?: number;
+        highestNumber?: number;
+    }>;
+    numberOfErrors?: number;
 }
+
+/*export interface PlayerData {
+    userID?: string;
+    guildID?: string;
+    saves?: 0 | 1 | 2 | 3;
+}*/
 
 export interface PermLevels {
     member: 0;
