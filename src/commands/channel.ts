@@ -9,6 +9,8 @@ module.exports = {
     name: "channel",
     aliases: ["countchannel"],
     description: "set the counting channel",
+    usage: "<channel>",
+    args: true,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
