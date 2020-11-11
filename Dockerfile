@@ -1,6 +1,6 @@
 # RUN with sudo docker-compose up --build -d
 
-FROM node:14
+FROM node:14-alpine3.10
 
 WORKDIR /src
 
