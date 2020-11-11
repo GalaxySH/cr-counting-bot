@@ -1,6 +1,6 @@
 import { CommandClient, ExtMessage } from "../typings";
 import xlg from "../xlogger";
-import { handleFoul } from "./foul";
+//import { handleFoul } from "./foul";
 //import fs from "fs";
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
@@ -13,12 +13,14 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!chatting) return false;
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
             if (!message.gprefix || !client.commands) return false;
-            const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
-            const commandName = args.shift()?.toLowerCase()
-            if (!commandName) return false;
-            const command = client.commands.get(commandName) ||
-                client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
-            if (command) return false;
+            if (message.content.toLowerCase().indexOf(message.gprefix) === 0) {
+                const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
+                const commandName = args.shift()?.toLowerCase()
+                if (!commandName) return false;
+                const command = client.commands.get(commandName) ||
+                    client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+                if (command) return false;
+            }
             if (!chatting?.chatAllowed) message.delete();
             return true;
         }
@@ -50,4 +52,29 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         xlg.log(error);
         return false;
     }
+}
+
+async function handleFoul(client: CommandClient, message: ExtMessage, reason: string): Promise<boolean> {
+    if (!client || !message) return false;
+    if (!reason) reason = "Foul";
+
+    message.react("❌");
+    await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
+    await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
+    await client.database?.incrementErrorCount(message.guild?.id || "");
+
+    const increment = await client.database?.getIncrement(message.guild?.id);
+    if (!increment) return false;
+    const incre = increment.increment || 1;
+    message.channel.send({
+        embed: {
+            color: process.env.INFO_COLOR,
+            title: `❌ ${reason}`,
+            description: `**reset to 0**\nincrement is ${incre}`,
+            footer: {
+                text: "idiot"
+            }
+        }
+    }).catch(xlg.error);
+    return true;
 }

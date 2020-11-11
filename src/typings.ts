@@ -41,7 +41,16 @@ export interface guildObject {
     countChannel?: string;
     lastUpdatedID?: string;
     chatAllowed?: boolean;
-    leaderboardEligible?: boolean;
+    leaderboardEligible?: 0 | 1;
+    numberOfCounts?: number;
+    totalCount?: number;
+    recordNumber?: number;
+    members?: Array<{
+        id: string;
+        totalCounts?: number;
+        highestNumber?: number;
+    }>;
+    numberOfErrors?: number;
 }
 
 /*export interface PlayerData {
