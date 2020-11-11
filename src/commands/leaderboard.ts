@@ -41,11 +41,12 @@ module.exports = {
                     const gu = client.guilds.cache.get(g.guildID) || await client.guilds.fetch(g.guildID);
                     if (gu) {
                         let guildName = gu.name;
-                        for (let i = 0; i < (longestNameLength - guildName.length); i++) {
-                            guildName += " ";
-                        }
                         if (guildName.length > 20) {
                             guildName = guildName.slice(0, 17) + "...";
+                        }
+                        const lengToAdd = longestNameLength - guildName.length;
+                        for (let i = 0; i < lengToAdd; i++) {
+                            guildName += " ";
                         }
 
                         // ⫸
