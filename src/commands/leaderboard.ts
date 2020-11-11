@@ -21,7 +21,7 @@ module.exports = {
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
                 if (g.guildID) {
-                    const gu = client.guilds.cache.get(g.guildID) || await client.guilds.fetch(g.guildID);
+                    const gu = client.guilds.cache.get(g.guildID);
                     if (gu) {
                         if (longestNameLength < gu.name.length) longestNameLength = gu.name.length;
                     }
@@ -38,7 +38,7 @@ module.exports = {
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
                 if (g.guildID) {
-                    const gu = client.guilds.cache.get(g.guildID) || await client.guilds.fetch(g.guildID);
+                    const gu = client.guilds.cache.get(g.guildID);
                     if (gu) {
                         let guildName = gu.name;
                         if (guildName.length > 20) {
