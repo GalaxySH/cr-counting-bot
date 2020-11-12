@@ -29,11 +29,13 @@ module.exports = {
             }
             if (longestNameLength > 20) longestNameLength = 20;
             // Getting the right spacing and length and adding the header row
+            const columnOneName = "Rank.";
+            const columnTwoName = "Name";
             let spaces = "";
-            for (let i = 0; i < (longestNameLength - "Name".length); i++) {
+            for (let i = 0; i < (longestNameLength - columnTwoName.length); i++) {
                 spaces += " ";
             }
-            lbMap.unshift(`R  | Name${spaces} | Count`);
+            lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
             // Getting and adding the entries
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
@@ -45,12 +47,16 @@ module.exports = {
                             guildName = guildName.slice(0, 17) + "...";
                         }
                         const lengToAdd = longestNameLength - guildName.length;
-                        for (let i = 0; i < lengToAdd; i++) {
+                        for (let b = 0; b < lengToAdd; b++) {
                             guildName += " ";
+                        }
+                        let rankSpaces = "";
+                        for (let b = 0; b < (columnOneName.length - `${i}`.length - 2); b++) {
+                            rankSpaces += " ";
                         }
 
                         // ⫸
-                        lbMap.push(`${(i + 1 < 10) ? (i + 1 + " ") : (i + 1)} | ${guildName} | ${g.count}`)
+                        lbMap.push(` ${(i + 1 < 10) ? (`${rankSpaces}${i + 1}`) : (`${i + 1}`)}. │ ${guildName} │ ${g.count}`)
                     }
                 }
             }
@@ -70,7 +76,7 @@ module.exports = {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Leaderboard of Guilds",
-                    description: `\`\`\`\n${lbMap.join("\n")}\n\`\`\``,
+                    description: `\`\`\`md\n${lbMap.join("\n")}\n\`\`\``,
                     footer: {
                         iconURL: message.author.avatarURL() || "",
                         text: message.author.tag
