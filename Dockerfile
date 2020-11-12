@@ -14,4 +14,6 @@ COPY . .
 
 #RUN ["chmod", "+x", "/src/scripts/wait-for-it.sh"]
 
-CMD chmod +x ./scripts/wait-for-it.sh && ./scripts/wait-for-it.sh crmongo:27024 -t 15 -- npm run start
+RUN ["chmod", "+x", "./scripts/wait-for-it.sh"]
+
+CMD ./scripts/wait-for-it.sh crmongo:27024 -t 15 -- npm run start
