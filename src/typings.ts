@@ -21,6 +21,7 @@ export interface Command {
     description: string | descriptionObject,
     usage: string,
     args: boolean,
+    showInHelp: boolean,
     execute: (client: CommandClient, message: ExtMessage, args: string[]) => never
 }
 
