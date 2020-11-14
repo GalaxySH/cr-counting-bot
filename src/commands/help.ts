@@ -12,18 +12,20 @@ module.exports = {
             if (!client.commands) return;
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
-                cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
-            })
+                if (!c.showInHelp) {
+                    cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
+                }
+            });
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Server Commands",
-                    description: `Use this command any time. Use the \`${message.gprefix}howto\` command to learn how to count.\n\n__**Commands**__\n${cmdMap.join("\n")}`,
+                    description: `Use this command any time. Use the \`${message.gprefix}howto\` command to learn how to count.\n\n__**Commands**__\n${cmdMap.join("\n")}\n\nRules:\n• No one counts more than one number in a row.\n• If the count is broken, one "save" will be removed from the guild's saves if it has any. Otherwise, the count will reset.`,
                     footer: {
-                        text: `Send ${message.gprefix}howto for instructions`
+                        text: `Send ${message.gprefix}howto for detailed instructions`
                     }
                 }
-            }).catch(xlg.error);
+            });
         } catch (error) {
             xlg.error(error);
             if (!(message.channel instanceof TextChannel)) return;

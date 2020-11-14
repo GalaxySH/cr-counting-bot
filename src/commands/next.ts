@@ -19,6 +19,9 @@ module.exports = {
             const incre = increment.increment || 1;
             // check for perms
             //if (!(await checkAccess(message))) return;
+
+            // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SET EMBED IF THERE ISN"T ONE
+            
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,

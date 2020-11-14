@@ -21,6 +21,7 @@ export interface Command {
     description: string | descriptionObject,
     usage: string,
     args: boolean,
+    showInHelp: boolean,
     execute: (client: CommandClient, message: ExtMessage, args: string[]) => never
 }
 
@@ -37,7 +38,6 @@ export interface guildObject {
     guildID?: string;
     count?: number;
     increment?: number;
-    paused?: boolean;
     countChannel?: string;
     lastUpdatedID?: string;
     chatAllowed?: boolean;
@@ -45,12 +45,14 @@ export interface guildObject {
     numberOfCounts?: number;
     totalCount?: number;
     recordNumber?: number;
+    numberOfErrors?: number;
+    paused?: boolean;
     members?: Array<{
         id: string;
         totalCounts?: number;
         highestNumber?: number;
     }>;
-    numberOfErrors?: number;
+    saves?: number;
 }
 
 /*export interface PlayerData {

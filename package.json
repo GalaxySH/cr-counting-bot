@@ -1,11 +1,12 @@
 {
   "name": "cr_counting_bot",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "a bot to manage the counting channel of crs discord server",
   "main": "dist/bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx tsc && node dist/bot.js"
+    "start": "npx tsc && node dist/bot.js",
+    "build:prod": ""
   },
   "keywords": [
     "discord",
