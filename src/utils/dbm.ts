@@ -136,6 +136,17 @@ export class Database {
         const result = await GuildData.find({ "leaderboardEligible": 1 }, { sort: { "count": -1 }, limit: 15 });
         return result.toArray();
     }
+
+    async getSaves(guildID: string | undefined): Promise<number | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || { saves: 1 };
+        if (isNaN(result.saves) || result.saves < 0) {
+            return 0;
+        }
+        return result.saves;
+    }
     
     async updateCount(guildID: string, value: number): Promise<void> {
         if (!this.db) return;
@@ -231,21 +242,23 @@ export class Database {
             guildID: guildID,
             count: 0,
             increment: 1,
-            chatAllowed: false,
+            chatAllowed: true,
             leaderboardEligible: 1,
             numberOfCounts: 0,
             recordNumber: 0,
             countChannel: "",
-            numberOfErrors: 0
+            numberOfErrors: 0,
+            saves: 1
         }
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
         if (isNaN(guild.increment)) guild.increment = 1;
-        if (!guild.chatAllowed) guild.chatAllowed = false;
+        if (!guild.chatAllowed && guild.chatAllowed !== false) guild.chatAllowed = true;
         if (isNaN(guild.numberOfCounts)) guild.numberOfCounts = 0;
         if (isNaN(guild.recordNumber)) guild.recordNumber = 0;
         if (!guild.countChannel) guild.countChannel = "";
         if (isNaN(guild.numberOfErrors)) guild.numberOfErrors = 0;
+        if (isNaN(guild.saves)) guild.saves = 1;
         await GuildData.updateOne(
             { guildID: guildID },
             { $set: guild },
