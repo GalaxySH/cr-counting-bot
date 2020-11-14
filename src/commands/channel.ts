@@ -8,15 +8,15 @@ import { stringToChannel } from "../utils/parsers";
 module.exports = {
     name: "channel",
     aliases: ["countchannel"],
-    description: "set the counting channel",
-    usage: "<channel>",
+    description: "set the counting channel to the current channel",
+    usage: "[channel]",
     args: true,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
             if (!(await checkAccess(message))) return;
             if (!message.guild) return;
-            const targetChannel = stringToChannel(message.guild, args.join(" "))
+            const targetChannel = stringToChannel(message.guild, args.join(" ")) || message.channel;
             if (!targetChannel) {
                 message.channel.send({
                     embed: {
@@ -31,8 +31,8 @@ module.exports = {
             await client.database?.setChannel(message.guild.id, targetChannel.id);
             message.channel.send({
                 embed: {
-                    color: process.env.NAVY_COLOR,
-                    description: `counting channel set to ${targetChannel}`
+                    color: process.env.INFO_COLOR,
+                    description: (targetChannel.id === message.channel.id) ? `the current channel has been set as the counting channel` : `counting channel set to ${targetChannel}`
                 }
             });
             return;
