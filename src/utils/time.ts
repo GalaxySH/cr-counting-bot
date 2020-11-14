@@ -9,7 +9,7 @@ timeUnits.normalMonth = timeUnits.day * 30;
  * @param {number} msAlive duration in milliseconds
  * @param {boolean} leadingzero whether times should have leading zeroes
  */
-function getFriendlyUptime(msAlive = 0, leadingzero = false) {
+export function getFriendlyUptime(msAlive = 0, leadingzero = false): Record<string, unknown> {
     msAlive = Math.abs(msAlive);
     let days: number | string = Math.floor(msAlive / timeUnits.day);
     let hours: number | string = Math.floor(msAlive / timeUnits.hour) % 24;
@@ -49,7 +49,7 @@ function getFriendlyUptime(msAlive = 0, leadingzero = false) {
  * @param {number} timestamp1 second timestamp
  * @returns
  */
-function getDayDiff(timestamp0: number, timestamp1: number) {
+export function getDayDiff(timestamp0: number, timestamp1: number): number {
     return Math.round(getDurationDiff(timestamp0, timestamp1, timeUnits.day));
 }
 
@@ -61,7 +61,7 @@ function getDayDiff(timestamp0: number, timestamp1: number) {
  * @param {(number | timeUnits)} duration duration of time
  * @returns
  */
-function getDurationDiff(timestamp0: number, timestamp1: number, duration: number) {
+export function getDurationDiff(timestamp0: number, timestamp1: number, duration: number): number {
     return Math.abs(timestamp0 - timestamp1) / duration;
 }
 
@@ -76,7 +76,7 @@ function getDurationDiff(timestamp0: number, timestamp1: number, duration: numbe
  * @param {string} text input text
  * @returns
  */
-function stringToDuration(text: string) {
+export function stringToDuration(text: string): number {
     let ms = 0;
     const seconds = /(\d+)s/.exec(text);
     if (seconds) ms += Number(seconds[1]) * timeUnits.second;

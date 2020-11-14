@@ -12,8 +12,10 @@ module.exports = {
             if (!client.commands) return;
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
-                cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
-            })
+                if (!c.showInHelp) {
+                    cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
+                }
+            });
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
@@ -23,7 +25,7 @@ module.exports = {
                         text: `Send ${message.gprefix}howto for instructions`
                     }
                 }
-            }).catch(xlg.error);
+            });
         } catch (error) {
             xlg.error(error);
             if (!(message.channel instanceof TextChannel)) return;
