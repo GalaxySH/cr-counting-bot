@@ -24,7 +24,7 @@ module.exports = {
                 });
                 return false;
             }
-            const state = (args[0] !== "false");
+            const state = (args[0] !== "true");
             await client.database?.setChatAllowed(message.guild.id, state);// set desired chatAllowed state
             const countChannel = await client.database?.getChannel(message.guild?.id);// get counting channel id
             if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND

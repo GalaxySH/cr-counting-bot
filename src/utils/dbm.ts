@@ -141,11 +141,21 @@ export class Database {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || { saves: 1 };
+        const result = await GuildData.findOne({ "guildID": guildID });
+        let saves;
         if (isNaN(result.saves) || result.saves < 0) {
-            return 0;
+            saves = 0;
+        } else {
+            saves = result.saves;
         }
-        return result.saves;
+        if (!result.lastSaved) return saves;
+        const yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+        //const yesterday = new Date(new Date().getTime() - (10000));
+        if (yesterday >= result.lastSaved.getTime() && saves < 3) {
+            await this.updateSaves(guildID, saves + 1)
+            return await this.getSaves(guildID);
+        }
+        return saves;
     }
     
     async updateCount(guildID: string, value: number): Promise<void> {
@@ -232,6 +242,17 @@ export class Database {
             $inc: { "numberOfErrors": 1 }
         }, {
             upsert: true
+        });
+    }
+
+    async updateSaves(guildID: string, saves: number): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "saves": saves, "lastSaved": new Date() }
         });
     }
 

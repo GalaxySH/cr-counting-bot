@@ -53,6 +53,7 @@ export interface guildObject {
         highestNumber?: number;
     }>;
     saves?: number;
+    lastSaved?: Date;
 }
 
 /*export interface PlayerData {
