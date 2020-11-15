@@ -1,4 +1,4 @@
-# RUN with sudo docker-compose up --build -d
+# RUN with `sudo docker-compose up --build -d -t countingman`
 
 FROM node:14-alpine3.10
 

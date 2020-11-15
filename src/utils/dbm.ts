@@ -157,6 +157,15 @@ export class Database {
         }
         return saves;
     }
+
+    async getFailRole(guildID: string | undefined): Promise<string | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || { failRole: "" };
+        if (!result.failRole) return "";
+        return result.failRole;
+    }
     
     async updateCount(guildID: string, value: number): Promise<void> {
         if (!this.db) return;
@@ -256,6 +265,19 @@ export class Database {
         });
     }
 
+    async setFailRole(guildID: string, role: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "failRole": role }
+        }, {
+            upsert: true
+        });
+    }
+
     private async maybeSetDefaults(guildID: string): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
@@ -269,7 +291,8 @@ export class Database {
             recordNumber: 0,
             countChannel: "",
             numberOfErrors: 0,
-            saves: 1
+            saves: 1,
+            //lastSaved: new Date()
         }
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
@@ -280,6 +303,7 @@ export class Database {
         if (!guild.countChannel) guild.countChannel = "";
         if (isNaN(guild.numberOfErrors)) guild.numberOfErrors = 0;
         if (isNaN(guild.saves)) guild.saves = 1;
+        //if (!guild.lastSaved) guild.lastSaved = new Date();
         await GuildData.updateOne(
             { guildID: guildID },
             { $set: guild },
