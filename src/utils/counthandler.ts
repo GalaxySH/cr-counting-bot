@@ -8,7 +8,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         const countChannel = await client.database?.getChannel(message.guild?.id);
         if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND
         if (message.channel.id !== countChannel?.countChannel) return false;
-    
+
         const chatting = await client.database?.getChatAllowed(message.guild?.id);
         if (!chatting) return false;
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
@@ -36,7 +36,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             if (!await handleFoul(client, message, "wrong number")) xlg.log("failed to handle foul: number");
             return true;
         }
-    
+
         const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
         if (!lastUpdater) return false;
         if (lastUpdater.lastUpdatedID === message.author.id) {
@@ -58,6 +58,28 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     if (!client || !message) return false;
     if (!reason) reason = "Foul";
 
+    let saves = await client.database?.getSaves(message.guild?.id);
+    if (saves && saves >= 1) {// || saves === 0
+        saves--;
+        client.database?.updateSaves(message.guild?.id || "", saves);
+        message.react("🟧");
+        message.channel.send(`${message.member} you screwed it, **but you were saved.**`, {
+            embed: {
+                color: process.env.INFO_COLOR,
+                //author: {
+                //    name: `${reason || message.author.tag}`,
+                //    iconURL: message.author.avatarURL() || undefined
+                //},
+                title: `\\🟧 ${reason}`,
+                description: `**one save has been docked**\nSaves remaining: **${saves}**`,
+                footer: {
+                    text: "c?help"
+                }
+            }
+        }).catch(xlg.error);
+        return true;
+    }
+
     message.react("❌");
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
@@ -66,10 +88,10 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
     const incre = increment.increment || 1;
-    message.channel.send({
+    message.channel.send(`${message.member} you screwed it, **and you had no saves left.**`, {
         embed: {
             color: process.env.INFO_COLOR,
-            title: `❌ ${reason}`,
+            title: `\\❌ ${reason}`,
             description: `**reset to 0**\nincrement is ${incre}`,
             footer: {
                 text: "idiot"
