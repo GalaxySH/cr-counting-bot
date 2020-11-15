@@ -39,6 +39,7 @@ export interface guildObject {
     count?: number;
     increment?: number;
     countChannel?: string;
+    failRole?: string;
     lastUpdatedID?: string;
     chatAllowed?: boolean;
     leaderboardEligible?: 0 | 1;

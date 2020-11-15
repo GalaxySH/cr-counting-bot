@@ -84,6 +84,16 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
     await client.database?.incrementErrorCount(message.guild?.id || "");
+    // fail role handling
+    const failroleid = await client.database?.getFailRole(message.guild?.id || "");
+    if (failroleid && failroleid.length > 0) {
+        const failrole = message.guild?.roles.cache.get(failroleid);
+        if (!failrole) {
+            await client.database?.setFailRole(message.guild?.id || "", "");
+        } else {
+            message.member?.roles.add(failrole).catch(xlg.error);
+        }
+    }
 
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
