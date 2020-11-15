@@ -2,6 +2,7 @@ version: "3.8"
 services: 
     bot:
         container_name: crBot
+        image: countingman:cm2
         restart: always
         build: .
         env_file: 
