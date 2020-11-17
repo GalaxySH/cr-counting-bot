@@ -278,6 +278,12 @@ export class Database {
         });
     }
 
+    async deleteGuildEntry(guildID: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        this.db.collection("GuildData").deleteOne({ "guildID": guildID });
+    }
+
     private async maybeSetDefaults(guildID: string): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");

@@ -102,9 +102,9 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
         embed: {
             color: process.env.INFO_COLOR,
             title: `\\❌ ${reason}`,
-            description: `**reset to 0**\nincrement is ${incre}`,
+            description: `**reset to 0**\nthe next number is: **${incre}**`,
             footer: {
-                text: "idiot"
+                text: "use c?curr next time, idiot"
             }
         }
     }).catch(xlg.error);
