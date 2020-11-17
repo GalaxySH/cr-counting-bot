@@ -37,6 +37,7 @@ module.exports = {
             }
             lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
             // Getting and adding the entries
+            let displayIndex = 1
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
                 if (g.guildID) {
@@ -51,12 +52,15 @@ module.exports = {
                             guildName += " ";
                         }
                         let rankSpaces = "";
-                        for (let b = 0; b < (columnOneName.length - `${i}`.length - 2); b++) {
+                        for (let b = 0; b < (columnOneName.length - `${displayIndex}`.length - 2); b++) {
                             rankSpaces += " ";
                         }
 
                         // ⫸
-                        lbMap.push(` ${(i + 1 < 10) ? (`${rankSpaces}${i + 1}`) : (`${i + 1}`)}. │ ${guildName} │ ${g.count}`)
+                        lbMap.push(` ${(displayIndex < 10) ? (`${rankSpaces}${displayIndex}`) : (`${displayIndex}`)}. │ ${guildName} │ ${g.count}`);
+                        displayIndex++;
+                    } else {
+                        await client.database?.deleteGuildEntry(g.guildID);
                     }
                 }
             }
