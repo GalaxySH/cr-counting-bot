@@ -57,12 +57,6 @@ export interface guildObject {
     lastSaved?: Date;
 }
 
-/*export interface PlayerData {
-    userID?: string;
-    guildID?: string;
-    saves?: 0 | 1 | 2 | 3;
-}*/
-
 export interface PermLevels {
     member: 0;
     trustedMember: 1;
@@ -75,4 +69,10 @@ export interface PermLevels {
 export interface CheckAccessOptions {
     adminOnly?: boolean;
     ownerOnly?: boolean;
+}
+
+export interface PlayerData {
+    userID?: string;
+    //guildID?: string;
+    saves?: 0 | 1 | 2 | 3;
 }

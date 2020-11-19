@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { guildObject } from '../typings';
+import { guildObject, PlayerData } from '../typings';
 import xlg from '../xlogger';
 
 /*/**
@@ -71,6 +71,10 @@ export class Database {
             return this;
         }
     }
+
+    /*┏━━━━━━━━━┓
+      ┃ GETTERS ┃
+      ┗━━━━━━━━━┛*/
     
     async getCount(guildID: string | undefined): Promise<guildObject | false> {
         if (!guildID || !this.db) return false;
@@ -166,6 +170,19 @@ export class Database {
         if (!result.failRole) return "";
         return result.failRole;
     }
+
+    async getPlayerData(userID: string | undefined): Promise<string | false> {
+        if (!userID || !this.db) return false;
+        await this.createUser(userID);
+        const UserData = this.db.collection("UserData");
+        const result = await UserData.findOne({ "userID": userID });
+        if (!result) return false;
+        return result.failRole;
+    }
+
+    /*┏━━━━━━━━━┓
+      ┃ SETTERS ┃
+      ┗━━━━━━━━━┛*/
     
     async updateCount(guildID: string, value: number): Promise<void> {
         if (!this.db) return;
@@ -284,6 +301,10 @@ export class Database {
         this.db.collection("GuildData").deleteOne({ "guildID": guildID });
     }
 
+    /*┏━━━━━━━━━━┓
+      ┃ DEFAULTS ┃
+      ┗━━━━━━━━━━┛*/
+
     private async maybeSetDefaults(guildID: string): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
@@ -313,6 +334,24 @@ export class Database {
         await GuildData.updateOne(
             { guildID: guildID },
             { $set: guild },
+            { upsert: true }
+        );
+        return;
+    }
+
+    private async createUser(userID: string): Promise<void> {
+        if (!this.db) return;
+        const UserData = this.db.collection("UserData");
+        const userDefaults: PlayerData = {
+            userID: userID,
+            saves: 1
+        }
+        const user = await UserData.findOne({ "userID": userID }) || userDefaults;
+        if (isNaN(user.saves)) user.saves = 1;
+        //if (!guild.lastSaved) guild.lastSaved = new Date();
+        await UserData.updateOne(
+            { "userID": userID },
+            { $set: user },
             { upsert: true }
         );
         return;
