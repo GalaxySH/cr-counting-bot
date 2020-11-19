@@ -47,7 +47,9 @@ module.exports = {
                 await warnMsg.react("🟢").catch(xlg.error);
                 await warnMsg.react("🚫").catch(xlg.error);
 
-                const filter: CollectorFilter = (r, u) => (r.emoji.name === '🟢' || r.emoji.name === '🚫') && u.id === message.author.id;
+                const filter: CollectorFilter = async (r, u) => {
+                    return ((r.emoji.name === '🟢' || r.emoji.name === '🚫') && (message.guild?.members.cache.get(u.id)?.permissions.has(["ADMINISTRATOR"]) || u.id === message.author.id))
+                };
                 const collected = await warnMsg.awaitReactions(filter, { max: 1, time: 10000 });
                 if (!collected || !collected.size || collected.first()?.emoji.name === '🚫') {
                     warnMsg.embeds[0].color = parseInt(process.env.FAIL_COLOR || "0");
