@@ -3,6 +3,12 @@ import xlg from "../xlogger";
 //import { handleFoul } from "./foul";
 //import fs from "fs";
 
+const reactToMessageInOrder = async (message: ExtMessage, emojis: string[]) => {
+    for (let emoji of emojis) {
+        await message.react(emoji)
+    }
+}
+
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
         const countChannel = await client.database?.getChannel(message.guild?.id);
@@ -29,12 +35,44 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!count || !count.count) count = { count: 0 };
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
+        const stats = await client?.database?.getStats(message.guild?.id);
+
         const cc = count.count || 0;
         const incre = increment.increment || 1;
+        const userCountInput = parseInt(message.content, 10);
+
         //if (parseInt(message.content, 10) !== parseInt((rmsgs.array())[1].content, 10) + 1) {
-        if (parseInt(message.content, 10) !== cc + incre) {
+
+        if (userCountInput !== cc + incre) {
             if (!await handleFoul(client, message, "wrong number")) xlg.log("failed to handle foul: number");
             return true;
+        }
+
+        // Handle funny nice numbers
+        if (userCountInput == 69 || userCountInput == 420) {
+            reactToMessageInOrder(message, ["🇳", "🇮", "🇨", "🇪"]);
+        }
+
+        // Divisible by 100
+        if (userCountInput % 100 == 0 && incre == 1) {
+            message.react("💯");
+        }
+
+        // Handle new records
+        if (
+            stats != null && stats != false && stats.recordNumber != null
+            && userCountInput == stats.recordNumber + 1
+        ) {
+            message.channel.send(
+                `${message.member} broke the previous counting record!`,
+                {
+                    embed: {
+                        color: process.env.INFO_COLOR,
+                        title: 'New Record',
+                        description: `${message.member} set a new record of ${userCountInput}!`
+                    }
+                }
+            );
         }
 
         const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
