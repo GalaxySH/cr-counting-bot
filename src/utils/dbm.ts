@@ -177,7 +177,7 @@ export class Database {
         const UserData = this.db.collection("UserData");
         const result = await UserData.findOne({ "userID": userID });
         if (!result) return false;
-        return result.failRole;
+        return result;
     }
 
     /*┏━━━━━━━━━┓
