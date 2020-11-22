@@ -13,7 +13,7 @@ module.exports = {
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
                 if (!c.showInHelp) {
-                    cmdMap.push(`🔹 \`${message.gprefix}${c.name}\`\n${c.description}`)
+                    cmdMap.push(`🔹 \`${message.gprefix}${c.name} ${c.usage || "<>"}\`\n${c.description}`)
                 }
             });
             message.channel.send({

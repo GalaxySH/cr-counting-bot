@@ -36,14 +36,31 @@ module.exports = {
                     });
                     return false;
                 }
-                const ninc = parseInt(args[0], 10);
+                const ninc = parseInt(args[0], 10);// The increment to be set
 
+
+                const stats = await client.database?.getStats(message.guild?.id);
+                if (!stats) return false;
+                // This section will only execute if the guild no longer has eligibility
+                if (!stats.leaderboardEligible) {
+                    await client.database?.setIncrement(message.guild?.id || "none", ninc);
+
+                    await message.channel.send({
+                        embed: {
+                            color: parseInt(process.env.INFO_COLOR || "0"),
+                            description: `Increment set to ${ninc}`
+                        }
+                    });
+
+                    return true;
+                }
+                // This section will only execute if the guild still has eligibility
                 const warnMsg = await message.channel.send({
                     embed: {
                         color: process.env.WARN_COLOR,
                         description: `**WARNING:** This action will permanently remove your leaderboard eligibility, continue?`
                     }
-                })
+                });
                 await warnMsg.react("🟢").catch(xlg.error);
                 await warnMsg.react("🚫").catch(xlg.error);
 
@@ -81,7 +98,7 @@ module.exports = {
                         xlg.error("could not remove my reactions");
                     }
                 }
-                return;
+                return true;
             }
             /*const ninc = Math.floor(Math.random() * 10);
             client.database?.setIncrement(message.guild?.id, ninc);

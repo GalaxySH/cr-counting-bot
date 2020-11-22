@@ -5,6 +5,27 @@ import { sendError } from "../utils/messages";
 import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
+const actions = [
+    "get yoinked",
+    "get smushed",
+    "feel bad",
+    "get yelled at",
+    "get banned",
+    "get fired",
+    "get kicked",
+    "become depressed",
+    "regret not listening",
+    "facy my wrath",
+    "pay your taxes",
+    "get anxiety",
+    "your computer will crash",
+    "you don't know how to count",
+    "never fit in",
+    "be that one kid",
+    "get the Fail Role",
+    "nothing much will happen"
+]
+
 module.exports = {
     name: "next",
     aliases: ["hint"],
@@ -20,21 +41,44 @@ module.exports = {
             // check for perms
             //if (!(await checkAccess(message))) return;
 
-            // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SET EMBED IF THERE ISN"T ONE
+            // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SEND EMBED IF THERE ISN"T ONE
+
+            // CHECK IF THE SENDER WAS THE LAST PERSON TO COUNT, THEN SAY DON"T COUNT
+            const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
             
-            message.channel.send({
-                embed: {
-                    color: process.env.INFO_COLOR,
-                    author: {
-                        name: "〉〉〉〉〉〉"
-                    },
-                    title: "Next",
-                    description: `send \`${cc + incre}\``,
-                    footer: {
-                        text: "or get yoinked"
-                    }
+            let embed = {};
+            if (lastUpdater) {
+                const last = lastUpdater?.lastUpdatedID || false;
+
+                if (last === message.author.id) {
+                    embed = {
+                        color: process.env.INFO_COLOR,
+                        title: "Next",
+                        description: `Don't send anything! You were the last to count.`,
+                        footer: {
+                            text: `or ${actions[Math.floor(Math.random() * actions.length)]}`
+                        }
+                    };
+                } else {
+                    embed = {
+                        color: process.env.INFO_COLOR,
+                        author: {
+                            name: "〉〉〉〉〉〉〉〉〉〉〉〉〉〉"
+                        },
+                        title: "Next",
+                        description: `send \`${cc + incre}\``,
+                        footer: {
+                            text: `or ${actions[Math.floor(Math.random() * actions.length)]}`
+                        }
+                    };
                 }
-            });
+                
+            } else {
+                embed = {
+                    title: "No Data"
+                };
+            }
+            message.channel.send({ embed: embed });
             return;
         } catch (error) {
             xlg.error(error);
