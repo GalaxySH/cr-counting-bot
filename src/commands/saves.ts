@@ -7,8 +7,15 @@ module.exports = {
     name: "saves",
     aliases: ["s"],
     description: "get the saves for the guild",
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
+            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Arguments not allowed");
+                return false;
+            }
+
             let saves = await client.database?.getGuildSaves(message.guild?.id);
             if (!saves && saves !== 0) saves = 0;
 

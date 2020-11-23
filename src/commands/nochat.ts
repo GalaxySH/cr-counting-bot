@@ -6,7 +6,7 @@ import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "nochat",
-    usage: "<true/false(default)>",
+    usage: "<true/FALSE>",
     args: true,
     description: "set whether chatting is allowed in the channel",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
@@ -14,7 +14,7 @@ module.exports = {
             // check for perms
             if (!(await checkAccess(message))) return;
             if (!message.guild) return;
-            if (args[0] !== "true" && args[0] !== "false") {
+            if (args.join(" ") !== "true" && args.join(" ") !== "false") {
                 message.channel.send({
                     embed: {
                         color: process.env.FAIL_COLOR,

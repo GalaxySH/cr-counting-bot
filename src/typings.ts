@@ -32,6 +32,8 @@ export interface CommandClient extends Discord.Client {
 
 export interface ExtMessage extends Discord.Message {
     gprefix?: string
+    chatting?: boolean;
+    countChannel?: string;
 }
 
 export interface guildObject {

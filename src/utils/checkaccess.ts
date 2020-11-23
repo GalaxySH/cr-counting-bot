@@ -5,6 +5,7 @@ export = async (message: ExtMessage, options?: CheckAccessOptions): Promise<bool
     if (!message.member) return false;
     if (options) {
         if (options.ownerOnly && message.author.id !== process.env.OWNERID) {
+            if (!message.chatting) message.delete();
             await message.channel.send({
                 embed: {
                     color: process.env.FAIL_COLOR,
@@ -14,6 +15,7 @@ export = async (message: ExtMessage, options?: CheckAccessOptions): Promise<bool
             return false;
         }
         if (options.adminOnly && !message.member.permissions.has("ADMINISTRATOR")) {
+            if (!message.chatting) message.delete();
             await message.channel.send({
                 embed: {
                     color: process.env.FAIL_COLOR,
@@ -24,6 +26,7 @@ export = async (message: ExtMessage, options?: CheckAccessOptions): Promise<bool
         }
     }
     if (message.author.id !== process.env.OWNERID && !message.member.permissions.has("ADMINISTRATOR")) {
+        if (!message.chatting) message.delete();
         await message.channel.send({
             embed: {
                 color: process.env.FAIL_COLOR,

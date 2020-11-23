@@ -7,8 +7,14 @@ module.exports = {
     name: "howto",
     aliases: ["instructions"],
     description: "in case you haven't already figured it out",
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
+            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Arguments not allowed");
+                return false;
+            }
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,

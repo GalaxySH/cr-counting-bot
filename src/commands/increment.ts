@@ -15,7 +15,7 @@ module.exports = {
             // check for perms
             if (!(await checkAccess(message))) return;
 
-            if (args.length > 0 && args.length < 2) {
+            if (args.length === 1) {
                 if (/[^0-9]+/.test(args[0]) || parseInt(args[0], 10) > 75000 || parseInt(args[0], 10) < 1) {
                     message.channel.send({
                         embed: {
@@ -99,6 +99,12 @@ module.exports = {
                     }
                 }
                 return true;
+            }
+            if (args.length > 1 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Those arguments are not allowed");
+                return false;
             }
             /*const ninc = Math.floor(Math.random() * 10);
             client.database?.setIncrement(message.guild?.id, ninc);

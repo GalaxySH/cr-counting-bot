@@ -77,6 +77,18 @@ client.on("message", async (message: ExtMessage) => {
         if (dm) return // aborting all dm messages for now
         
         //const now = Date.now();
+        const chatting = await client.database?.getChatAllowed(message.guild?.id);
+        if (!chatting || (!chatting.chatAllowed && chatting.chatAllowed !== false)) {
+            message.chatting = true;
+        } else {
+            message.chatting = chatting.chatAllowed;
+        }
+        const countChannel = await client.database?.getChannel(message.guild?.id);
+        if (countChannel && countChannel.countChannel) {
+            message.countChannel = countChannel.countChannel;
+        } else {
+            message.countChannel = "";
+        }
 
         message.gprefix = process.env.PREFIX;
         if (await counthandler(client, message)) return;
