@@ -58,10 +58,10 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     if (!client || !message) return false;
     if (!reason) reason = "Foul";
 
-    let saves = await client.database?.getSaves(message.guild?.id);
-    if (saves && saves >= 1) {// || saves === 0
-        saves--;
-        client.database?.updateSaves(message.guild?.id || "", saves);
+    let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
+    if (guildSaves && guildSaves >= 1) {// || saves === 0
+        guildSaves--;
+        client.database?.updateSaves(message.guild?.id || "", guildSaves);
         message.react("🟧");
         message.channel.send(`${message.member} you screwed it, **but you were saved.**`, {
             embed: {
@@ -71,7 +71,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
                 //    iconURL: message.author.avatarURL() || undefined
                 //},
                 title: `\\🟧 ${reason}`,
-                description: `**one save has been docked**\nSaves remaining: **${saves}**`,
+                description: `**One save has been docked**\nGuild Saves Remaining: **${guildSaves}**`,
                 footer: {
                     text: "c?help"
                 }

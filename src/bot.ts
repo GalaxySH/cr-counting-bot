@@ -83,6 +83,9 @@ client.on("message", async (message: ExtMessage) => {
         if (!message) return;
         if (!client.commands || !message.gprefix) return;
 
+        const cmdChannel = await client.database?.getCommandChannel(message.guild?.id);
+        if (cmdChannel && cmdChannel !== message.channel.id) return;
+
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);
         if (!args || !args.length) return;

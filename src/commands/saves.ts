@@ -9,7 +9,7 @@ module.exports = {
     description: "get the saves for the guild",
     async execute(client: CommandClient, message: ExtMessage) {
         try {
-            let saves = await client.database?.getSaves(message.guild?.id);
+            let saves = await client.database?.getGuildSaves(message.guild?.id);
             if (!saves && saves !== 0) saves = 0;
 
             // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SET EMBED IF THERE ISN"T ONE
