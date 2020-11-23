@@ -15,7 +15,7 @@ const actions = [
     "get kicked",
     "become depressed",
     "regret not listening",
-    "facy my wrath",
+    "face my wrath",
     "pay your taxes",
     "get anxiety",
     "your computer will crash",
@@ -30,8 +30,14 @@ module.exports = {
     name: "next",
     aliases: ["hint"],
     description: "find the next number",
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
+            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Arguments not allowed");
+                return false;
+            }
             let count = await client.database?.getCount(message.guild?.id);
             if (!count || !count.count) count = { count: 0 };
             const cc = count.count || 0;

@@ -77,11 +77,26 @@ client.on("message", async (message: ExtMessage) => {
         if (dm) return // aborting all dm messages for now
         
         //const now = Date.now();
+        const chatting = await client.database?.getChatAllowed(message.guild?.id);
+        if (!chatting || (!chatting.chatAllowed && chatting.chatAllowed !== false)) {
+            message.chatting = true;
+        } else {
+            message.chatting = chatting.chatAllowed;
+        }
+        const countChannel = await client.database?.getChannel(message.guild?.id);
+        if (countChannel && countChannel.countChannel) {
+            message.countChannel = countChannel.countChannel;
+        } else {
+            message.countChannel = "";
+        }
 
         message.gprefix = process.env.PREFIX;
         if (await counthandler(client, message)) return;
         if (!message) return;
         if (!client.commands || !message.gprefix) return;
+
+        const cmdChannel = await client.database?.getCommandChannel(message.guild?.id);
+        if (cmdChannel && cmdChannel !== message.channel.id) return;
 
         if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);

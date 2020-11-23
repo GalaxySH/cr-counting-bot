@@ -32,6 +32,12 @@ module.exports = {
                 });
                 return;
             }
+            if (args.length > 1 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Arguments not allowed");
+                return false;
+            }
             // get the current count from database
             let count = await client.database?.getCount(message.guild?.id);
             if (!count || !count.count) count = { count: 0 };

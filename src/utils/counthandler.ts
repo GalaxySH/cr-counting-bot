@@ -5,12 +5,12 @@ import xlg from "../xlogger";
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
-        const countChannel = await client.database?.getChannel(message.guild?.id);
-        if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND
-        if (message.channel.id !== countChannel?.countChannel) return false;
+        /*const countChannel = await client.database?.getChannel(message.guild?.id);
+        if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND*/
+        if (message.channel.id !== message.countChannel) return false;
 
-        const chatting = await client.database?.getChatAllowed(message.guild?.id);
-        if (!chatting) return false;
+        //const chatting = await client.database?.getChatAllowed(message.guild?.id);
+        //if (!chatting) return false;
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
             if (!message.gprefix || !client.commands) return false;
             if (message.content.toLowerCase().indexOf(message.gprefix) === 0) {
@@ -21,7 +21,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                     client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
                 if (command) return false;
             }
-            if (!chatting?.chatAllowed) message.delete();
+            if (!message.chatting) message.delete();
             return true;
         }
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
@@ -58,10 +58,10 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     if (!client || !message) return false;
     if (!reason) reason = "Foul";
 
-    let saves = await client.database?.getSaves(message.guild?.id);
-    if (saves && saves >= 1) {// || saves === 0
-        saves--;
-        client.database?.updateSaves(message.guild?.id || "", saves);
+    let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
+    if (guildSaves && guildSaves >= 1) {// || saves === 0
+        guildSaves--;
+        client.database?.updateSaves(message.guild?.id || "", guildSaves);
         message.react("🟧");
         message.channel.send(`${message.member} you screwed it, **but you were saved.**`, {
             embed: {
@@ -71,7 +71,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
                 //    iconURL: message.author.avatarURL() || undefined
                 //},
                 title: `\\🟧 ${reason}`,
-                description: `**one save has been docked**\nSaves remaining: **${saves}**`,
+                description: `**One save has been docked**\nGuild Saves Remaining: **${guildSaves}**`,
                 footer: {
                     text: "c?help"
                 }
@@ -101,8 +101,8 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     message.channel.send(`${message.member} you screwed it, **and you had no saves left.**`, {
         embed: {
             color: process.env.INFO_COLOR,
-            title: `\\❌ ${reason}`,
-            description: `**reset to 0**\nthe next number is: **${incre}**`,
+            title: `\`❌\` ${reason}`,
+            description: `**reset to 0**\nthe next number is \`${incre}\``,
             footer: {
                 text: "use c?curr next time, idiot"
             }

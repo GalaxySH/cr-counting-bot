@@ -80,7 +80,7 @@ export class Database {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || { count: 0 };
+        const result = await GuildData.findOne({ "guildID": guildID }) || { count: 0, lastMessageID: "" };
         return result;
     }
 
@@ -141,7 +141,7 @@ export class Database {
         return result.toArray();
     }
 
-    async getSaves(guildID: string | undefined): Promise<number | false> {
+    async getGuildSaves(guildID: string | undefined): Promise<number | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
@@ -157,7 +157,7 @@ export class Database {
         //const yesterday = new Date(new Date().getTime() - (10000));
         if (yesterday >= result.lastSaved.getTime() && saves < 3) {
             await this.updateSaves(guildID, saves + 1)
-            return await this.getSaves(guildID);
+            return await this.getGuildSaves(guildID);
         }
         return saves;
     }
@@ -180,11 +180,20 @@ export class Database {
         return result;
     }
 
+    async getCommandChannel(guildID: string | undefined): Promise<string | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID });
+        if (!result.commandChannel || result.commandChannel.length !== 18) return "";
+        return result.commandChannel;
+    }
+
     /*┏━━━━━━━━━┓
       ┃ SETTERS ┃
       ┗━━━━━━━━━┛*/
     
-    async updateCount(guildID: string, value: number): Promise<void> {
+    async updateCount(guildID: string, value: number, messageid = ""): Promise<void> {
         if (!this.db) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
@@ -197,7 +206,7 @@ export class Database {
         await GuildData.updateOne({
             "guildID": guildID,
         }, {
-            $set: { "count": value },
+            $set: { "count": value, "lastMessageID": messageid },
             $inc: { "numberOfCounts": 1, "totalCount": inc.increment },
             $max: { "recordNumber": value }
         }, {
@@ -299,6 +308,19 @@ export class Database {
         if (!this.db) return;
         await this.maybeSetDefaults(guildID);
         this.db.collection("GuildData").deleteOne({ "guildID": guildID });
+    }
+
+    async setCommandChannel(guildID: string, channel: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "commandChannel": channel }
+        }, {
+            upsert: true
+        });
     }
 
     /*┏━━━━━━━━━━┓

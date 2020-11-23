@@ -32,6 +32,8 @@ export interface CommandClient extends Discord.Client {
 
 export interface ExtMessage extends Discord.Message {
     gprefix?: string
+    chatting?: boolean;
+    countChannel?: string;
 }
 
 export interface guildObject {
@@ -39,8 +41,10 @@ export interface guildObject {
     count?: number;
     increment?: number;
     countChannel?: string;
+    commandChannel?: string;
     failRole?: string;
     lastUpdatedID?: string;
+    lastMessageID?: string;
     chatAllowed?: boolean;
     leaderboardEligible?: 0 | 1;
     numberOfCounts?: number;

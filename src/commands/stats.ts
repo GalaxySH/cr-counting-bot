@@ -8,8 +8,15 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "stats",
     description: "get stats about the current guild",
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
+            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
+                message.delete();
+                if (!(message.channel instanceof TextChannel)) return;
+                sendError(message.channel, "Arguments not allowed");
+                return false;
+            }
+
             const stats = await client.database?.getStats(message.guild?.id);
             if (!stats) return false;
             //const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
