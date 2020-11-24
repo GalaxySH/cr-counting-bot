@@ -12,6 +12,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         //const chatting = await client.database?.getChatAllowed(message.guild?.id);
         //if (!chatting) return false;
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
+            if (!message.chatting && message.channel.id === message.countChannel) message.delete();
             if (!message.gprefix || !client.commands) return false;
             if (message.content.toLowerCase().indexOf(message.gprefix) === 0) {
                 const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
@@ -21,7 +22,6 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                     client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
                 if (command) return false;
             }
-            if (!message.chatting) message.delete();
             return true;
         }
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
