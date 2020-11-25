@@ -21,7 +21,8 @@ export interface Command {
     description: string | descriptionObject,
     usage: string,
     args: boolean,
-    showInHelp: boolean,
+    specialArgs: number;
+    hideInHelp: boolean,
     execute: (client: CommandClient, message: ExtMessage, args: string[]) => never
 }
 
@@ -34,6 +35,7 @@ export interface ExtMessage extends Discord.Message {
     gprefix?: string
     chatting?: boolean;
     countChannel?: string;
+    cmdChannel?: string | false;
 }
 
 export interface guildObject {

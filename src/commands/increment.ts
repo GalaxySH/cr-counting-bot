@@ -10,6 +10,7 @@ module.exports = {
     description: "set the count difference",
     usage: "<number < 75,000>",
     args: true,
+    specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
@@ -99,12 +100,6 @@ module.exports = {
                     }
                 }
                 return true;
-            }
-            if (args.length > 1 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Those arguments are not allowed");
-                return false;
             }
             /*const ninc = Math.floor(Math.random() * 10);
             client.database?.setIncrement(message.guild?.id, ninc);

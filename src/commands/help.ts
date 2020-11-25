@@ -12,7 +12,7 @@ module.exports = {
             if (!client.commands) return;
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
-                if (!c.showInHelp) {
+                if (!c.hideInHelp) {
                     cmdMap.push(`🔹 \`${message.gprefix}${c.name} ${c.usage || "<>"}\`\n${c.description}`)
                 }
             });

@@ -9,14 +9,9 @@ module.exports = {
     name: "leaderboard",
     aliases: ["lb"],
     description: "get the global leaderboard",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    specialArgs: 0,
+    async execute(client: CommandClient, message: ExtMessage) {
         try {
-            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Arguments not allowed");
-                return false;
-            }
             // Retrieving the leaderboard from the database
             const guildsLb = await client.database?.getGuildsLeaderboard(message.guild?.id);
             if (!guildsLb) return false;

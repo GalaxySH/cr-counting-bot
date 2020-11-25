@@ -12,10 +12,11 @@ catch (err) {
 
 import xlg from './xlogger';
 import fs from "fs";
-import Discord from 'discord.js';
+import Discord, { TextChannel } from 'discord.js';
 import counthandler from "./utils/counthandler";
 import { Command, CommandClient, ExtMessage } from './typings';
 import { Database } from "./utils/dbm";
+import { sendError } from './utils/messages';
 //import config from "./config.json";
 
 process.on('uncaughtException', function (e) {
@@ -64,6 +65,18 @@ client.on("ready", async () => {
     client.database = await new Database().handleDb();
 })
 
+client.on("rateLimit", rateLimitInfo => {
+    xlg.log('Ratelimited: ' + JSON.stringify(rateLimitInfo));
+})
+
+function delNoChat(msg: ExtMessage) {
+    if (!msg.chatting && msg.channel.id !== msg.cmdChannel) {
+        msg.delete();
+        xlg.log("deletd")
+    }
+    return;
+}
+
 client.on("message", async (message: ExtMessage) => {
     try {
         if (message.author.bot) return; // returning if messages should not be received
@@ -92,35 +105,59 @@ client.on("message", async (message: ExtMessage) => {
 
         message.gprefix = process.env.PREFIX;
         if (await counthandler(client, message)) return;
-        if (!message) return;
-        if (!client.commands || !message.gprefix) return;
+        if (!client.commands || !message.gprefix) return delNoChat(message);
 
-        const cmdChannel = await client.database?.getCommandChannel(message.guild?.id);
-        if (cmdChannel && cmdChannel !== message.channel.id) return;
+        message.cmdChannel = await client.database?.getCommandChannel(message.guild?.id);
+        if (message.cmdChannel && message.cmdChannel !== message.channel.id) return delNoChat(message);
 
-        if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return; // check for absence of prefix
+        if (message.content.toLowerCase().indexOf(message.gprefix) !== 0) return delNoChat(message); // check for absence of prefix
         const args = message.content.slice(message.gprefix.length).trim().split(/ +/g);
-        if (!args || !args.length) return;
+        if (!args || !args.length) return delNoChat(message);
 
         const commandName = args.shift()?.toLowerCase();
-        if (!commandName) return;
+        if (!commandName) return delNoChat(message);
         const command = client.commands.get(commandName) ||
             client.commands?.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        if (!command || !command.name) return delNoChat(message); // if command doesn't exist, stop
 
-        if (!command || !command.name) return // if command doesn't exist, stop
-        if (command.args && !args.length) {
-            let reply = `I need arguments to make that work, ${message.author}!`
-            if (command.usage) {
-                reply += `\nThe proper usage would be: \`${message.gprefix}${command.name} ${command.usage}\``
-            }
-            return message.channel.send({
-                embed: {
-                    description: reply,
-                    footer: {
-                        text: 'tip: separate arguments with spaces'
-                    }
+        if (command.args) {
+            if (!args.length) {
+                let reply = `I need arguments to make that work, ${message.author}!`
+                if (command.usage) {
+                    reply += `\nThe proper usage would be: \`${message.gprefix}${command.name} ${command.usage}\``
                 }
-            });
+                message.channel.send({
+                    embed: {
+                        description: reply,
+                        footer: {
+                            text: 'tip: separate arguments with spaces'
+                        }
+                    }
+                });
+                return delNoChat(message);
+            }
+        }
+
+        if (command.specialArgs || command.specialArgs === 0) {
+            if (args.length !== command.specialArgs) {
+                let reply = `${message.author}, those arguments are not allowed.`
+                if (command.usage) {
+                    reply += `\nCorrect Usage: \`${message.gprefix}${command.name} ${command.usage}\``
+                } else {
+                    reply += `\nCorrect Usage: \`${message.gprefix}${command.name}\``
+                }
+                message.channel.send({
+                    embed: {
+                        color: process.env.FAIL_COLOR,
+                        title: "Illegal Arguments",
+                        description: reply,
+                        footer: {
+                            text: 'tip: separate arguments with spaces'
+                        }
+                    }
+                });
+                return delNoChat(message);
+            }
         }
 
         try {
@@ -128,10 +165,13 @@ client.on("message", async (message: ExtMessage) => {
             command.execute(client, message, args); // execute command function (execute())
         } catch (error) {
             xlg.error(error);
-            message.reply('error while executing! please ask a mod for help.');
+            if (!(message.channel instanceof TextChannel)) return;
+            sendError(message.channel, 'Error while executing! You may try asking server staff for help. If this occurs again, please create an issue for this bug on my [GitHub](https://github.com/galaxysh/cr-counting-bot/issues).');
         }
     } catch (error) {
         xlg.error(error);
+        if (!(message.channel instanceof TextChannel)) return;
+        sendError(message.channel, 'Error while processing. You may try asking server staff for help. If this occurs again, please create an issue for this bug on my [GitHub](https://github.com/galaxysh/cr-counting-bot/issues).');
     }
 })
 
