@@ -9,20 +9,8 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND*/
         if (message.channel.id !== message.countChannel) return false;
 
-        //const chatting = await client.database?.getChatAllowed(message.guild?.id);
-        //if (!chatting) return false;
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
-            if (!message.gprefix || !client.commands) return false;
-            if (message.content.toLowerCase().indexOf(message.gprefix) === 0 && message.chatting) {
-                const args = message.content.slice(message.gprefix.length).trim().split(/ +/g)
-                const commandName = args.shift()?.toLowerCase()
-                if (!commandName) return false;
-                const command = client.commands.get(commandName) ||
-                client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
-                if (command) return false;
-            }
-            if (!message.chatting) message.delete();
-            return true;
+            return false;
         }
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
         let count = await client.database?.getCount(message.guild?.id);

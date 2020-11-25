@@ -10,10 +10,10 @@ module.exports = {
     description: "get the current count",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
-            if (args.length === 1) {
+            if (args.length > 0) {
                 // check for perms
                 if (!(await checkAccess(message, {ownerOnly: true}))) return;
-                if (/[^0-9]+/.test(args[0])) {
+                if (/[^0-9]+/.test(args.join(" "))) {
                     message.channel.send({
                         embed: {
                             color: process.env.FAIL_COLOR,
@@ -22,7 +22,7 @@ module.exports = {
                     });
                     return false;
                 }
-                const ncount = parseInt(args[0], 10);
+                const ncount = parseInt(args.join(" "), 10);
                 await client.database?.updateCount(message.guild?.id || "", ncount);
                 message.channel.send({
                     embed: {
@@ -31,12 +31,6 @@ module.exports = {
                     }
                 });
                 return;
-            }
-            if (args.length > 1 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Arguments not allowed");
-                return false;
             }
             // get the current count from database
             let count = await client.database?.getCount(message.guild?.id);

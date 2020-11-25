@@ -8,16 +8,10 @@ import { getFriendlyUptime } from '../utils/time';
 module.exports = {
     name: "uptime",
     description: "get the bot's uptime",
-    showInHelp: false,
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    hideInHelp: true,
+    specialArgs: 0,
+    async execute(client: CommandClient, message: ExtMessage) {
         try {
-            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Arguments not allowed");
-                return false;
-            }
-
             const uptime = getFriendlyUptime(client.uptime || 0, true);
 
             message.channel.send({

@@ -9,6 +9,7 @@ module.exports = {
     usage: "<true/FALSE>",
     args: true,
     description: "set whether chatting is allowed in the channel",
+    specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
@@ -30,7 +31,7 @@ module.exports = {
             if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND
             message.channel.send({
                 embed: {
-                    color: process.env.NAVY_COLOR,
+                    color: process.env.INFO_COLOR,
                     description: `**${state ? "allowed" : "disallowed"}** chatting in ${message.guild.channels.cache.get(countChannel.countChannel || "")}`
                 }
             });

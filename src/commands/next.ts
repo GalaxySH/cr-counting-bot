@@ -13,31 +13,38 @@ const actions = [
     "get banned",
     "get fired",
     "get kicked",
-    "become depressed",
-    "regret not listening",
+    "disappoint your family",
+    "regret it",
     "face my wrath",
     "pay your taxes",
     "get anxiety",
     "your computer will crash",
-    "you don't know how to count",
     "never fit in",
     "be that one kid",
-    "get the Fail Role",
-    "nothing much will happen"
+    "get the f-role",
+    "I can't do anything to stop you",
+    "lose your pension",
+    "lose your prospects",
+    "you won't get that scholarship",
+    "you might die\nwith the same odds as always",
+    "you're bad",
+    "your phone will break",
+    "your keyboard will break",
+    "you will never see light again",
+    "lose the ability to feel heat",
+    "get an F",
+    "you will become infamous",
+    "you will only be able to play golf",
+    "god will exist, but only for you, and you will go to hell, and you will be the only one there...for eternity"
 ]
 
 module.exports = {
     name: "next",
     aliases: ["hint"],
     description: "find the next number",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    specialArgs: 0,
+    async execute(client: CommandClient, message: ExtMessage) {
         try {
-            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Arguments not allowed");
-                return false;
-            }
             let count = await client.database?.getCount(message.guild?.id);
             if (!count || !count.count) count = { count: 0 };
             const cc = count.count || 0;
@@ -69,7 +76,7 @@ module.exports = {
                     embed = {
                         color: process.env.INFO_COLOR,
                         author: {
-                            name: "〉〉〉〉〉〉〉〉〉〉〉〉〉〉"
+                            name: "〉〉〉〉〉〉〉〉〉〉"
                         },
                         title: "Next",
                         description: `send \`${cc + incre}\``,

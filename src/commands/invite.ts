@@ -6,14 +6,9 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "invite",
     description: "invite the bot to your server!",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    specialArgs: 0,
+    async execute(client: CommandClient, message: ExtMessage) {
         try {
-            if (args.length > 0 && !message.chatting && message.channel.id === message.countChannel) {
-                message.delete();
-                if (!(message.channel instanceof TextChannel)) return;
-                sendError(message.channel, "Arguments not allowed");
-                return false;
-            }
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
