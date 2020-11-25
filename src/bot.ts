@@ -70,7 +70,7 @@ client.on("rateLimit", rateLimitInfo => {
 })
 
 function delNoChat(msg: ExtMessage) {
-    if (!msg.chatting && msg.channel.id !== msg.cmdChannel) {
+    if (!msg.chatting && msg.channel.id === msg.countChannel) {
         msg.delete();
         xlg.log("deletd")
     }
