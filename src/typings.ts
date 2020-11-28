@@ -36,6 +36,7 @@ export interface ExtMessage extends Discord.Message {
     chatting?: boolean;
     countChannel?: string;
     cmdChannel?: string | false;
+    guesses?: number;
 }
 
 export interface guildObject {
@@ -53,14 +54,19 @@ export interface guildObject {
     totalCount?: number;
     recordNumber?: number;
     numberOfErrors?: number;
-    paused?: boolean;
-    members?: Array<{
+    //paused?: boolean;
+    players?: Array<{
         id: string;
         totalCounts?: number;
         highestNumber?: number;
     }>;
     saves?: number;
     lastSaved?: Date;
+    //checkMarks?: boolean;
+    deletedMessageReminder?: boolean;
+    courtesyChances?: 0 | 1 | 2;
+    //foulMessage?: boolean;
+    //redemptionChances?: 0 | 1 | 2;
 }
 
 export interface PermLevels {
@@ -78,7 +84,12 @@ export interface CheckAccessOptions {
 }
 
 export interface PlayerData {
-    userID?: string;
+    userID: string;
     //guildID?: string;
-    saves?: 0 | 1 | 2 | 3;
+    saves: 0 | 1 | 2 | 3;
+    lastSaved?: Date;
+    errors?: number;
+    counts?: number;
+    highestNumber?: number;
+    banned: boolean;
 }

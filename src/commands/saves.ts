@@ -12,6 +12,7 @@ module.exports = {
         try {
             let saves = await client.database?.getGuildSaves(message.guild?.id);
             if (!saves && saves !== 0) saves = 0;
+            const player = await client.database?.getPlayerData(message.author.id);
 
             // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SET EMBED IF THERE ISN"T ONE
 
@@ -19,7 +20,7 @@ module.exports = {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Saves",
-                    description: `Saves Left: **${saves}**\nMax Saves: **3**`
+                    description: `Personal: **${player ? player.saves : "0"}/3**\nG-Saves: **${saves}/3**`
                 }
             });
             return;
