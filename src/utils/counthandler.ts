@@ -12,9 +12,23 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
             return false;
         }
+
+        const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
+        if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
+            if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
+            return true;
+        }
+        
+        const guesses = await client.database?.getCourtesyChances(message.guild?.id);
+        if (!guesses) {
+            message.guesses = 0;
+        } else {
+            message.guesses = guesses;
+        }
+
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
         let count = await client.database?.getCount(message.guild?.id);
-        if (!count || !count.count) count = { count: 0 };
+        if (!count || !count.count) count = { guildID: message.guild?.id || "", count: 0 };
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
         const cc = count.count || 0;
@@ -24,15 +38,13 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             if (!await handleFoul(client, message, "wrong number")) xlg.log("failed to handle foul: number");
             return true;
         }
-
-        const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
-        if (!lastUpdater) return false;
-        if (lastUpdater.lastUpdatedID === message.author.id) {
-            if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
-            return true;
-        }
+        
         await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
-        await client.database?.updateCount(message.guild?.id || "", cc + incre);
+        await client.database?.updateCount(message.guild?.id || "", cc + incre, message.id);
+        await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+        if (message.guesses !== 2) {
+            await client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+        }
         //message.react("✔");
         message.react("☑️");
         return true;
@@ -46,20 +58,45 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     if (!client || !message) return false;
     if (!reason) reason = "Foul";
 
+    const lastMessageID = await client.database?.getLastMessageID(message.guild?.id);
+    if (lastMessageID && reason === "wrong number") {// will go here if someone messes up and the last message id has been logged and not reset
+        const lastMessage = await message.channel.messages.cache.get(lastMessageID);
+        if (!lastMessage) {// if the message for the last count in the counting channel couldn't be found
+        if (message.guesses) {// if the guild has guesses for the number left, continue letting them guess
+            message.react("🟣");
+                const delReminder = await client.database?.getDelReminderSent(message.guild?.id);
+                if (!delReminder) {// if the message about being tricked hasn't been sent yet
+                    message.channel.send(`${message.member} you were tricked.`, {
+                        embed: {
+                            color: process.env.INFO_COLOR,
+                            title: `\`🟣\` Previous Count Deleted`,
+                            description: `**The message that had the most recent count was deleted.**\nThe server can use **two** redemption guesses.`,
+                            footer: {
+                                text: "c?help"
+                            }
+                        }
+                    }).catch(xlg.error);
+                    client.database?.setDelReminderShown(message.guild?.id || "", true);
+                    return true;
+                } else {
+                    client.database?.setCourtesyChances(message.guild?.id || "", message.guesses - 1);
+                    return true;
+                }
+            }
+        }
+    }
+
+    const player = await client.database?.getPlayerData(message.author.id);
     let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
-    if (guildSaves && guildSaves >= 1) {// || saves === 0
-        guildSaves--;
-        client.database?.updateSaves(message.guild?.id || "", guildSaves);
-        message.react("🟧");
+    if (player && player.saves >= 1) {// if the user has individual saves left, stop
+        player.saves--;
+        client.database?.updatePlayerSaves(message.author.id, player.saves);
+        message.react("🟠");
         message.channel.send(`${message.member} you screwed it, **but you were saved.**`, {
             embed: {
                 color: process.env.INFO_COLOR,
-                //author: {
-                //    name: `${reason || message.author.tag}`,
-                //    iconURL: message.author.avatarURL() || undefined
-                //},
-                title: `\\🟧 ${reason}`,
-                description: `**One save has been docked**\nGuild Saves Remaining: **${guildSaves}**`,
+                title: `\`🟠\` ${reason}`,
+                description: `**Docked one of your saves**\nPersonal Saves: **${player.saves}**\nGuild Saves: **${guildSaves || 0}**`,
                 footer: {
                     text: "c?help"
                 }
@@ -68,13 +105,38 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
         return true;
     }
 
+    if (guildSaves && guildSaves >= 1) {// if the guild has saves left, stop
+        guildSaves--;
+        client.database?.updateSaves(message.guild?.id || "", guildSaves);
+        message.react("🟠");
+        message.channel.send(`${message.member} you screwed it, **but you were saved.**`, {
+            embed: {
+                color: process.env.INFO_COLOR,
+                //author: {
+                //    name: `${reason || message.author.tag}`,
+                //    iconURL: message.author.avatarURL() || undefined
+                //},
+                title: `\`🟠\` ${reason}`,
+                description: `**You had to use a guild save**\nSaves Remaining: **${guildSaves}**`,
+                footer: {
+                    text: "c?help"
+                }
+            }
+        }).catch(xlg.error);
+        return true;
+    }
+    // if all checks have failed and the numbers should be reset and the data logged
     message.react("❌");
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
-    await client.database?.incrementErrorCount(message.guild?.id || "");
+    await client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
+    await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+    if (message.guesses !== 2) {
+        await client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+    }
     // fail role handling
     const failroleid = await client.database?.getFailRole(message.guild?.id || "");
-    if (failroleid && failroleid.length > 0) {
+    if (failroleid && failroleid.length > 0) {// will check if a role needs to be given to the user who failed the count
         const failrole = message.guild?.roles.cache.get(failroleid);
         if (!failrole) {
             await client.database?.setFailRole(message.guild?.id || "", "");
@@ -86,7 +148,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
     const incre = increment.increment || 1;
-    message.channel.send(`${message.member} you screwed it, **and you had no saves left.**`, {
+    message.channel.send(`${message.member} you screwed it, **and you had no saves left.**`, {// gives the actual fail message
         embed: {
             color: process.env.INFO_COLOR,
             title: `\`❌\` ${reason}`,
