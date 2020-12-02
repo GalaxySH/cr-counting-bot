@@ -58,7 +58,7 @@ module.exports = {
                         }
 
                         // ⫸
-                        lbMap.push(` ${(displayIndex < 10) ? (`${rankSpaces}${displayIndex}`) : (`${displayIndex}`)}. │ ${guildName} │ ${g.count}`);
+                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${g.count}`);
                         displayIndex++;
                     } else {
                         await client.database?.deleteGuildEntry(g.guildID);
