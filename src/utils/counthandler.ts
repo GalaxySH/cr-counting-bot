@@ -103,7 +103,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
             embed: {
                 color: process.env.INFO_COLOR,
                 title: `\`🟠\` ${reason}`,
-                description: `**Docked one of your saves**\nPersonal Saves: **${player.saves}**\nGuild Saves: **${guildSaves || 0}**`,
+                description: `**Docked one of your saves**\nPersonal Saves: **${player.saves}** -1\nGuild Saves: **${guildSaves || 0}**`,
                 footer: {
                     text: "c?help"
                 }
@@ -124,7 +124,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
                 //    iconURL: message.author.avatarURL() || undefined
                 //},
                 title: `\`🟠\` ${reason}`,
-                description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}**`,
+                description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}** -1`,
                 footer: {
                     text: "c?help"
                 }
