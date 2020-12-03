@@ -52,8 +52,20 @@ module.exports = {
                             inline: true
                         },
                         {
+                            name: "69 Reached",
+                            value: `\`\`\`${stats.pogNumStat} times\`\`\``
+                        },
+                        {
                             name: "Total With No Resets",
                             value: `\`\`\`${stats.totalCount}\`\`\``
+                        },
+                        {
+                            name: "Best Counter",
+                            value: `\`\`\`${"coming soon"}\`\`\``
+                        },
+                        {
+                            name: "Worst Counter",
+                            value: `\`\`\`${"coming soon"}\`\`\``
                         },
                         {
                             name: "Leaderboard Eligible",

@@ -1,5 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
-import { guildObject, PlayerData } from '../typings';
+import { guildObject, GuildPlayer, PlayerData } from '../typings';
 import xlg from '../xlogger';
 
 /*/**
@@ -51,6 +51,10 @@ export class Database {
         this.db;
     }
 
+    /**
+     * Initialize the database
+     * @returns The database handler
+     */
     async handleDb(): Promise<this> {
         try {
             const username = process.env.MONGO_INITDB_ROOT_USERNAME;
@@ -91,7 +95,9 @@ export class Database {
         lastUpdatedID: "",
         lastMessageID: "",
         totalCount: 0,
-        failRole: ""
+        failRole: "",
+        pogNumStat: 0,
+        players: []
     }
     private userDefaults: PlayerData = {
         userID: "",
@@ -156,6 +162,8 @@ export class Database {
         if (!result.totalCount && result.totalCount !== 0) result.totalCount = 0;
         if (!result.numberOfErrors) result.numberOfErrors = 0;
         if (!result.count) result.count = 0;
+        if (!result.pogNumStat) result.pogNumStat = 0;
+        if (!result.players) result.players = [];
         return result;
     }
     
@@ -422,6 +430,52 @@ export class Database {
         });
     }
 
+    async incrementPogStat(guildID: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $inc: { "pogNumStat": 1 }
+        }, {
+            upsert: true
+        });
+    }
+
+    async incrementGuildPlayerStats(guildID: string, memberID: string, inerror = false, cnum = 0): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        
+        const nstatsdef: GuildPlayer = {
+            id: memberID,
+            errors: 0,
+            totalCounts: 0,
+            highestNumber: 0
+        }
+        const guild = await GuildData.findOne({ "guildID": guildID });
+        const playerIndex = guild.players.findIndex((x: GuildPlayer) => x.id && x.id === memberID)
+        const player: GuildPlayer = guild.players[playerIndex] || nstatsdef;
+
+        if (!inerror) player.totalCounts += 1;
+        if (!inerror && cnum > player.highestNumber) player.highestNumber = cnum;
+        if (inerror) player.errors += 1;
+
+        if (!guild.players[playerIndex]) {
+            guild.players.push(player);
+        } else {
+            guild.players[playerIndex] = player;
+        }
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "players": guild.players }
+        }, {
+            upsert: true
+        });
+    }
+
     /*┏━━━━━━━━━━┓
       ┃ DEFAULTS ┃
       ┗━━━━━━━━━━┛*/
@@ -441,6 +495,8 @@ export class Database {
             numberOfErrors: 0,
             saves: 1,
             courtesyChances: 2,
+            pogNumStat: 0,
+            players: []
             //lastSaved: new Date()
         }
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
@@ -453,6 +509,8 @@ export class Database {
         if (isNaN(guild.numberOfErrors)) guild.numberOfErrors = 0;
         if (isNaN(guild.saves)) guild.saves = 1;
         if (isNaN(guild.courtesyChances)) guild.courtesyChances = 2;
+        if (isNaN(guild.pogNumStat)) guild.pogNumStat = 0;
+        if (!guild.players) guild.players = [];
         //if (!guild.lastSaved) guild.lastSaved = new Date();
         await GuildData.updateOne(
             { guildID: guildID },
