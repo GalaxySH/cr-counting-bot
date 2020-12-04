@@ -5,6 +5,7 @@ import xlg from "../xlogger";
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
+        if (!message.guild || !client.database) return false;
         /*const countChannel = await client.database?.getChannel(message.guild?.id);
         if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND*/
         if (message.channel.id !== message.countChannel) return false;
@@ -13,7 +14,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
-        const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
+        const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
             if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
             return true;
@@ -27,8 +28,8 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
 
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
-        let count = await client.database?.getCount(message.guild?.id);
-        if (!count || !count.count) count = { guildID: message.guild?.id || "", count: 0 };
+        let count = await client.database?.getCount(message.guild.id);
+        if (!count || !count.count) count = { guildID: message.guild.id, count: 0 };
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
         const cc = count.count || 0;
@@ -39,12 +40,18 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return true;
         }
         
-        await client.database?.setLastUpdater(message.guild?.id || "", message.author.id);// mark the sender as the last counter
-        await client.database?.updateCount(message.guild?.id || "", cc + incre, message.id);
-        await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+        await client.database?.setLastUpdater(message.guild.id, message.author.id);// mark the sender as the last counter
+        await client.database?.updateCount(message.guild.id, cc + incre, message.id);
+        await client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
         if (message.guesses !== 2) {
-            await client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+            await client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
         }
+        if (cc + incre === 69) {
+            await client.database?.incrementPogStat(message.guild.id);
+            message.channel.send("nice");
+        }
+        await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
+
         //message.react("✔");
         message.react("☑️");
         return true;
@@ -96,7 +103,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
             embed: {
                 color: process.env.INFO_COLOR,
                 title: `\`🟠\` ${reason}`,
-                description: `**Docked one of your saves**\nPersonal Saves: **${player.saves}**\nGuild Saves: **${guildSaves || 0}**`,
+                description: `**Docked one of your saves**\nPersonal Saves: **${player.saves}** -1\nGuild Saves: **${guildSaves || 0}**`,
                 footer: {
                     text: "c?help"
                 }
@@ -117,7 +124,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
                 //    iconURL: message.author.avatarURL() || undefined
                 //},
                 title: `\`🟠\` ${reason}`,
-                description: `**You had to use a guild save**\nSaves Remaining: **${guildSaves}**`,
+                description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}** -1`,
                 footer: {
                     text: "c?help"
                 }
@@ -134,6 +141,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     if (message.guesses !== 2) {
         await client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
     }
+    await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
     // fail role handling
     const failroleid = await client.database?.getFailRole(message.guild?.id || "");
     if (failroleid && failroleid.length > 0) {// will check if a role needs to be given to the user who failed the count
@@ -160,3 +168,5 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
     }).catch(xlg.error);
     return true;
 }
+
+// function userStatter(status: boolean, memberid: string, guildid: string, count?: number) {}

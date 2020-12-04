@@ -54,12 +54,9 @@ export interface guildObject {
     totalCount?: number;
     recordNumber?: number;
     numberOfErrors?: number;
+    pogNumStat?: number;
     //paused?: boolean;
-    players?: Array<{
-        id: string;
-        totalCounts?: number;
-        highestNumber?: number;
-    }>;
+    players?: Array<GuildPlayer>;
     saves?: number;
     lastSaved?: Date;
     //checkMarks?: boolean;
@@ -67,6 +64,13 @@ export interface guildObject {
     courtesyChances?: 0 | 1 | 2;
     //foulMessage?: boolean;
     //redemptionChances?: 0 | 1 | 2;
+}
+
+export interface GuildPlayer {
+    id: string;
+    errors: number;
+    totalCounts: number;
+    highestNumber: number;
 }
 
 export interface PermLevels {
