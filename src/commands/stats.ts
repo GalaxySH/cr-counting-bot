@@ -17,6 +17,12 @@ module.exports = {
             //if (!lastUpdater) return false;
             //const statArray: Array<string> = [];
             //statArray.push()
+
+            const bestSorted = stats.players?.slice().sort((p1, p2) => (p1.totalCounts > p2.totalCounts) ? -1 : 1)
+            const bestCounter = bestSorted && bestSorted[0] ? message.guild?.members.cache.get(bestSorted[0].id) : null;
+            const worstSorted = stats.players?.slice().sort((p1, p2) => (p1.errors > p2.errors) ? -1 : 1)
+            const worstCounter = worstSorted && worstSorted[0] ? message.guild?.members.cache.get(worstSorted[0].id) : null;
+
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
@@ -53,7 +59,8 @@ module.exports = {
                         },
                         {
                             name: "69 Reached",
-                            value: `\`\`\`${stats.pogNumStat} times\`\`\``
+                            value: `\`\`\`${stats.pogNumStat} times\`\`\``,
+                            inline: true
                         },
                         {
                             name: "Total With No Resets",
@@ -61,11 +68,11 @@ module.exports = {
                         },
                         {
                             name: "Best Counter",
-                            value: `\`\`\`${"coming soon"}\`\`\``
+                            value: `\`\`\`${bestCounter ? bestCounter.user.tag : "ND"}\`\`\``
                         },
                         {
                             name: "Worst Counter",
-                            value: `\`\`\`${"coming soon"}\`\`\``
+                            value: `\`\`\`${worstCounter ? worstCounter.user.tag : "ND"}\`\`\``
                         },
                         {
                             name: "Leaderboard Eligible",
