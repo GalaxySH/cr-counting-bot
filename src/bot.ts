@@ -53,13 +53,15 @@ client.on("ready", async () => {
 
     xlg.log(`Bot ${client.user?.tag}(${client.user?.id}) has started, with ~${client.users.cache.size}~ users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     // set the visible bot status
-    client.user?.setPresence({
-        activity: {
-            name: `for ✔ nums | ${process.env.PREFIX}help`,
-            type: 'WATCHING'
-        },
-        status: 'online'
-    }).catch(xlg.error)
+    setInterval(async () => {
+        client.user?.setPresence({
+            activity: {
+                name: `for ✔ nums | ${process.env.PREFIX}help`,
+                type: 'WATCHING'
+            },
+            status: 'online'
+        }).catch(xlg.error)
+    }, 20000);
 
     // setting up db and attaching it to the client
     client.database = await new Database().handleDb();
