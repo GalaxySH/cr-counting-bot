@@ -1,3 +1,4 @@
+import moment from "moment";
 import { CommandClient, ExtMessage } from "../typings";
 import xlg from "../xlogger";
 //import { handleFoul } from "./foul";
@@ -61,7 +62,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
     }
 }
 
-async function handleFoul(client: CommandClient, message: ExtMessage, reason: string): Promise<boolean> {
+async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string): Promise<boolean> {
     if (!client || !message) return false;
     if (!reason) reason = "Foul";
 
@@ -152,6 +153,8 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
             message.member?.roles.add(failrole).catch(xlg.error);
         }
     }
+    // auto mute handling
+    await handleMute(client, message);
 
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
@@ -167,6 +170,17 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason: st
         }
     }).catch(xlg.error);
     return true;
+}
+
+async function handleMute(client: CommandClient, message: ExtMessage): Promise<void> {
+    if (!message.guild || message.channel.type !== "text" || !message.member) return;
+    const ams = await client.database?.getAutoMuteSetting(message.guild?.id);
+    if (!ams) return;
+    message.channel.updateOverwrite(message.member, {
+        "SEND_MESSAGES": false
+    }, `muting ${message.author.tag} for failing the count`);
+    const aimDate = moment(new Date()).add(parseInt(process.env.DEF_MUTE_LENGTH || "10"), "m").toDate();
+    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate)
 }
 
 // function userStatter(status: boolean, memberid: string, guildid: string, count?: number) {}

@@ -64,6 +64,7 @@ export interface guildObject {
     courtesyChances?: 0 | 1 | 2;
     //foulMessage?: boolean;
     //redemptionChances?: 0 | 1 | 2;
+    autoMute?: boolean;
 }
 
 export interface GuildPlayer {
@@ -71,6 +72,7 @@ export interface GuildPlayer {
     errors: number;
     totalCounts: number;
     highestNumber: number;
+    //mutedUntil?: Date;
 }
 
 export interface PermLevels {
@@ -96,4 +98,10 @@ export interface PlayerData {
     counts?: number;
     highestNumber?: number;
     banned: boolean;
+}
+
+export interface MuteData {
+    guildID: string;
+    memberID: string;
+    muteTime: Date | 0;
 }

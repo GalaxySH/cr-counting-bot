@@ -67,11 +67,11 @@ module.exports = {
                             value: `\`\`\`${stats.totalCount}\`\`\``
                         },
                         {
-                            name: "Best Counter | Most Counting",
+                            name: "Most Counting",
                             value: `\`\`\`${bestCounter ? bestCounter.user.tag : "ND"}\`\`\``
                         },
                         {
-                            name: "Worst Counter | Most Errors",
+                            name: "Most Errors",
                             value: `\`\`\`${worstCounter ? worstCounter.user.tag : "ND"}\`\`\``
                         },
                         {
