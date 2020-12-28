@@ -20,7 +20,7 @@ module.exports = {
             const chan = message.guild.channels.cache.get(ccid.countChannel);
             if (!chan || !chan.id) return;
 
-            chan.permissionOverwrites.forEach(o => {
+            chan.permissionOverwrites.filter(x => x.type === "member").forEach(o => {
                 o.update({
                     "SEND_MESSAGES": null
                 }, "clearing all mutes by moderator action");
