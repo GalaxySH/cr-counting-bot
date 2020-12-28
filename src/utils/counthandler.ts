@@ -92,7 +92,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
 
     const lastMessageID = await client.database?.getLastMessageID(message.guild?.id);
     if (lastMessageID && reason === "wrong number") {// will go here if someone messes up and the last message id has been logged and not reset
-        const lastMessage = await message.channel.messages.cache.get(lastMessageID);
+        const lastMessage = message.channel.messages.cache.get(lastMessageID);
         if (!lastMessage) {// if the message for the last count in the counting channel couldn't be found
         if (message.guesses) {// if the guild has guesses for the number left, continue letting them guess
             message.react("🟣");

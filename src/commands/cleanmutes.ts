@@ -3,6 +3,7 @@ import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
 import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
+//import { stringToChannel } from '../utils/parsers';
 
 module.exports = {
     name: "cleanmutes",
@@ -14,8 +15,12 @@ module.exports = {
             // check for perms
             if (!(await checkAccess(message))) return;
             if (!message.guild || message.channel.type !== "text") return;
+            const ccid = await client.database?.getChannel(message.guild.id);
+            if (!ccid || !ccid.countChannel) return;
+            const chan = message.guild.channels.cache.get(ccid.countChannel);
+            if (!chan || !chan.id) return;
 
-            message.channel.permissionOverwrites.forEach(o => {
+            chan.permissionOverwrites.forEach(o => {
                 o.update({
                     "SEND_MESSAGES": null
                 }, "clearing all mutes by moderator action");
