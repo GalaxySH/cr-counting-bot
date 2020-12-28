@@ -39,39 +39,40 @@ export interface ExtMessage extends Discord.Message {
     guesses?: number;
 }
 
-export interface guildObject {
-    guildID?: string;
-    count?: number;
-    increment?: number;
-    countChannel?: string;
-    commandChannel?: string;
-    failRole?: string;
-    lastUpdatedID?: string;
-    lastMessageID?: string;
-    chatAllowed?: boolean;
-    leaderboardEligible?: 0 | 1;
-    numberOfCounts?: number;
-    totalCount?: number;
-    recordNumber?: number;
-    numberOfErrors?: number;
-    pogNumStat?: number;
+export interface guildObject {// the information object assigned to every active guild
+    guildID?: string;// identifying snowflake
+    count?: number;// current count (the last number in the counting channel)
+    increment?: number;// what the count should be increasing by
+    countChannel?: string;// identifying snowflake of the channel the count takes place in
+    commandChannel?: string;// identifying snowflake of the only channel commands can be executed in, if enabled
+    failRole?: string;// identifying snowflake of the role given to players when they fail the count
+    lastUpdatedID?: string;// identifying snowflake of the last user to count
+    lastMessageID?: string;// identifying snowflake of the message containing the last count
+    chatAllowed?: boolean;// setting for whether non-numeric messages should be allowed in the counting channel
+    leaderboardEligible?: 0 | 1;// status of whether the guild is stil eligible to appear on the leaderboard
+    numberOfCounts?: number;// the total number of counts committed in the guild
+    totalCount?: number;// numberOfCounts * increment (the current increment is added to this figure every count)
+    recordNumber?: number;// the highest number reached in the guild
+    numberOfErrors?: number;// the total number of counting errors made in the guild
+    pogNumStat?: number;// the number of times the number 69 was reached
+    players?: Array<GuildPlayer>;// individual player data for the guild, not global info
+    saves?: number;// the number of saves the guild currently has (max 3)
+    lastSaved?: Date;// the timestamp of the last time a save was used on the count
+    deletedMessageReminder?: boolean;// whether or not the message warning that the previous count was deleted was already sent for the turn
+    courtesyChances?: 0 | 1 | 2;// the number of chances remaining for the players to guess the number if the situation arises
+    autoMute?: boolean;// whether the auto-mute on fail feature is enabled, IN BETA
+    recordRole?: string;// for the achievement role handed out when the record is broken
+    recordHolder?: string;// identifying snowflake of the user who made the last highest count, MAY SWITCH TO ARRAY OF USERS
     //paused?: boolean;
-    players?: Array<GuildPlayer>;
-    saves?: number;
-    lastSaved?: Date;
-    //checkMarks?: boolean;
-    deletedMessageReminder?: boolean;
-    courtesyChances?: 0 | 1 | 2;
     //foulMessage?: boolean;
-    //redemptionChances?: 0 | 1 | 2;
-    autoMute?: boolean;
+    //checkMarks?: boolean;
 }
 
-export interface GuildPlayer {
-    id: string;
-    errors: number;
-    totalCounts: number;
-    highestNumber: number;
+export interface GuildPlayer {// used for player data in a guildObject
+    id: string;// the identifying snowflake
+    errors: number;// the number of errors in total made by the player
+    totalCounts: number;// the total number of counts made by the player
+    highestNumber: number;// the highest number the player reached
     //mutedUntil?: Date;
 }
 
