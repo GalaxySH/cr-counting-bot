@@ -202,17 +202,17 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
     const ams = await client.database?.getAutoMuteSetting(message.guild?.id);
     if (!ams) return;
 
-    message.channel.updateOverwrite(message.member, {
-        "SEND_MESSAGES": false
-    }, `muting ${message.author.tag} for failing the count`);
-
+    
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
     if (offBy && Math.abs(offBy) > 5) {
         muteLength = (Math.abs(offBy) + 5) * 2;
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 
-    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate)
+    message.channel.updateOverwrite(message.member, {
+        "SEND_MESSAGES": false
+    }, `auto-muting ${message.author.tag} for failing for ${muteLength}min`);
+    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate);
 }
 
 // function userStatter(status: boolean, memberid: string, guildid: string, count?: number) {}
