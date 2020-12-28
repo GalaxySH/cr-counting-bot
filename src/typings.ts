@@ -61,8 +61,8 @@ export interface guildObject {// the information object assigned to every active
     deletedMessageReminder?: boolean;// whether or not the message warning that the previous count was deleted was already sent for the turn
     courtesyChances?: 0 | 1 | 2;// the number of chances remaining for the players to guess the number if the situation arises
     autoMute?: boolean;// whether the auto-mute on fail feature is enabled, IN BETA
-    recordHolder?: string;
     recordRole?: string;// for the achievement role handed out when the record is broken
+    recordHolder?: string;// identifying snowflake of the user who made the last highest count, MAY SWITCH TO ARRAY OF USERS
     //paused?: boolean;
     //foulMessage?: boolean;
     //checkMarks?: boolean;
