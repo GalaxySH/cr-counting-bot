@@ -206,6 +206,8 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
     if (offBy && Math.abs(offBy) > 5) {
         muteLength = (Math.abs(offBy) + 5) * 2;
+    } else {
+        muteLength = 0.5;
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 
