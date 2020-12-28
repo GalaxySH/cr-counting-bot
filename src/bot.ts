@@ -5,8 +5,7 @@
 try {
     process.chdir('dist');
     console.log('Working-dir: ' + process.cwd());
-}
-catch (err) {
+} catch (err) {
     console.log('chdir: ' + err);
 }
 
@@ -17,6 +16,7 @@ import counthandler from "./utils/counthandler";
 import { Command, CommandClient, ExtMessage } from './typings';
 import { Database } from "./utils/dbm";
 import { sendError } from './utils/messages';
+import { MutePoller } from './utils/mutepoller';
 //import config from "./config.json";
 
 process.on('uncaughtException', function (e) {
@@ -28,6 +28,19 @@ process.on('unhandledRejection', async (reason, promise) => {
     const error = new Error('Unhandled Rejection. Reason: ' + reason);
     console.error(error, "Promise:", promise);
 });
+
+export class Bot {
+    static client: CommandClient;
+    static mutePoller: MutePoller;
+    static config: Record<string, unknown>;
+    static init(client: CommandClient, mutePoller: MutePoller, config?: Record<string, unknown>): void {
+        this.client = client;
+        this.mutePoller = mutePoller;
+        if (config) {
+            this.config = config;
+        }
+    }
+}
 
 const client: CommandClient = new Discord.Client();
 client.commands = new Discord.Collection<string, Command>();
@@ -65,6 +78,9 @@ client.on("ready", async () => {
 
     // setting up db and attaching it to the client
     client.database = await new Database().handleDb();
+
+    const mutePoller = new MutePoller(client.database);
+    Bot.init(client, mutePoller);
 })
 
 client.on("rateLimit", rateLimitInfo => {
@@ -176,4 +192,4 @@ client.on("message", async (message: ExtMessage) => {
     }
 })
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN);

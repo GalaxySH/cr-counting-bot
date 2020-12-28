@@ -1,5 +1,5 @@
-import { Db, MongoClient } from 'mongodb';
-import { guildObject, GuildPlayer, PlayerData } from '../typings';
+import { Cursor, Db, MongoClient } from 'mongodb';
+import { guildObject, GuildPlayer, MuteData, PlayerData } from '../typings';
 import xlg from '../xlogger';
 
 /*/**
@@ -97,7 +97,9 @@ export class Database {
         totalCount: 0,
         failRole: "",
         pogNumStat: 0,
-        players: []
+        players: [],
+        courtesyChances: 2,
+        autoMute: false
     }
     private userDefaults: PlayerData = {
         userID: "",
@@ -257,6 +259,41 @@ export class Database {
         const result = await GuildData.findOne({ "guildID": guildID });
         if (!result.courtesyChances) return 0;
         return result.courtesyChances;
+    }
+
+    async getGuildPlayers(guildID: string | undefined): Promise<Array<GuildPlayer> | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result.players) result.players = [];
+        return result;
+    }
+
+    async getMute(guildID: string | undefined, memberID: string | undefined): Promise<MuteData | false> {
+        if (!guildID || !memberID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const MuteData = this.db.collection("MuteSchedule");
+        let mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
+        if (!mute) mute = false;
+        return mute;
+    }
+
+    async getExpiredMutes(): Promise<Cursor | false> {
+        if (!this.db) return false;
+        const MuteData = this.db.collection("MuteSchedule");
+        const mutes = MuteData.find({ "muteTime": { $lte: new Date() } });
+        if (!mutes || !mutes.count()) return false;
+        return mutes;
+    }
+
+    async getAutoMuteSetting(guildID: string | undefined): Promise<boolean> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID });
+        if (!result || !result.autoMute) return false;
+        return true;
     }
     
     /*┏━━━━━━━━━┓
@@ -476,6 +513,58 @@ export class Database {
         });
     }
 
+    async setAutoMuting(guildID: string, state: boolean): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "autoMute": state }
+        }, {
+            upsert: true
+        });
+    }
+
+    async setMemberMute(guildID: string, memberID: string, until: Date): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const MuteData = this.db.collection("MuteSchedule");
+
+        let mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
+
+        if (!mute) {
+            mute = {
+                guildID,
+                memberID,
+                muteTime: until
+            };
+        } else {
+            mute.muteTime = until;
+        }
+
+        await MuteData.updateOne({
+            "guildID": guildID,
+            "memberID": memberID
+        }, {
+            $set: mute
+        }, {
+            upsert: true
+        });
+    }
+    
+    async unsetMemberMute(guildID: string, memberID: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const MuteData = this.db.collection("MuteSchedule");
+        //const mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
+
+        await MuteData.deleteOne({
+            "guildID": guildID,
+            "memberID": memberID
+        });
+    }
+
     /*┏━━━━━━━━━━┓
       ┃ DEFAULTS ┃
       ┗━━━━━━━━━━┛*/
@@ -483,7 +572,7 @@ export class Database {
     private async maybeSetDefaults(guildID: string): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
-        const guildDefaults: guildObject = {
+        const guildDefaults: guildObject = {// i'm not sure why i haven't done this yet, but at some point i should probably get rid of this and use the other guildDefaults var
             guildID: guildID,
             count: 0,
             increment: 1,
@@ -496,8 +585,14 @@ export class Database {
             saves: 1,
             courtesyChances: 2,
             pogNumStat: 0,
-            players: []
+            players: [],
             //lastSaved: new Date()
+            //lastSaved: new Date()
+            lastUpdatedID: "",
+            lastMessageID: "",
+            totalCount: 0,
+            failRole: "",
+            autoMute: false
         }
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
@@ -511,6 +606,7 @@ export class Database {
         if (isNaN(guild.courtesyChances)) guild.courtesyChances = 2;
         if (isNaN(guild.pogNumStat)) guild.pogNumStat = 0;
         if (!guild.players) guild.players = [];
+        if (!guild.autoMute && guild.autoMute !== false) guild.autoMute = false;
         //if (!guild.lastSaved) guild.lastSaved = new Date();
         await GuildData.updateOne(
             { guildID: guildID },
