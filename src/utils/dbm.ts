@@ -530,7 +530,6 @@ export class Database {
         if (!this.db) return;
         await this.maybeSetDefaults(guildID);
         const MuteData = this.db.collection("MuteSchedule");
-
         let mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
 
         if (!mute) {
@@ -551,6 +550,13 @@ export class Database {
         }, {
             upsert: true
         });
+    }
+
+    async clearMemberMutes(guildID: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const MuteData = this.db.collection("MuteSchedule");
+        await MuteData.deleteMany({ "guildID": guildID });
     }
     
     async unsetMemberMute(guildID: string, memberID: string): Promise<void> {
