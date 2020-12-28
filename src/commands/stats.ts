@@ -19,9 +19,9 @@ module.exports = {
             //statArray.push()
 
             const bestSorted = stats.players?.slice().sort((p1, p2) => (p1.totalCounts > p2.totalCounts) ? -1 : 1)
-            const bestCounter = bestSorted && bestSorted[0] ? message.guild?.members.cache.get(bestSorted[0].id) : null;
+            const bestCounter = bestSorted && bestSorted[0] ? await message.guild?.members.fetch(bestSorted[0].id) : null;
             const worstSorted = stats.players?.slice().sort((p1, p2) => (p1.errors > p2.errors) ? -1 : 1)
-            const worstCounter = worstSorted && worstSorted[0] ? message.guild?.members.cache.get(worstSorted[0].id) : null;
+            const worstCounter = worstSorted && worstSorted[0] ? await message.guild?.members.fetch(worstSorted[0].id) : null;
 
             message.channel.send({
                 embed: {

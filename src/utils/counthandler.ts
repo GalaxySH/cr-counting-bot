@@ -212,7 +212,7 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 
-    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate)
+    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate);
 }
 
 // function userStatter(status: boolean, memberid: string, guildid: string, count?: number) {}
