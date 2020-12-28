@@ -99,7 +99,9 @@ export class Database {
         pogNumStat: 0,
         players: [],
         courtesyChances: 2,
-        autoMute: false
+        autoMute: false,
+        recordRole: "",
+        recordHolder: ""
     }
     private userDefaults: PlayerData = {
         userID: "",
@@ -294,6 +296,28 @@ export class Database {
         const result = await GuildData.findOne({ "guildID": guildID });
         if (!result || !result.autoMute) return false;
         return true;
+    }
+
+    async getRecordRole(guildID: string | undefined): Promise<string | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (result.recordRole) {
+            return result.recordRole;
+        }
+        return "";
+    }
+
+    async getRecordHolder(guildID: string | undefined): Promise<string | false> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (result.recordHolder) {
+            return result.recordHolder;
+        }
+        return "";
     }
     
     /*┏━━━━━━━━━┓
@@ -571,6 +595,32 @@ export class Database {
         });
     }
 
+    async setRecordRole(guildID: string, role: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "recordRole": role }
+        }, {
+            upsert: true
+        });
+    }
+
+    async setRecordHolder(guildID: string, id: string): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "recordHolder": id }
+        }, {
+            upsert: true
+        });
+    }
+
     /*┏━━━━━━━━━━┓
       ┃ DEFAULTS ┃
       ┗━━━━━━━━━━┛*/
@@ -598,7 +648,9 @@ export class Database {
             lastMessageID: "",
             totalCount: 0,
             failRole: "",
-            autoMute: false
+            autoMute: false,
+            recordRole: "",
+            recordHolder: ""
         }
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
