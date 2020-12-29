@@ -5,11 +5,11 @@ import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
 module.exports = {
-    name: "automute",
-    aliases: ["am"],
+    name: "foulplay",
+    aliases: ["fp"],
     usage: "<on/OFF>",
     args: true,
-    description: "turn the auto mute on or off",
+    description: "turn foul play prevention on or off",
     specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
@@ -28,11 +28,11 @@ module.exports = {
                 return false;
             }
             const state = (a === "on");
-            await client.database?.setAutoMuting(message.guild.id, state);// set desired autoMuting state
+            await client.database?.setFoulPrevention(message.guild.id, state);// set desired autoMuting state
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `Auto Muting **${state ? "enabled" : "disabled"}**`
+                    description: `Foul Play prevention **${state ? "enabled" : "disabled"}**`
                 }
             });
             return;

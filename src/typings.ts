@@ -60,9 +60,10 @@ export interface guildObject {// the information object assigned to every active
     lastSaved?: Date;// the timestamp of the last time a save was used on the count
     deletedMessageReminder?: boolean;// whether or not the message warning that the previous count was deleted was already sent for the turn
     courtesyChances?: 0 | 1 | 2;// the number of chances remaining for the players to guess the number if the situation arises
-    autoMute?: boolean;// whether the auto-mute on fail feature is enabled, IN BETA
+    autoMute?: boolean;// whether the auto-mute on fail feature is enabled; IN BETA
     recordRole?: string;// for the achievement role handed out when the record is broken
     recordHolder?: string;// identifying snowflake of the user who made the last highest count, MAY SWITCH TO ARRAY OF USERS
+    foulPlayPrevention?: boolean;// foul play prevention setting turned on or off, default off; IN BETA
     //paused?: boolean;
     //foulMessage?: boolean;
     //checkMarks?: boolean;
@@ -105,4 +106,10 @@ export interface MuteData {
     guildID: string;
     memberID: string;
     muteTime: Date | 0;
+}
+
+export interface CountTiming {
+    guildID: string;
+    threshold: number;
+    time: Date;
 }

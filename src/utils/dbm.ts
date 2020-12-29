@@ -101,7 +101,8 @@ export class Database {
         courtesyChances: 2,
         autoMute: false,
         recordRole: "",
-        recordHolder: ""
+        recordHolder: "",
+        foulPlayPrevention: false
     }
     private userDefaults: PlayerData = {
         userID: "",
@@ -319,11 +320,20 @@ export class Database {
         }
         return "";
     }
-    
+
+    async getFoulPrevention(guildID: string | undefined): Promise<boolean> {
+        if (!guildID || !this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        const result = await GuildData.findOne({ "guildID": guildID });
+        if (!result || !result.foulPlayPrevention) return false;
+        return result.foulPlayPrevention;
+    }
+
     /*┏━━━━━━━━━┓
       ┃ SETTERS ┃
       ┗━━━━━━━━━┛*/
-    
+
     async updateCount(guildID: string, value: number, messageid = ""): Promise<void> {
         if (!this.db) return;
         await this.maybeSetDefaults(guildID);
@@ -344,7 +354,7 @@ export class Database {
             upsert: true
         });
     }
-    
+
     async setIncrement(guildID: string | undefined, value: number): Promise<void> {
         if (!guildID || !this.db) return;
         await this.maybeSetDefaults(guildID);
@@ -621,6 +631,19 @@ export class Database {
         });
     }
 
+    async setFoulPrevention(guildID: string, state: boolean): Promise<void> {
+        if (!this.db) return;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+        await GuildData.updateOne({
+            "guildID": guildID,
+        }, {
+            $set: { "foulPlayPrevention": state }
+        }, {
+            upsert: true
+        });
+    }
+
     /*┏━━━━━━━━━━┓
       ┃ DEFAULTS ┃
       ┗━━━━━━━━━━┛*/
@@ -628,7 +651,7 @@ export class Database {
     private async maybeSetDefaults(guildID: string): Promise<void> {
         if (!this.db) return;
         const GuildData = this.db.collection("GuildData");
-        const guildDefaults: guildObject = {// i'm not sure why i haven't done this yet, but at some point i should probably get rid of this and use the other guildDefaults var
+        /*const guildDefaults: guildObject = {// i'm not sure why i haven't done this yet, but at some point i should probably get rid of this and use the other guildDefaults var
             guildID: guildID,
             count: 0,
             increment: 1,
@@ -650,8 +673,10 @@ export class Database {
             failRole: "",
             autoMute: false,
             recordRole: "",
-            recordHolder: ""
-        }
+            recordHolder: "",
+            foulPlayPrevention: false
+        }*/
+        const guildDefaults: guildObject = Object.create(this.guildDefaults);
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
         if (isNaN(guild.increment)) guild.increment = 1;
