@@ -8,13 +8,11 @@ const countTimings: Array<CountTiming> = [];
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
         if (!message.guild || !client.database) return false;
-        //console.log(countTimings)
-        //const now = new Date();
-        /*const countChannel = await client.database?.getChannel(message.guild?.id);
-        if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND*/
+
         if (message.channel.id !== message.countChannel) return false;
 
-        if (!parseInt(message.content, 10) || /[^0-9]+/.test(message.content)) {
+        const num = parseInt(message.content, 10);
+        if (!num || /[^0-9]+/.test(message.content)) {
             return false;
         }
 
@@ -38,11 +36,16 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!increment) return false;
         const cc = count.count || 0;
         const incre = increment.increment || 1;
-        //if (parseInt(message.content, 10) !== parseInt((rmsgs.array())[1].content, 10) + 1) {
-        if (parseInt(message.content, 10) !== cc + incre) {
-            if (!await handleFoul(client, message, "wrong number", parseInt(message.content, 10) - (cc + incre))) xlg.log("failed to handle foul: number");
+        if (num !== cc + incre) {
+            //const num = parseInt(message.content, 10);// would recommend BigInt, but I am ignoring all BigInt numbers
+            /*if (num > Number.MAX_SAFE_INTEGER) {
+                num = Number.MAX_SAFE_INTEGER;
+            }*/
+            if (!await handleFoul(client, message, "wrong number", num - (cc + incre))) xlg.log("failed to handle foul: number");
             return true;
         }
+
+        await client.database?.updateCount(message.guild.id, cc + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
 
         // record role handling
         const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
@@ -60,9 +63,9 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                                 rh.roles.remove(recordRole);
                             }
                         }
-                        await client.database.setRecordHolder(message.guild.id, message.author.id);
+                        client.database.setRecordHolder(message.guild.id, message.author.id);
                     } else {
-                        await client.database?.setRecordRole(message.guild?.id || "", "");
+                        client.database?.setRecordRole(message.guild?.id || "", "");
                     }
                 }
             }
@@ -81,13 +84,13 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
 
         await client.database?.setLastUpdater(message.guild.id, message.author.id);// mark the sender as the last counter
-        await client.database?.updateCount(message.guild.id, cc + incre, message.id);
+        // THE COUNT UPDATE HAD BEEN HERE, I REMOVED IT BECAUSE I REALIZED THE DATABASE NEEDED TO BE UPDATED IMMEDIATELY AFTER CHECKING
         await client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
         if (message.guesses !== 2) {
-            await client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+            client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
         }
         if (cc + incre === 69) {
-            await client.database?.incrementPogStat(message.guild.id);
+            client.database?.incrementPogStat(message.guild.id);
             message.channel.send("nice");
         }
         await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
@@ -108,7 +111,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     if (timing) {
         const duration = moment.duration(moment(message.createdAt).diff(moment(timing.time)));
         const ms = duration.asMilliseconds();
-        //console.log(`Dur: ${ms}`)
+
         if (ms < timing.threshold) {
             message.react("🟠");
             message.channel.send(`${message.member} you were second`, {
@@ -179,10 +182,6 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
         message.channel.send(`${message.member} you miscounted, **but you were saved**`, {
             embed: {
                 color: process.env.INFO_COLOR,
-                //author: {
-                //    name: `${reason || message.author.tag}`,
-                //    iconURL: message.author.avatarURL() || undefined
-                //},
                 title: `\`🟠\` ${reason}`,
                 description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}** -1`,
                 footer: {
@@ -196,11 +195,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     message.react("❌");
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
-    await client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
     await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
-    await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
+    client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
+    client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
     if (message.guesses !== 2) {
-        await client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+        client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
     }
 
     // handling count timing
@@ -213,7 +212,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     if (failroleid && failroleid.length > 0) {// will check if a role needs to be given to the user who failed the count
         const failrole = message.guild?.roles.cache.get(failroleid);
         if (!failrole) {
-            await client.database?.setFailRole(message.guild?.id || "", "");
+            client.database?.setFailRole(message.guild?.id || "", "");
         } else {
             message.member?.roles.add(failrole).catch(xlg.error);
         }
@@ -237,22 +236,30 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     return true;
 }
 
+// NOTE: number > Number.MAX_SAFE_INTEGER
 async function handleMute(client: CommandClient, message: ExtMessage, offBy?: number): Promise<void> {
     if (!message.guild || message.channel.type !== "text" || !message.member) return;
     const ams = await client.database?.getAutoMuteSetting(message.guild?.id);
     if (!ams) return;
 
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
-    if (offBy && Math.abs(offBy) > 5) {
-        muteLength = (Math.abs(offBy) + 5) * 2;
+    if (offBy && Math.abs(offBy) > 5) {// if the error was "wrong number" and they were off by more than 5
+        if (offBy < Number.MAX_SAFE_INTEGER) {
+            muteLength = (Math.abs(offBy) + 5) * 2;
+        } else {
+            muteLength = 60 * 24 * 2;// two days
+        }
+        if (muteLength > 60 * 24 * 5) {
+            muteLength = 60 * 24 * 5;
+        }
     } else {
         muteLength = 0.5;
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 
-    message.channel.updateOverwrite(message.member, {
+    await message.channel.updateOverwrite(message.member, {
         "SEND_MESSAGES": false
-    }, `auto-muting ${message.author.tag} for failing for ${muteLength}min`);
+    }, `auto-muting ${message.author.tag} for ${muteLength}min`);
     client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate);
 }
 
