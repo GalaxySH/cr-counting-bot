@@ -73,7 +73,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (!timing) {
             countTimings.push({
                 guildID: message.guild.id,
-                threshold: 100,
+                threshold: 200,
                 time: message.createdAt
             });
         } else {
