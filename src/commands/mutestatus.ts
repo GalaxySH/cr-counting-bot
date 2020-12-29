@@ -4,18 +4,22 @@ import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 import moment from 'moment';
 import { getFriendlyUptime } from '../utils/time';
+import { stringToMember } from '../utils/parsers';
 
 module.exports = {
     name: "mutestatus",
     aliases: ["ms"],
     description: "get information about a current mute",
-    specialArgs: 0,
-    async execute(client: CommandClient, message: ExtMessage) {
-        if (!(message.channel instanceof TextChannel)) return;
+    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+        if (!(message.channel instanceof TextChannel) || !message.guild) return;
         try {
-            const mute = await client.database?.getMute(message.guild?.id, message.author.id);
+            const target = (await stringToMember(message.guild, args.join(" "), true, true, true)) || message.member;
+            if (!target) {// logically this will never be true
+                sendError(message.channel, "Invalid target");
+                return;
+            }
+            const mute = await client.database?.getMute(message.guild.id, target.user.id);
             if (!mute || !mute.muteTime) return false;
-            const target = message.guild?.members.cache.get(mute.memberID);
             if (!target) {
                 sendError(message.channel, "Invalid member to look up");
                 return;
