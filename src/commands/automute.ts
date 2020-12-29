@@ -32,7 +32,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `auto muting **${state ? "enabled" : "disabled"}**`
+                    description: `Auto Muting **${state ? "enabled" : "disabled"}**`
                 }
             });
             return;
