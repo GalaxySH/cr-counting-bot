@@ -40,7 +40,7 @@ const actions = [
 
 module.exports = {
     name: "next",
-    aliases: ["hint"],
+    aliases: ["hint", "n"],
     description: "find the next number",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
