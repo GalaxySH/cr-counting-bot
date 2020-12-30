@@ -4,6 +4,7 @@ import xlg from "../xlogger";
 import { getFriendlyUptime } from "./time";
 //import { handleFoul } from "./foul";
 //import fs from "fs";
+
 const countTimings: Array<CountTiming> = [];
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {

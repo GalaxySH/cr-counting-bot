@@ -19,7 +19,10 @@ module.exports = {
                 return;
             }
             const mute = await client.database?.getMute(message.guild.id, target.user.id);
-            if (!mute || !mute.muteTime) return false;
+            if (!mute || !mute.muteTime) {
+                sendError(message.channel, `${target} member is not muted (by me)`);
+                return;
+            }
             if (!target) {
                 sendError(message.channel, "Invalid member to look up");
                 return;

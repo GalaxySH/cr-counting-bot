@@ -127,6 +127,7 @@ export async function stringToUser(client: { users: { fetch: (arg0: any) => any;
  * @param {boolean} [bySimilar=true] if it should also search by similar username (default true)
  * @returns
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function stringToMember(guild: { members: { cache: { get: (arg0: any) => any; find: (arg0: { (x: any): boolean; (x: any): boolean; }) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; fetch: () => any; }; }, text: any, byUsername = true, byNickname = true, bySimilar = true): Promise<GuildMember | undefined> {
     if (!text) return undefined;
     text = extractString(text, /<@!?(\d*)>/) || extractString(text, /([^#@:]{2,32})#\d{4}/) || text;
