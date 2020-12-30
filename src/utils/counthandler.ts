@@ -264,9 +264,15 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
 
 Your server admins have enable auto-muting.
 
-You have been muted for **${t.hours} hours, ${t.minutes} minutes, and ${t.seconds} seconds.**
+You have been muted for **${t.hours} hours, ${t.minutes} minutes, and ${t.seconds} seconds.** Check how much time remains on your mute with the \` c?ms \` command.
 
-Check how much time remains on your mute with the \` c?ms \` command.
+Remember:
+    - **You can't count more than once in a row**
+    - **You cannot count out of sequence**
+    - After a fatal mistake is made, the count starts over
+    - Your server gets one save per day
+    - Check the current count with the \` c?c \` command
+    - Of course, **other people may try to mess with you**
 
 Yours,
 Human`)
