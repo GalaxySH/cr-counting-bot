@@ -31,7 +31,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `**Mute Info Of:**
+                    description: `**Mute Info For:**
 ${target}
 
 **Mute Time Remaining:**
