@@ -20,7 +20,7 @@ module.exports = {
             }
             const mute = await client.database?.getMute(message.guild.id, target.user.id);
             if (!mute || !mute.muteTime) {
-                sendError(message.channel, `${target} member is not muted (by me)`);
+                sendError(message.channel, `${target} is not muted (by me)`);
                 return;
             }
             if (!target) {
