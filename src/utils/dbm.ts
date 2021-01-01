@@ -126,6 +126,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         if (!result.increment) {
             await this.setIncrement(guildID, 1);
         }
@@ -137,6 +138,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         return result;
     }
     
@@ -145,6 +147,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         return result;
     }
     
@@ -153,6 +156,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         return result;
     }
     
@@ -161,6 +165,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         if (!result.recordNumber && result.recordNumber !== 0) result.recordNumber = 0;
         if (!result.numberOfCounts && result.numberOfCounts !== 0) result.numberOfCounts = 0;
         if (!result.leaderboardEligible && result.leaderboardEligible !== 0) result.leaderboardEligible = 1;
@@ -177,6 +182,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.find({ "leaderboardEligible": 1 }, { sort: { "count": -1 }, limit: 15 });
+        if (!result) return false;
         return result.toArray();
     }
 
@@ -185,6 +191,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
+        if (!result) return false;
         let saves;
         if (isNaN(result.saves) || result.saves < 0) {
             saves = 0;
@@ -215,6 +222,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        if (!result) return false;
         if (!result.failRole) return "";
         return result.failRole;
     }
@@ -224,7 +232,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
-        if (!result.commandChannel || result.commandChannel.length !== 18) return "";
+        if (!result || !result.commandChannel || result.commandChannel.length !== 18) return "";
         return result.commandChannel;
     }
     
@@ -242,6 +250,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
+        if (!result) return false;
         if (!result.lastMessageID || result.lastMessageID.length !== 18) return "";
         return result.lastMessageID;
     }
@@ -251,7 +260,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
-        if (!result.deletedMessageReminder) return false;
+        if (!result || !result.deletedMessageReminder) return false;
         return result.deletedMessageReminder;
     }
 
@@ -260,7 +269,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
-        if (!result.courtesyChances) return 0;
+        if (!result || !result.courtesyChances) return 0;
         return result.courtesyChances;
     }
 
@@ -269,7 +278,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (!result.players) result.players = [];
+        if (!result || !result.players) result.players = [];
         return result;
     }
 
@@ -295,7 +304,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID });
-        if (!result || !result.autoMute) return false;
+        if (!result || !result || !result.autoMute) return false;
         return true;
     }
 
@@ -304,7 +313,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (result.recordRole) {
+        if (result && result.recordRole) {
             return result.recordRole;
         }
         return "";
@@ -315,7 +324,7 @@ export class Database {
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (result.recordHolder) {
+        if (result && result.recordHolder) {
             return result.recordHolder;
         }
         return "";
