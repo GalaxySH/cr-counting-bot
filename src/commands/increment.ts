@@ -12,27 +12,23 @@ module.exports = {
     args: true,
     specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+        if (!(message.channel instanceof TextChannel)) return;
         try {
             // check for perms
             if (!(await checkAccess(message))) return;
 
             if (args.length === 1) {
                 if (/[^0-9]+/.test(args[0]) || parseInt(args[0], 10) > 75000 || parseInt(args[0], 10) < 1) {
-                    message.channel.send({
-                        embed: {
-                            color: process.env.FAIL_COLOR,
-                            description: "that is not a valid number\nnumber must be less than `75,000`"
-                        }
-                    });
+                    sendError(message.channel, "that is not a valid number\nnumber must be less than `75,000`");
                     return false;
                 }
                 const increment = await client.database?.getIncrement(message.guild?.id);
                 if (!increment) return;
-                if (parseInt(args[0], 10) === increment.increment) {
+                if (parseInt(args.join(" "), 10) === increment.increment) {
                     message.channel.send({
                         embed: {
                             color: process.env.WARN_COLOR,
-                            description: "that increment is already set"
+                            description: `\`${args[0]}\` is the current increment`
                         }
                     });
                     return false;
@@ -112,7 +108,6 @@ module.exports = {
             return;*/
         } catch (error) {
             xlg.error(error);
-            if (!(message.channel instanceof TextChannel)) return;
             sendError(message.channel);
         }
     }

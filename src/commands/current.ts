@@ -9,27 +9,18 @@ module.exports = {
     aliases: ["count", "curr", "c"],
     description: "get the current count",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+        if (!(message.channel instanceof TextChannel)) return;
         try {
             if (args.length > 0) {
                 // check for perms
                 if (!(await checkAccess(message, {ownerOnly: true}))) return;
                 if (/[^0-9]+/.test(args.join(" "))) {
-                    message.channel.send({
-                        embed: {
-                            color: process.env.FAIL_COLOR,
-                            description: "that is not a valid number"
-                        }
-                    });
+                    sendError(message.channel, "That is not a valid number");
                     return false;
                 }
                 const ncount = parseInt(args.join(" "), 10);
                 await client.database?.updateCount(message.guild?.id || "", ncount);
-                message.channel.send({
-                    embed: {
-                        color: process.env.NAVY_COLOR,
-                        description: `count set to \`${ncount}\``
-                    }
-                });
+                message.channel.send(`Count set to \`${ncount}\``);
                 return;
             }
             // get the current count from database
@@ -40,14 +31,12 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    title: "Current",
                     description: `Count: \`${count.count || 0}\`\nIncrement: \`${increment.increment || 1}\``
                 }
             });
             return;
         } catch (error) {
             xlg.error(error);
-            if (!(message.channel instanceof TextChannel)) return;
             sendError(message.channel);
         }
     }

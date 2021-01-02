@@ -32,7 +32,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `**${state ? "allowed" : "disallowed"}** chatting in ${message.guild.channels.cache.get(countChannel.countChannel || "")}`
+                    description: `**${state ? "Allowed" : "Disallowed"}** Chatting In ${message.guild.channels.cache.get(countChannel.countChannel || "")}`
                 }
             });
             return;
