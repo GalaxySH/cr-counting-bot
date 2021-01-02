@@ -38,7 +38,7 @@ module.exports = {
 ${target}
 
 **Mute Time Remaining:**
-${fd.hours} hrs, ${fd.minutes} min, ${fd.seconds} sec`
+${fd.hours + (fd.days * 24)} hrs, ${fd.minutes} min, ${fd.seconds} sec`
                 }
             });
             return;
