@@ -1,5 +1,6 @@
-import Discord from 'discord.js';
+import Discord, { TextChannel } from 'discord.js';
 import { Database } from './utils/dbm';
+import { sendError, sendInfo, sendWarn } from './utils/messages';
 //import { Db } from 'mongodb';
 //import mongodb from 'mongodb';
 
@@ -27,8 +28,12 @@ export interface Command {
 }
 
 export interface CommandClient extends Discord.Client {
-    commands?: Discord.Collection<string, Command>,
-    database?: Database
+    commands?: Discord.Collection<string, Command>;
+    database?: Database;
+    //sendError: (channel: TextChannel, message?: string | undefined, errorTitle?: boolean) => undefined;
+    sendError?: typeof sendError;
+    sendWarn?: typeof sendWarn;
+    sendInfo?: typeof sendInfo; 
 }
 
 export interface ExtMessage extends Discord.Message {

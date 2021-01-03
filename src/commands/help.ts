@@ -14,7 +14,7 @@ module.exports = {
             const cmdMap: string[] = [];
             client.commands.forEach(c => {
                 if (!c.hideInHelp) {
-                    cmdMap.push(`🔹 \`${message.gprefix}${c.name} ${c.usage || "<>"}\`\n${c.description}`)
+                    cmdMap.push(`🔹 \`${message.gprefix}${c.name} ${c.usage || ""}\`\n${c.description}`)
                 } else {
                     hc++;
                 }

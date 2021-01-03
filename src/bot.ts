@@ -15,7 +15,7 @@ import Discord, { TextChannel } from 'discord.js';
 import counthandler from "./utils/counthandler";
 import { Command, CommandClient, ExtMessage } from './typings';
 import { Database } from "./utils/dbm";
-import { sendError } from './utils/messages';
+import { sendError, sendInfo, sendWarn } from './utils/messages';
 import { MutePoller } from './utils/mutepoller';
 //import config from "./config.json";
 
@@ -75,6 +75,10 @@ client.on("ready", async () => {
             status: 'online'
         }).catch(xlg.error)
     }, 20000);
+    // VV these are "possible undefined," and I don't know how to fix that
+    client.sendError = sendError;
+    client.sendWarn = sendWarn;
+    client.sendInfo = sendInfo;
 
     // setting up db and attaching it to the client
     client.database = await new Database().handleDb();
