@@ -6,7 +6,7 @@ import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "help",
-    description: "stop, get help",
+    description: "Stop, get help",
     async execute(client: CommandClient, message: ExtMessage) {
         try {
             if (!client.commands) return;
