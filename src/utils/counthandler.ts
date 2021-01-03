@@ -77,7 +77,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         const p2 = await client.database.getPlayerData(message.author.id);
         if (p2) {
             const p2c = p2.correctAccumulation;
-            if (p2c && p2c + 1 >= 50) {
+            if (p2c && p2c + 1 >= 25) {
                 if (p2.saves < 3) {
                     client.database.updatePlayerSaves(message.author.id, p2.saves + 1);
                 }
