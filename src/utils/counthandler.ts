@@ -54,7 +54,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
             const s = await client.database.getStats(message.guild.id);
             if (s && s.recordNumber) {
-                if (cc + incre > s.recordNumber) {
+                if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
                     const recordRole = message.guild?.roles.cache.get(recordRoleID);
                     if (recordRole) {
                         message.member?.roles.add(recordRole).catch(xlg.error);
