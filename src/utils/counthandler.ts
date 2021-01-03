@@ -73,6 +73,20 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             }
         }
 
+        // handling personal saves
+        const p2 = await client.database.getPlayerData(message.author.id);
+        if (p2) {
+            const p2c = p2.correctAccumulation;
+            if (p2c && p2c + 1 >= 50) {
+                if (p2.saves < 3) {
+                    client.database.updatePlayerSaves(message.author.id, p2.saves + 1);
+                }
+                client.database.setPlayerCorrect(message.author.id, 0);
+            } else {
+                client.database.setPlayerCorrect(message.author.id, 0, true);
+            }
+        }
+
         // handling count timing
         const timing = countTimings.find(t => t.guildID === message.guild?.id);
         if (!timing) {
@@ -200,6 +214,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
     client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
     client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
+    await client.database?.setPlayerCorrect(message.author.id, 0);// reset the number of correct counts the user has made
     if (message.guesses !== 2) {
         client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
     }
