@@ -14,7 +14,7 @@ module.exports = {
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
-            if (!(await checkAccess(message))) return;
+            if (!(await checkAccess(message, { adminOnly: true }))) return;
             if (!message.guild) return;
             const a = args.join(" ").toLowerCase();
             if (a !== "on" && a !== "off") {

@@ -13,7 +13,7 @@ module.exports = {
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
-            if (!(await checkAccess(message))) return;
+            if (!(await checkAccess(message, { adminOnly: true }))) return;
             if (!message.guild) return;
             const targetChannel = stringToChannel(message.guild, args.join(" ")) || message.channel;
             if (!targetChannel) {

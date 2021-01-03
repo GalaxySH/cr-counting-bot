@@ -261,7 +261,8 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
         if (offBy < Number.MAX_SAFE_INTEGER) {
             muteLength = (Math.abs(offBy) + 5) * 2;
         } else {
-            muteLength = 60 * 24 * 2;// two days
+            //muteLength = 60 * 24 * 2;// two days
+            muteLength = 60 * 24 * 5;// five days
         }
         if (muteLength > 60 * 24 * 5) {
             muteLength = 60 * 24 * 5;

@@ -12,7 +12,7 @@ module.exports = {
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms
-            if (!(await checkAccess(message))) return;
+            if (!(await checkAccess(message, { adminOnly: true }))) return;
             if (!message.guild) return;
             if (args.length === 1 && args[0] === "reset") {
                 // setting counting channel in database

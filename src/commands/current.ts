@@ -13,7 +13,7 @@ module.exports = {
         try {
             if (args.length > 0) {
                 // check for perms
-                if (!(await checkAccess(message, {ownerOnly: true}))) return;
+                if (!(await checkAccess(message, { ownerOnly: true }))) return;
                 if (/[^0-9]+/.test(args.join(" "))) {
                     sendError(message.channel, "That is not a valid number");
                     return false;

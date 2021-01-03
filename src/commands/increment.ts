@@ -15,11 +15,11 @@ module.exports = {
         if (!(message.channel instanceof TextChannel)) return;
         try {
             // check for perms
-            if (!(await checkAccess(message))) return;
+            if (!(await checkAccess(message, { adminOnly: true }))) return;
 
             if (args.length === 1) {
                 if (/[^0-9]+/.test(args[0]) || parseInt(args[0], 10) > 75000 || parseInt(args[0], 10) < 1) {
-                    sendError(message.channel, "that is not a valid number\nnumber must be less than `75,000`");
+                    sendError(message.channel, "That is not a valid number\nNumber must be less than `75,000`");
                     return false;
                 }
                 const increment = await client.database?.getIncrement(message.guild?.id);
