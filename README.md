@@ -3,7 +3,7 @@ A Discord bot made for any server, counting human is something cool and fun to h
 
 ## The Counting Game
 
-Essentially, the counting game is an activity involving counting. The server's admin(s) get final say over exactly how it is played and the rules to play it, but often the game is a challenege to see how high the members of the server can count, in sequence, until they mess up. counting human adds to the game by introducing measures of fair play, channel moderation (e.g. only allowing numbers in the channel), saves (basically "lives" for the players to use up), and more.
+Essentially, the counting game is an activity involving counting. The server's admin(s) get final say over exactly how it is played and the rules to play it, but often the game is a challenge to see how high the members of the server can count, in sequence, until they mess up. counting human adds to the game by introducing measures of fair play, channel moderation (e.g. only allowing numbers in the channel), saves (basically "lives" for the players to use up), and more.
 
 ## Usage
 
