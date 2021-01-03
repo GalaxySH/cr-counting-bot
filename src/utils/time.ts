@@ -1,3 +1,5 @@
+import { DurationObject } from "../typings";
+
 const timeUnits = { second: 1000, minute: 0, hour: 0, day: 0, normalMonth: 0 };
 timeUnits.minute = timeUnits.second * 60;
 timeUnits.hour = timeUnits.minute * 60;
@@ -9,35 +11,47 @@ timeUnits.normalMonth = timeUnits.day * 30;
  * @param {number} msAlive duration in milliseconds
  * @param {boolean} leadingzero whether times should have leading zeroes
  */
-export function getFriendlyUptime(msAlive = 0, leadingzero = false): Record<string, unknown> {
+export function getFriendlyUptime(msAlive = 0, leadingzero = false): DurationObject {
     msAlive = Math.abs(msAlive);
-    let days: number | string = Math.floor(msAlive / timeUnits.day);
-    let hours: number | string = Math.floor(msAlive / timeUnits.hour) % 24;
-    let minutes: number | string = Math.floor(msAlive / timeUnits.minute) % 60;
-    let seconds: number | string = Math.floor(msAlive / timeUnits.second) % 60;
+    const days: number = Math.floor(msAlive / timeUnits.day);
+    const hours: number = Math.floor(msAlive / timeUnits.hour) % 24;
+    const minutes: number = Math.floor(msAlive / timeUnits.minute) % 60;
+    const seconds: number = Math.floor(msAlive / timeUnits.second) % 60;
     const milliseconds: number = msAlive % 1000;
+    // I made these separate vars for pretty much no reason, I was trying to figure out if I could gauarantee a return type of string or a return type of number
+    let d = `${days}`;
+    let h = `${hours}`;
+    let m = `${minutes}`;
+    let s = `${seconds}`;
+    const ms = `${milliseconds}`
     if (leadingzero) {
         if (days < 10) {
-            days = "00" + days;
+            d = "00" + days;
         } else if (days < 100) {
-            days = "0" + days;
+            d = "0" + days;
         }
         if (hours < 10) {
-            hours = "0" + hours;
+            h = "0" + hours;
         }
         if (minutes < 10) {
-            minutes = "0" + minutes;
+            m = "0" + minutes;
         }
         if (seconds < 10) {
-            seconds = "0" + seconds;
+            s = "0" + seconds;
         }
     }
+    // I ended up making it just return a full object with the same values but in two different types (therefore two different properties)
     return {
         days,
         hours,
         minutes,
         seconds,
-        milliseconds
+        milliseconds,
+        d,
+        h,
+        m,
+        s,
+        ms
     };
 }
 

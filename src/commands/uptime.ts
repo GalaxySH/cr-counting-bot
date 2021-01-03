@@ -22,7 +22,7 @@ module.exports = {
                     fields: [
                         {
                             name: "Elapsed Time",
-                            value: `\`${uptime.days} : ${uptime.hours} : ${uptime.minutes} ; ${uptime.seconds} . ${uptime.milliseconds}\ndays  hrs  min  sec  ms \``,
+                            value: `\`${uptime.d} : ${uptime.h} : ${uptime.m} ; ${uptime.s} . ${uptime.ms}\ndays  hrs  min  sec  ms \``,
                             inline: true
                         },
                         {

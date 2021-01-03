@@ -24,7 +24,7 @@ module.exports = {
                 message.channel.send({
                     embed: {
                         color: process.env.NAVY_COLOR,
-                        description: `The Fail Role has been reset.`
+                        description: `Reset The Fail Role`
                     }
                 });
                 return;

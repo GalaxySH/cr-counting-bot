@@ -31,7 +31,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: (targetChannel.id === message.channel.id) ? `the current channel has been set as the counting channel` : `counting channel set to ${targetChannel}`
+                    description: (targetChannel.id === message.channel.id) ? `The current channel has been set as the counting channel` : `counting channel set to ${targetChannel}`
                 }
             });
             return;

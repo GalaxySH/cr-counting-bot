@@ -32,7 +32,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `Foul Play prevention **${state ? "enabled" : "disabled"}**`
+                    description: `Foul Play Prevention **${state ? "Enabled" : "Disabled"}**`
                 }
             });
             return;

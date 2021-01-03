@@ -69,7 +69,7 @@ module.exports = {
                         title: "Next",
                         description: `Don't send anything! You were the last to count.`,
                         footer: {
-                            text: `or ${actions[Math.floor(Math.random() * actions.length)]}`
+                            text: `else ${actions[Math.floor(Math.random() * actions.length)]}`
                         }
                     };
                 } else {

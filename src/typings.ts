@@ -100,6 +100,7 @@ export interface PlayerData {
     counts?: number;
     highestNumber?: number;
     banned: boolean;
+    correctAccumulation?: number;
 }
 
 export interface MuteData {
@@ -112,4 +113,17 @@ export interface CountTiming {
     guildID: string;
     threshold: number;
     time: Date;
+}
+
+export interface DurationObject {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    milliseconds: number;
+    d: string;
+    h: string;
+    m: string;
+    s: string;
+    ms: string;
 }

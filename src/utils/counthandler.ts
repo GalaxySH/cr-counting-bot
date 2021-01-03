@@ -73,6 +73,20 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             }
         }
 
+        // handling personal saves
+        const p2 = await client.database.getPlayerData(message.author.id);
+        if (p2) {
+            const p2c = p2.correctAccumulation;
+            if (p2c && p2c + 1 >= 50) {
+                if (p2.saves < 3) {
+                    client.database.updatePlayerSaves(message.author.id, p2.saves + 1);
+                }
+                client.database.setPlayerCorrect(message.author.id, 0);
+            } else {
+                client.database.setPlayerCorrect(message.author.id, 0, true);
+            }
+        }
+
         // handling count timing
         const timing = countTimings.find(t => t.guildID === message.guild?.id);
         if (!timing) {
@@ -200,6 +214,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
     client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
     client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
+    await client.database?.setPlayerCorrect(message.author.id, 0);// reset the number of correct counts the user has made
     if (message.guesses !== 2) {
         client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
     }
@@ -245,7 +260,7 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
     if (!ams) return;
 
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
-    if (offBy && Math.abs(offBy) > 5) {// if the error was "wrong number" and they were off by more than 5
+    if (offBy && Math.abs(offBy) > 3) {// if the error was "wrong number" and they were off by more than 5
         if (offBy < Number.MAX_SAFE_INTEGER) {
             muteLength = (Math.abs(offBy) + 5) * 2;
         } else {
@@ -254,6 +269,8 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
         if (muteLength > 60 * 24 * 5) {
             muteLength = 60 * 24 * 5;
         }
+    } else if (!offBy) {
+        muteLength = 1;
     } else {
         muteLength = 0.5;
     }
@@ -261,11 +278,32 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
 
     const t = getFriendlyUptime(muteLength * 60 * 1000);
     try {
+        const th = t.hours + (t.days * 24);
+        const tm = t.minutes;
+        const ts = t.seconds;
+        const ttypes = ["hours", "minutes", "seconds"];
+        if (!th) {
+            ttypes.splice(ttypes.indexOf("hours"), 1);
+        }
+        if (!tm) {
+            ttypes.splice(ttypes.indexOf("minutes"), 1);
+        }
+        if (!ts) {
+            ttypes.splice(ttypes.indexOf("seconds"), 1);
+        }
+        const tt = [th, tm, ts].filter(x => x > 0).map((x, i, xt) => {
+            //ttypes.splice(0, ttypes.length - xt.length)
+            return `${x} ${ttypes[i]}${i !== (xt.length - 1) ? (xt.length > 1 && xt.length - 2 === i ? `${xt.length > 2 ? "," : ""} and ` : ", ") : ""}`;
+        });
+        /*if (tt.length > 1) {
+            tt.splice(tt.length - 2, 0, ", and")
+        }*/
+        const joinedtt = tt.join("");
         await message.author.send(`Hello Person Who Cannot Count 👋
 
 Your server admins have enable auto-muting.
 
-You have been muted for **${t.hours} hours, ${t.minutes} minutes, and ${t.seconds} seconds.** Check how much time remains on your mute with the \` c?ms \` command.
+You have been muted for **${joinedtt}.** Check how much time remains on your mute with the \` c?ms \` command.
 
 Remember:
     - **You can't count more than once in a row**

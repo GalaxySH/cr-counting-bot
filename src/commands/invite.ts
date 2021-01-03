@@ -13,7 +13,7 @@ module.exports = {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: "Invite Me",
-                    description: `[click here](https://digmsl.link/counting2)`
+                    description: `[click here (shortlink)](https://digmsl.link/counting2)`
                 }
             }).catch(xlg.error);
         } catch (error) {

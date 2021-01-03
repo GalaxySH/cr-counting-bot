@@ -30,7 +30,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `all mutes cleared`
+                    description: `All Mutes Cleared`
                 }
             });
             return;

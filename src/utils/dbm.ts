@@ -110,7 +110,8 @@ export class Database {
         counts: 0,
         errors: 0,
         highestNumber: 0,
-        banned: false
+        banned: false,
+        correctAccumulation: 0
     }
     
     async getCount(guildID: string | undefined): Promise<guildObject | false> {
@@ -653,6 +654,25 @@ export class Database {
         });
     }
 
+    async setPlayerCorrect(userID: string, num?: number, incrementing = false): Promise<void> {
+        if (!this.db) return;
+        await this.createUser(userID);
+        const UserData = this.db.collection("UserData");
+        if ((num || num === 0) && !incrementing) {
+            await UserData.updateOne({
+                "userID": userID,
+            }, {
+                $set: { "correctAccumulation": num }
+            });
+        } else {
+            await UserData.updateOne({
+                "userID": userID,
+            }, {
+                $inc: { "correctAccumulation": 1 }
+            });
+        }
+    }
+
     /*┏━━━━━━━━━━┓
       ┃ DEFAULTS ┃
       ┗━━━━━━━━━━┛*/
@@ -717,7 +737,8 @@ export class Database {
             counts: 0,
             errors: 0,
             highestNumber: 0,
-            banned: false
+            banned: false,
+            correctAccumulation: 0
         }
         const user = await UserData.findOne({ "userID": userID }) || userDefaults;
         if (isNaN(user.saves)) user.saves = 1;
@@ -725,6 +746,7 @@ export class Database {
         if (isNaN(user.errors)) user.errors = 0;
         if (isNaN(user.highestNumber)) user.highestNumber = 0;
         if (user.banned !== true && user.banned !== false) user.banned = false;
+        if (isNaN(user.correctAccumulation)) user.correctAccumulation = 0;
         //if (!guild.lastSaved) guild.lastSaved = new Date();
         await UserData.updateOne(
             { "userID": userID },
