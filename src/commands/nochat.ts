@@ -8,7 +8,7 @@ module.exports = {
     name: "nochat",
     usage: "<true/FALSE>",
     args: true,
-    description: "set whether chatting is allowed in the channel",
+    description: "Set whether chatting is allowed in the channel",
     specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {

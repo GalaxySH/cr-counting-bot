@@ -77,7 +77,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         const p2 = await client.database.getPlayerData(message.author.id);
         if (p2) {
             const p2c = p2.correctAccumulation;
-            if (p2c && p2c + 1 >= 50) {
+            if (p2c && p2c + 1 >= 25) {
                 if (p2.saves < 3) {
                     client.database.updatePlayerSaves(message.author.id, p2.saves + 1);
                 }
@@ -130,7 +130,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
 
         if (ms < timing.threshold) {
             message.react("🟠");
-            message.channel.send(`${message.member} you were second`, {
+            message.channel.send(`${message.member} you were beaten`, {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: `\`🟠\``,
@@ -146,27 +146,23 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
         const lastMessageID = await client.database?.getLastMessageID(message.guild?.id);
         if (lastMessageID && reason === "wrong number") {// will go here if someone messes up and the last message id has been logged and not reset
             const lastMessage = message.channel.messages.cache.get(lastMessageID);
-            if (!lastMessage) {// if the message for the last count in the counting channel couldn't be found
-            if (message.guesses) {// if the guild has guesses for the number left, continue letting them guess
+            if (!lastMessage && message.guesses) {// if the message for the last count in the counting channel couldn't be found
+                // if the guild has guesses for the number left, continue letting them guess
                 message.react("🟣");
-                    const delReminder = await client.database?.getDelReminderSent(message.guild?.id);
-                    if (!delReminder) {// if the message about being tricked hasn't been sent yet
-                        message.channel.send(`${message.member} you were tricked.`, {
-                            embed: {
-                                color: process.env.INFO_COLOR,
-                                title: `\`🟣\` Previous Count Deleted`,
-                                description: `**The message that had the most recent count was deleted.**\nThe server can use **two** redemption guesses.`,
-                                footer: {
-                                    text: "c?help"
-                                }
-                            }
-                        }).catch(xlg.error);
-                        client.database?.setDelReminderShown(message.guild?.id || "", true);
-                        return true;
-                    } else {
-                        client.database?.setCourtesyChances(message.guild?.id || "", message.guesses - 1);
-                        return true;
-                    }
+                const delReminder = await client.database?.getDelReminderSent(message.guild?.id);
+                if (!delReminder) {// if the message about being tricked hasn't been sent yet
+                    message.channel.send(`${message.member} you were tricked`, {
+                        embed: {
+                            color: process.env.INFO_COLOR,
+                            title: `\`🟣\` Previous Count Deleted`,
+                            description: `**The message that had the most recent count was deleted**\nThe server has **two** chances at redemption`
+                        }
+                    }).catch(xlg.error);
+                    client.database?.setDelReminderShown(message.guild?.id || "", true);
+                    return true;
+                } else {
+                    client.database?.setCourtesyChances(message.guild?.id || "", message.guesses - 1);
+                    return true;
                 }
             }
         }
@@ -207,7 +203,8 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
         }).catch(xlg.error);
         return true;
     }
-    // if all checks have failed and the numbers should be reset and the data logged
+
+    // If all checks have failed, the numbers should be reset and the data logged
     message.react("❌");
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count

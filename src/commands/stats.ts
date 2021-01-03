@@ -7,7 +7,7 @@ import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "stats",
-    description: "get stats about the current guild",
+    description: "Get stats about the current guild",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {

@@ -8,7 +8,7 @@ import { stringToChannel } from "../utils/parsers";
 module.exports = {
     name: "channel",
     aliases: ["countchannel"],
-    description: "set the counting channel to the current channel",
+    description: "Set the counting channel to the current channel",
     usage: "[#channel]",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {

@@ -11,7 +11,7 @@ module.exports = {
     usage: "<role (any form) | 'none'>",
     args: true,
     specialArgs: 1,
-    description: "set the role to give someone when they reset the count",
+    description: "Set the role to give someone when they reset the count",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms

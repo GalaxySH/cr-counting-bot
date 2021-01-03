@@ -9,7 +9,7 @@ module.exports = {
     name: "cleanmutes",
     aliases: ["cm"],
     specialArgs: 0,
-    description: "clear all muting permissions from the counting channel",
+    description: "Clear all existing mutes from the counting channel",
     async execute(client: CommandClient, message: ExtMessage) {
         try {
             // check for perms

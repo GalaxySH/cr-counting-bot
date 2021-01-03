@@ -9,7 +9,7 @@ module.exports = {
     aliases: ["am"],
     usage: "<on/OFF>",
     args: true,
-    description: "turn the auto mute on or off",
+    description: "Turn the auto mute on or off",
     specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
