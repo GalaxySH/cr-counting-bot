@@ -6,7 +6,7 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "saves",
     aliases: ["s"],
-    description: "view all available saves",
+    description: "View all available saves",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {

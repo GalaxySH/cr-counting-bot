@@ -11,7 +11,7 @@ module.exports = {
     usage: "<#role | none>",
     args: true,
     specialArgs: 1,
-    description: "set the role given to record breakers",
+    description: "Set the role given to record breakers",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
             // check for perms

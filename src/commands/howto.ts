@@ -6,7 +6,7 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "howto",
     aliases: ["instructions"],
-    description: "in case you haven't already figured it out",
+    description: "In case you haven't already figured it out",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {

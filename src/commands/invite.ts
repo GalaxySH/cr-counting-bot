@@ -5,7 +5,7 @@ import { TextChannel } from 'discord.js';
 
 module.exports = {
     name: "invite",
-    description: "invite the bot to your server!",
+    description: "Invite the bot to your server!",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {

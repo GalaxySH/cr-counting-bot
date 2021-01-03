@@ -7,7 +7,7 @@ import { getFriendlyUptime } from '../utils/time';
 
 module.exports = {
     name: "uptime",
-    description: "get the bot's uptime",
+    description: "Get the bot's uptime",
     hideInHelp: true,
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {

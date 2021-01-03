@@ -9,7 +9,7 @@ import { stringToMember } from '../utils/parsers';
 module.exports = {
     name: "mutestatus",
     aliases: ["ms"],
-    description: "get information about a current mute",
+    description: "Get information about a current mute",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         if (!(message.channel instanceof TextChannel) || !message.guild) return;
         try {

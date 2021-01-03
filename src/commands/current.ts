@@ -7,7 +7,7 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "current",
     aliases: ["count", "curr", "c"],
-    description: "get the current count",
+    description: "Get the current count",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         if (!(message.channel instanceof TextChannel)) return;
         try {

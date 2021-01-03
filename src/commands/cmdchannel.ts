@@ -7,7 +7,7 @@ import { stringToChannel } from "../utils/parsers";
 
 module.exports = {
     name: "cmdchannel",
-    description: "set the channel that commands will be allowed in",
+    description: "Set the channel that commands will be allowed in",
     usage: "[#channel | 'reset']",
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {

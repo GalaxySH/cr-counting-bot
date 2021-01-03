@@ -7,7 +7,7 @@ import { CollectorFilter, MessageEmbed, TextChannel } from 'discord.js';
 module.exports = {
     name: "increment",
     aliases: ["count"],
-    description: "set the count difference",
+    description: "Set the count difference",
     usage: "<number < 75,000>",
     args: true,
     specialArgs: 1,

@@ -8,7 +8,7 @@ import { TextChannel } from 'discord.js';
 module.exports = {
     name: "leaderboard",
     aliases: ["lb"],
-    description: "get the global leaderboard",
+    description: "Get the global leaderboard",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {

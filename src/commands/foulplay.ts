@@ -9,7 +9,7 @@ module.exports = {
     aliases: ["fp"],
     usage: "<on/OFF>",
     args: true,
-    description: "turn foul play prevention on or off",
+    description: "Turn foul play prevention on or off",
     specialArgs: 1,
     async execute(client: CommandClient, message: ExtMessage, args: string[]) {
         try {
