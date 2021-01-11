@@ -38,13 +38,23 @@ module.exports = {
             }
             lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
             // Getting and adding the entries
-            let displayIndex = 1
+            const garray = [];
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
                 if (g.guildID) {
-                    const gu = client.guilds.cache.get(g.guildID);
+                    const gu = await client.guilds.fetch(g.guildID);
                     if (gu) {
-                        let guildName = gu.name;
+                        garray.push(gu);
+                    } else {
+                        await client.database?.deleteGuildEntry(g.guildID);
+                    }
+                }
+            }
+            console.log("r:"+garray.find(x => x.id === "797989875206586403"))
+            let displayIndex = 1
+            for (let i = 0; i < garray.length; i++) {
+                const g = garray[i];
+                        let guildName = g.name;
                         if (guildName.length > 20) {
                             guildName = guildName.slice(0, 17) + "...";
                         }
@@ -58,12 +68,8 @@ module.exports = {
                         }
 
                         // ⫸
-                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${g.count}`);
+                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${guildsLb[i].count}`);
                         displayIndex++;
-                    } else {
-                        await client.database?.deleteGuildEntry(g.guildID);
-                    }
-                }
             }
             // Making a divider and adding in between the header and the entries
             let divider = "";
