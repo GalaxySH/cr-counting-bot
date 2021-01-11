@@ -709,6 +709,7 @@ export class Database {
         const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
         if (isNaN(guild.count)) guild.count = 0;
         if (isNaN(guild.increment)) guild.increment = 1;
+        if (isNaN(guild.leaderboard) || guild.leaderboard > 1) guild.leaderboard = 1;
         if (!guild.chatAllowed && guild.chatAllowed !== false) guild.chatAllowed = true;
         if (isNaN(guild.numberOfCounts)) guild.numberOfCounts = 0;
         if (isNaN(guild.recordNumber)) guild.recordNumber = 0;
