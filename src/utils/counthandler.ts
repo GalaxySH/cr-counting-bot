@@ -243,7 +243,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
             title: `\`❌\` ${reason}`,
             description: `**reset to 0**\nthe next number is \`${incre}\``,
             footer: {
-                text: "use cmd c?c next time, idiot"
+                text: "next time use c?c"
             }
         }
     }).catch(xlg.error);
