@@ -182,7 +182,7 @@ export class Database {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.find({ "leaderboardEligible": 1 }).sort({ "count": -1 });
+        const result = GuildData.find({ "leaderboardEligible": 1, "guildID": { $nin: [""] }, "count": { $gt: 0 } }).sort({ "count": -1 });
         if (!result) return false;
         return result.toArray();
     }
