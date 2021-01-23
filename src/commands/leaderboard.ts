@@ -1,7 +1,5 @@
 import xlg from '../xlogger';
-//import fs from "fs";
 import { sendError } from "../utils/messages";
-//import checkAccess from '../utils/checkaccess';
 import { CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
@@ -42,15 +40,18 @@ module.exports = {
             for (let i = 0; i < guildsLb.length; i++) {
                 const g = guildsLb[i];
                 if (g.guildID) {
-                    const gu = await client.guilds.fetch(g.guildID);
-                    if (gu) {
-                        garray.push(gu);
-                    } else {
-                        await client.database?.deleteGuildEntry(g.guildID);
+                    try {
+                        const gu = await client.guilds.fetch(g.guildID);
+                        if (gu) {
+                            garray.push(gu);
+                        } else {
+                            await client.database?.deleteGuildEntry(g.guildID);
+                        }
+                    } catch (err) {
+                        xlg.log(`Leaderboard: Missing access for guild: ${g.guildID}`);
                     }
                 }
             }
-            console.log("r:"+garray.find(x => x.id === "797989875206586403"))
             let displayIndex = 1
             for (let i = 0; i < garray.length; i++) {
                 const g = garray[i];
@@ -83,6 +84,9 @@ module.exports = {
             }
             lbMap.splice(1, 0, divider);
             // Sending the leaderboard
+            while (`\`\`\`md\n${lbMap.join("\n")}\n\`\`\``.length > 2048) {
+                lbMap.pop();
+            }
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
