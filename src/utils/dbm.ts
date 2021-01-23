@@ -678,7 +678,7 @@ export class Database {
       ┗━━━━━━━━━━┛*/
 
     private async maybeSetDefaults(guildID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         const GuildData = this.db.collection("GuildData");
         /*const guildDefaults: guildObject = {// i'm not sure why i haven't done this yet, but at some point i should probably get rid of this and use the other guildDefaults var
             guildID: guildID,
@@ -722,7 +722,7 @@ export class Database {
         if (!guild.autoMute && guild.autoMute !== false) guild.autoMute = false;
         //if (!guild.lastSaved) guild.lastSaved = new Date();
         await GuildData.updateOne(
-            { guildID: guildID },
+            { guildID },
             { $set: guild },
             { upsert: true }
         );
