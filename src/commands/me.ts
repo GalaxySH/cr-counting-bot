@@ -43,7 +43,7 @@ export const command: Command = {
 **Highest Number Here:** ${gplayer.highestNumber}
 **Errors Here:** ${gplayer.errors}
 **Saves:** ${player.saves}/3
-**Muted:**${mute ? "yes" : "no"}
+**Muted:** ${mute ? "yes" : "no"}
 **Banned:** ${player.banned ? "yes" : "no"}`
                 }
             });
