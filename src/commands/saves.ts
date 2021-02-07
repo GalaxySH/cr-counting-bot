@@ -1,14 +1,14 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "saves",
     aliases: ["s"],
     description: "View all available saves",
     specialArgs: 0,
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client, message) {
         try {
             let saves = await client.database?.getGuildSaves(message.guild?.id);
             if (!saves && saves !== 0) saves = 0;

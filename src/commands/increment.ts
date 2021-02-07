@@ -1,17 +1,17 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { CollectorFilter, MessageEmbed, TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "increment",
     aliases: ["count"],
     description: "Set the count difference",
     usage: "<number < 75,000>",
     args: true,
     specialArgs: 1,
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         if (!(message.channel instanceof TextChannel)) return;
         try {
             // check for perms

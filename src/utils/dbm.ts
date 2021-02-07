@@ -340,6 +340,23 @@ export class Database {
         return result.foulPlayPrevention;
     }
 
+    async getGuildPlayer(guildID: string, userID: string): Promise<GuildPlayer | false> {
+        if (!this.db) return false;
+        await this.maybeSetDefaults(guildID);
+        const GuildData = this.db.collection("GuildData");
+
+        const nstatsdef: GuildPlayer = {
+            id: userID,
+            errors: 0,
+            totalCounts: 0,
+            highestNumber: 0
+        }
+        const guild = await GuildData.findOne({ "guildID": guildID });
+        const playerIndex = guild.players.findIndex((x: GuildPlayer) => x.id && x.id === userID)
+        const player: GuildPlayer = guild.players[playerIndex] || nstatsdef;
+        return player;
+    }
+
     /*┏━━━━━━━━━┓
       ┃ SETTERS ┃
       ┗━━━━━━━━━┛*/

@@ -1,11 +1,11 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 import { stringToChannel } from "../utils/parsers";
 
-module.exports = {
+export const command: Command = {
     name: "cmdchannel",
     description: "Set the channel that commands will be allowed in",
     usage: "[#channel | 'reset']",

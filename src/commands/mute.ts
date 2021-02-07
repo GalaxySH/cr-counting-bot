@@ -1,21 +1,21 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 import { durationToString, stringToMember } from '../utils/parsers';
 import { stringToDuration } from '../utils/time';
 import moment from 'moment';
 //import { stringToChannel } from '../utils/parsers';
 
-module.exports = {
+export const command: Command = {
     name: "mute",
     aliases: ["mute"],
     description: "Adjust the length of an existing mute or create a new one",
     usage: "<@member> [length]",
     //specialArgs: 2,
     args: true,
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         if (!(message.channel instanceof TextChannel)) return;
         try {
             // check for perms

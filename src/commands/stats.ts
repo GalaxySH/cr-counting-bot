@@ -2,10 +2,10 @@ import xlg from '../xlogger';
 //import fs from "fs";
 import { sendError } from "../utils/messages";
 //import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "stats",
     description: "Get stats about the current guild",
     specialArgs: 0,

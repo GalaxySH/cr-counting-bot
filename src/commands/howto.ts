@@ -1,14 +1,14 @@
 import xlg from '../xlogger';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { sendError } from "../utils/messages";
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "howto",
     aliases: ["instructions"],
     description: "In case you haven't already figured it out",
     specialArgs: 0,
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client, message) {
         try {
             message.channel.send({
                 embed: {

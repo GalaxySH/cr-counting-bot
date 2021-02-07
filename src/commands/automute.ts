@@ -1,17 +1,17 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "automute",
     aliases: ["am"],
     usage: "<on/OFF>",
     args: true,
     description: "Turn the auto mute on or off",
     specialArgs: 1,
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         try {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;

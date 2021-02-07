@@ -1,17 +1,17 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 import { stringToMember } from '../utils/parsers';
 //import { stringToChannel } from '../utils/parsers';
 
-module.exports = {
+export const command: Command = {
     name: "cleanmutes",
     aliases: ["cm", "clearmutes"],
     description: "Clear all existing mutes from the counting channel",
     usage: "[user id to unmute]",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         try {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;

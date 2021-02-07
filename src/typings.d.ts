@@ -18,13 +18,13 @@ interface descriptionObject {
 //DEFINE GLOBAL INTERFACES
 export interface Command {
     name: string,
-    aliases: string[],
-    description: string | descriptionObject,
-    usage: string,
-    args: boolean,
-    specialArgs: number;
-    hideInHelp: boolean,
-    execute: (client: CommandClient, message: ExtMessage, args: string[]) => never
+    aliases?: string[],
+    description?: string | descriptionObject,
+    usage?: string,
+    args?: boolean,
+    specialArgs?: number;
+    hideInHelp?: boolean,
+    execute(client: CommandClient, message: ExtMessage, args: string[]): Promise<void | boolean>
 }
 
 export interface CommandClient extends Discord.Client {

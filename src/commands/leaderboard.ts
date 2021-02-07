@@ -1,9 +1,9 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "leaderboard",
     aliases: ["lb"],
     description: "Get the global leaderboard",
@@ -48,6 +48,7 @@ module.exports = {
                             await client.database?.deleteGuildEntry(g.guildID);
                         }
                     } catch (err) {
+                        //garray.push(new Guild(client, {id: g.guildID}))
                         xlg.log(`Leaderboard: Missing access for guild: ${g.guildID}`);
                     }
                 }

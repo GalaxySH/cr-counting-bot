@@ -1,16 +1,16 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 import { stringToChannel } from "../utils/parsers";
 
-module.exports = {
+export const command: Command = {
     name: "channel",
     aliases: ["countchannel"],
     description: "Set the counting channel to the current channel",
     usage: "[#channel]",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         try {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;

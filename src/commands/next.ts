@@ -2,7 +2,7 @@ import xlg from '../xlogger';
 //import fs from "fs";
 import { sendError } from "../utils/messages";
 //import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
 const actions = [
@@ -38,7 +38,7 @@ const actions = [
     "god will exist, but only for you, and you will go to hell, and you will be the only one there...for eternity"
 ]
 
-module.exports = {
+export const command: Command = {
     name: "next",
     aliases: ["hint", "n"],
     description: "Find the next number",

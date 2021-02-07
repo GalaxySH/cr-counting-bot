@@ -1,13 +1,13 @@
 import xlg from '../xlogger';
 //import * as config from '../config.json';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { sendError } from "../utils/messages";
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "help",
     description: "Stop, get help",
-    async execute(client: CommandClient, message: ExtMessage) {
+    async execute(client, message) {
         try {
             if (!client.commands) return;
             let hc = 0;
