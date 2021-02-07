@@ -1,18 +1,18 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 import { stringToRole } from "../utils/parsers";
 
-module.exports = {
+export const command: Command = {
     name: "failrole",
     aliases: ["fr"],
     usage: "<role (any form) | 'none'>",
     args: true,
     specialArgs: 1,
     description: "Set the role to give someone when they reset the count",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         try {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;

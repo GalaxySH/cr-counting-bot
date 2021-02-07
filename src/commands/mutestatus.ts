@@ -1,17 +1,17 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
-import { CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 import moment from 'moment';
 import { getFriendlyUptime } from '../utils/time';
 import { stringToMember } from '../utils/parsers';
 
-module.exports = {
+export const command: Command = {
     name: "mutestatus",
     aliases: ["ms"],
     description: "Get information about a current mute",
     usage: "[muted member]",
-    async execute(client: CommandClient, message: ExtMessage, args: string[]) {
+    async execute(client, message, args) {
         if (!(message.channel instanceof TextChannel) || !message.guild) return;
         try {
             const target = (await stringToMember(message.guild, args.join(" "), true, true, true)) || message.member;

@@ -1,11 +1,11 @@
 import xlg from '../xlogger';
 //import * as config from '../config.json';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { sendError } from "../utils/messages";
 import { TextChannel } from 'discord.js';
 import { getFriendlyUptime } from '../utils/time';
 
-module.exports = {
+export const command: Command = {
     name: "uptime",
     description: "Get the bot's uptime",
     hideInHelp: true,

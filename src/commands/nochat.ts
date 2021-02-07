@@ -1,10 +1,10 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { CommandClient, ExtMessage } from '../typings';
+import { Command, CommandClient, ExtMessage } from '../typings';
 import { TextChannel } from 'discord.js';
 
-module.exports = {
+export const command: Command = {
     name: "nochat",
     usage: "<true/FALSE>",
     args: true,

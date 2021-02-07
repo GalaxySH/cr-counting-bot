@@ -45,21 +45,24 @@ export class Bot {
 const client: CommandClient = new Discord.Client();
 client.commands = new Discord.Collection<string, Command>();
 // ▼▲▼▲▼▲▼▲▼▲▼▲▼▲ for command handler
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-let commNumber = 1;
-for (const file of commandFiles) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-    let noName = '';
-    if (command.name === '' || command.name == null) {
-        noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m';
+async function loadCommands() {
+    const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
+    let commNumber = 1;
+    for (const file of commandFiles) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { command } = await import(`${__dirname}/commands/${file}`);
+        client.commands?.set(command.name, command);
+        let noName = '';
+        if (command.name === '' || command.name == null) {
+            noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m';
+        }
+        console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName);
+        commNumber++;
     }
-    console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName);
-    commNumber++;
 }
 
 client.on("ready", async () => {
+    await loadCommands();
     // set db
     //client.database = await require("./utils/dbm").createDatabase();
     //client.database?.collection("counts").insertOne({});
@@ -138,7 +141,7 @@ client.on("message", async (message: ExtMessage) => {
         const commandName = args.shift()?.toLowerCase();
         if (!commandName) return delNoChat(message);
         const command = client.commands.get(commandName) ||
-            client.commands?.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+            client.commands?.find(cmd => !!(cmd.aliases && cmd.aliases.includes(commandName)));
         if (!command || !command.name) return delNoChat(message); // if command doesn't exist, stop
 
         if (command.args) {
