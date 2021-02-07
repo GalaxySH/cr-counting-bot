@@ -29,8 +29,6 @@ export const command: Command = {
                 return;
             }
 
-            // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SET EMBED IF THERE ISN"T ONE
-
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
@@ -45,8 +43,8 @@ export const command: Command = {
 **Highest Number Here:** ${gplayer.highestNumber}
 **Errors Here:** ${gplayer.errors}
 **Saves:** ${player.saves}/3
-**Muted:** ${mute}
-**Banned:** ${player.banned}`
+**Muted:**${mute ? "yes" : "no"}
+**Banned:** ${player.banned ? "yes" : "no"}`
                 }
             });
             return;
