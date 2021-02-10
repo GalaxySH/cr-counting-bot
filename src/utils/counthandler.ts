@@ -57,14 +57,16 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                 if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
                     const recordRole = message.guild?.roles.cache.get(recordRoleID);
                     if (recordRole) {
-                        message.member?.roles.add(recordRole).catch(xlg.error);
                         const rhid = await client.database.getRecordHolder(message.guild.id);
                         if (rhid && rhid !== message.author.id) {
-                            const rh = message.guild.members.cache.get(rhid);
+                            const members = await message.guild.members.fetch();
+                            const rh = members.get(rhid);
                             if (rh/* && rh.roles.cache.has(recordRoleID)*/) {
                                 rh.roles.remove(recordRole);
                             }
                         }
+
+                        message.member?.roles.add(recordRole).catch(xlg.error);
                         client.database.setRecordHolder(message.guild.id, message.author.id);
                     } else {
                         client.database?.setRecordRole(message.guild?.id || "", "");
