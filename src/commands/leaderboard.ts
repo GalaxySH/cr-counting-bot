@@ -95,7 +95,7 @@ export const command: Command = {
                     description: `\`\`\`md\n${lbMap.join("\n")}\n\`\`\``,
                     footer: {
                         iconURL: message.author.avatarURL() || "",
-                        text: message.author.tag
+                        text: `${message.author.tag} | Top Ten`
                     }
                 }
             });
