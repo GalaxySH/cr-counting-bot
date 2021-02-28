@@ -28,7 +28,7 @@ export const command: Command = {
             }
             if (longestNameLength > 20) longestNameLength = 20;
             // Getting the right spacing and length and adding the header row
-            const columnOneName = "Rank.";
+            const columnOneName = "Rank";
             const columnTwoName = "Name";
             let spaces = "";
             for (let i = 0; i < (longestNameLength - columnTwoName.length); i++) {
