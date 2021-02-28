@@ -723,18 +723,19 @@ export class Database {
             foulPlayPrevention: false
         }*/
         const guildDefaults: guildObject = Object.create(this.guildDefaults);
-        const guild = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
-        if (isNaN(guild.count)) guild.count = 0;
-        if (isNaN(guild.increment)) guild.increment = 1;
-        if (isNaN(guild.leaderboardEligible) || guild.leaderboardEligible > 1) guild.leaderboardEligible = 1;
+        const guild: guildObject = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
+        if (!guild.guildID) guild.guildID = guildID;
+        if (!guild.count || isNaN(guild.count)) guild.count = 0;
+        if (!guild.increment || isNaN(guild.increment)) guild.increment = 1;
+        if (!guild.leaderboardEligible || isNaN(guild.leaderboardEligible) || guild.leaderboardEligible > 1) guild.leaderboardEligible = 1;
         if (!guild.chatAllowed && guild.chatAllowed !== false) guild.chatAllowed = true;
-        if (isNaN(guild.numberOfCounts)) guild.numberOfCounts = 0;
-        if (isNaN(guild.recordNumber)) guild.recordNumber = 0;
+        if (!guild.numberOfCounts || isNaN(guild.numberOfCounts)) guild.numberOfCounts = 0;
+        if (!guild.recordNumber || isNaN(guild.recordNumber)) guild.recordNumber = 0;
         if (!guild.countChannel) guild.countChannel = "";
-        if (isNaN(guild.numberOfErrors)) guild.numberOfErrors = 0;
-        if (isNaN(guild.saves)) guild.saves = 1;
-        if (isNaN(guild.courtesyChances)) guild.courtesyChances = 2;
-        if (isNaN(guild.pogNumStat)) guild.pogNumStat = 0;
+        if (!guild.numberOfErrors || isNaN(guild.numberOfErrors)) guild.numberOfErrors = 0;
+        if (!guild.saves || isNaN(guild.saves)) guild.saves = 1;
+        if (!guild.courtesyChances || isNaN(guild.courtesyChances)) guild.courtesyChances = 2;
+        if (!guild.pogNumStat || isNaN(guild.pogNumStat)) guild.pogNumStat = 0;
         if (!guild.players) guild.players = [];
         if (!guild.autoMute && guild.autoMute !== false) guild.autoMute = false;
         //if (!guild.lastSaved) guild.lastSaved = new Date();

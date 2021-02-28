@@ -6,6 +6,7 @@ import { stringToMember } from '../utils/parsers';
 
 export const command: Command = {
     name: "me",
+    aliases: ["user"],
     description: "View information about yourself or another user",
     usage: "[member]",
     async execute(client, message, args) {
