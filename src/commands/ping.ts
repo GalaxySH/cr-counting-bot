@@ -6,6 +6,8 @@ import { sendError } from "../utils/messages";
 export const command: Command = {
     name: 'ping',
     description: 'Ping the bot',
+    hideInHelp: true,
+    specialArgs: 0,
     async execute(client, message) {
         try {
             // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
