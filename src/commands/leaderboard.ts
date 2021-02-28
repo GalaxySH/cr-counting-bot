@@ -70,7 +70,7 @@ export const command: Command = {
                         }
 
                         // ⫸
-                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${guildsLb[i].count}`);
+                        lbMap.push(`${rankSpaces}${displayIndex}. │ ${guildName} │ ${guildsLb[i].count}`);
                         displayIndex++;
             }
             // Making a divider and adding in between the header and the entries
