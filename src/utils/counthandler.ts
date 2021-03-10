@@ -18,6 +18,18 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
+        // handling count timing
+        const timing = countTimings.find(t => t.guildID === message.guild?.id);
+        if (!timing) {
+            countTimings.push({
+                guildID: message.guild.id,
+                threshold: 200,
+                time: message.createdAt
+            });
+        } else {
+            timing.time = message.createdAt;
+        }
+
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
             if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
@@ -57,13 +69,15 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                 if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
                     const recordRole = message.guild?.roles.cache.get(recordRoleID);
                     if (recordRole) {
-                        const rhid = await client.database.getRecordHolder(message.guild.id);
-                        if (rhid && rhid !== message.author.id) {
-                            const members = await message.guild.members.fetch();
-                            const rh = members.get(rhid);
-                            if (rh/* && rh.roles.cache.has(recordRoleID)*/) {
-                                rh.roles.remove(recordRole);
-                            }
+                        const members = await message.guild.members.fetch();
+                        // const rh = members.get(rhid);
+                        // if (rh) {
+                        //     rh.roles.remove(recordRole);
+                        // }
+                        try {
+                            members.filter((a) => a.roles.cache.has(recordRole.id)).forEach((m) => m.roles.remove(recordRole));
+                        } catch (error) {
+                            //
                         }
 
                         message.member?.roles.add(recordRole).catch(xlg.error);
@@ -87,18 +101,6 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             } else {
                 client.database.setPlayerCorrect(message.author.id, 0, true);
             }
-        }
-
-        // handling count timing
-        const timing = countTimings.find(t => t.guildID === message.guild?.id);
-        if (!timing) {
-            countTimings.push({
-                guildID: message.guild.id,
-                threshold: 200,
-                time: message.createdAt
-            });
-        } else {
-            timing.time = message.createdAt;
         }
 
         await client.database?.setLastUpdater(message.guild.id, message.author.id);// mark the sender as the last counter
