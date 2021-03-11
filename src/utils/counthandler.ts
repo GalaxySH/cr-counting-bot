@@ -88,7 +88,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
 
         // record role handling
-        const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
+        /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
         if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
             const s = await client.database.getStats(message.guild.id);
             if (s && s.recordNumber) {
@@ -113,7 +113,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
                     }
                 }
             }
-        }
+        } */
 
         message.react("☑️");// ✔
         return true;
