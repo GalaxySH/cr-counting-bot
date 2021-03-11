@@ -18,18 +18,6 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
-        // handling count timing
-        const timing = countTimings.find(t => t.guildID === message.guild?.id);
-        if (!timing) {
-            countTimings.push({
-                guildID: message.guild.id,
-                threshold: 200,
-                time: message.createdAt
-            });
-        } else {
-            timing.time = message.createdAt;
-        }
-
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
             if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
@@ -61,32 +49,16 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
 
         await client.database?.updateCount(message.guild.id, cc + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
 
-        // record role handling
-        const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
-        if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
-            const s = await client.database.getStats(message.guild.id);
-            if (s && s.recordNumber) {
-                if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
-                    const recordRole = message.guild?.roles.cache.get(recordRoleID);
-                    if (recordRole) {
-                        const members = await message.guild.members.fetch();
-                        // const rh = members.get(rhid);
-                        // if (rh) {
-                        //     rh.roles.remove(recordRole);
-                        // }
-                        try {
-                            members.filter((a) => a.roles.cache.has(recordRole.id)).forEach((m) => m.roles.remove(recordRole));
-                        } catch (error) {
-                            //
-                        }
-
-                        message.member?.roles.add(recordRole).catch(xlg.error);
-                        client.database.setRecordHolder(message.guild.id, message.author.id);
-                    } else {
-                        client.database?.setRecordRole(message.guild?.id || "", "");
-                    }
-                }
-            }
+        // handling count timing
+        const timing = countTimings.find(t => t.guildID === message.guild?.id);
+        if (!timing) {
+            countTimings.push({
+                guildID: message.guild.id,
+                threshold: 200,
+                time: message.createdAt
+            });
+        } else {
+            timing.time = message.createdAt;
         }
 
         // handling personal saves
@@ -114,6 +86,34 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             message.channel.send("nice");
         }
         await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
+
+        // record role handling
+        /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
+        if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
+            const s = await client.database.getStats(message.guild.id);
+            if (s && s.recordNumber) {
+                if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
+                    const recordRole = message.guild?.roles.cache.get(recordRoleID);
+                    if (recordRole) {
+                        const members = await message.guild.members.fetch();
+                        // const rh = members.get(rhid);
+                        // if (rh) {
+                        //     rh.roles.remove(recordRole);
+                        // }
+                        try {
+                            members.filter((a) => a.roles.cache.has(recordRole.id)).forEach((m) => m.roles.remove(recordRole));
+                        } catch (error) {
+                            //
+                        }
+
+                        message.member?.roles.add(recordRole).catch(xlg.error);
+                        client.database.setRecordHolder(message.guild.id, message.author.id);
+                    } else {
+                        client.database?.setRecordRole(message.guild?.id || "", "");
+                    }
+                }
+            }
+        } */
 
         message.react("☑️");// ✔
         return true;
