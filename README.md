@@ -1,4 +1,5 @@
 # counting human
+
 A Discord bot made for any server: [counting human](https://github.com/GalaxySH/cr-counting-bot) is something cool and fun to have, and enjoyable to use. The purpose of this app is to manage and enhance a channel for counting. More specifically, this application is designed to run the *counting* game on your server.
 
 The support (Discord) server: [Rooskie's](https://dsc.gg/ro).
@@ -25,6 +26,20 @@ No guild or user may hold more than three (3) saves at one time.
 
 When it is invited (`c?invite`) the server admins (only admins can manage the settings at this time) may set a **counting channel**. The bot will listen to that channel, and will respond to numbers that are sent in it. Bot commands can be executed from any channel the bot has the permissions to see.
 
-## Self Hosting
+## Running Locally
 
-Don't :)
+It is not reccomended to run this locally, as you lose out on some functionality. If theres an issue with the bot, open a github issue, or join the [support server](https://dsc.gg/ro). That said, if you want to contribute, or just like running stuff locally, see below.
+
+### With Docker
+
+Make sure you have [docker](https://www.docker.com/get-started) installed. Then run:
+
+```bash
+git clone https://github.com/GalaxySH/cr-counting-bot .
+```
+
+After that create a `.env` file based off of the [template](https://github.com/GalaxySH/cr-counting-bot/tree/main/.env-example). Finally, you can run
+
+```bash
+docker-compose -f "docker-compose.yml" up -d --build -t counting_human
+```
