@@ -28,7 +28,7 @@ When it is invited (`c?invite`) the server admins (only admins can manage the se
 
 ## Running Locally
 
-It is not reccomended to run this locally, as you lose out on some functionality. If theres an issue with the bot, open a github issue, or join the [support server](https://dsc.gg/ro). That said, if you want to contribute, or just like running stuff locally, see below.
+It is not recommended to run this locally, as you lose out on some functionality. If there's an issue with the bot, open a GitHub issue, or join the [support server](https://dsc.gg/ro). That said, if you want to contribute or just like running stuff locally, see below.
 
 ### With Docker
 
@@ -38,7 +38,7 @@ Make sure you have [docker](https://www.docker.com/get-started) installed. Then 
 git clone https://github.com/GalaxySH/cr-counting-bot .
 ```
 
-After that create a `.env` file based off of the [template](https://github.com/GalaxySH/cr-counting-bot/tree/main/.env-example). Finally, you can run
+After that create a `.env` file using the [template](https://github.com/GalaxySH/cr-counting-bot/tree/main/.env-example). Finally run:
 
 ```bash
 docker-compose -f "docker-compose.yml" up -d --build -t counting_human
