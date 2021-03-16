@@ -46,4 +46,4 @@ docker-compose -f "docker-compose.yml" up -d --build -t counting_human
 
 ### Contributing
 
-See the [steps to contribute](https://github.com/GalaxySH/cr-counting-bot/tree/main/.env-example)
+See the [steps to contribute](https://github.com/CodePlaygroundWasTaken/cr-counting-bot/blob/main/.github/CONTRIBUTING.md)
