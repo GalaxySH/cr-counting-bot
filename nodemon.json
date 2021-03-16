@@ -1,6 +1,0 @@
-{
-    "verbose": true,
-    "ignore": ["config.json", "node_modules", "package.json", "package-lock.json", ".gitignore", ".eslintrc.json", "desktop.ini", "readme.md", "documentation", "media", "commands"],
-    "delay": 2000,
-    "ext": "js,json"
-}
