@@ -115,7 +115,11 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             }
         } */
 
-        message.react("☑️");// ✔
+        try {
+            await message.react("☑️");// ✔
+        } catch (error) {
+            await message.channel.send("Correct");
+        }
         return true;
     } catch (error) {
         xlg.log(error);
@@ -152,7 +156,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
             const lastMessage = message.channel.messages.cache.get(lastMessageID);
             if (!lastMessage && message.guesses) {// if the message for the last count in the counting channel couldn't be found
                 // if the guild has guesses for the number left, continue letting them guess
-                message.react("🟣");
+                try {
+                    message.react("🟣");
+                } catch (error) {
+                    message.channel.send("Guessed wrong");
+                }
                 const delReminder = await client.database?.getDelReminderSent(message.guild?.id);
                 if (!delReminder) {// if the message about being tricked hasn't been sent yet
                     message.channel.send(`${message.member} you were tricked`, {
@@ -176,9 +184,13 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
     if (player && player.saves >= 1) {// if the user has individual saves left, stop
         player.saves--;
-        client.database?.updatePlayerSaves(message.author.id, player.saves);
-        message.react("🟠");
-        message.channel.send(`${message.member} you miscounted, **but you were saved**`, {
+        try {
+            message.react("🟠");
+        } catch (error) {
+            message.channel.send("Saved");
+        }
+        await client.database?.updatePlayerSaves(message.author.id, player.saves);
+        message.channel.send(`${message.member} you miscounted **and were saved**`, {
             embed: {
                 color: process.env.INFO_COLOR,
                 title: `\`🟠\` ${reason}`,
@@ -193,9 +205,13 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
 
     if (guildSaves && guildSaves >= 1) {// if the guild has saves left, stop
         guildSaves--;
-        client.database?.updateSaves(message.guild?.id || "", guildSaves);
-        message.react("🟠");
-        message.channel.send(`${message.member} you miscounted, **but you were saved**`, {
+        try {
+            message.react("🟠");
+        } catch (error) {
+            message.channel.send("Saved");
+        }
+        await client.database?.updateSaves(message.guild?.id || "", guildSaves);
+        message.channel.send(`${message.member} you miscounted **and were saved**`, {
             embed: {
                 color: process.env.INFO_COLOR,
                 title: `\`🟠\` ${reason}`,
@@ -209,7 +225,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
     }
 
     // If all checks have failed, the numbers should be reset and the data logged
-    message.react("❌");
+    try {
+        message.react("❌");
+    } catch (error) {
+        message.channel.send("Incorrect");
+    }
     await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
     await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
     await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
