@@ -1,0 +1,11 @@
+FROM node:14-alpine3.10
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+# Bundle app source
+COPY . .
+RUN apk add --no-cache bash
+
+CMD dos2unix ./scripts/wait-for-it.sh && chmod +x ./scripts/wait-for-it.sh && bash ./scripts/wait-for-it.sh crmongo:27024 -t 15 -- npm run watch

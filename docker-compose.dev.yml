@@ -1,12 +1,17 @@
 version: '3.8'
 services:
   bot:
-    container_name: crBot
-    image: countingman:cm2
+    container_name: crBotDev
+    image: countingman:cm2Dev
     restart: always
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
       - ./.env
+    volumes:
+      - ./src:/app/src
+      - ./node_modules:/app/node_modules
     links:
       - mongo
   mongo:
