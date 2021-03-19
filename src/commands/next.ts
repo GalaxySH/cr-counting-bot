@@ -45,12 +45,10 @@ export const command: Command = {
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {
-            let count = await client.database?.getCount(message.guild?.id);
-            if (!count || !count.count) count = { count: 0 };
-            const cc = count.count || 0;
+            const count = await client.database?.getCount(message.guild?.id) || 0;
             const increment = await client.database?.getIncrement(message.guild?.id);
             if (!increment) return;
-            const incre = increment.increment || 1;
+            const incre = increment || 1;
             // check for perms
             //if (!(await checkAccess(message))) return;
 
@@ -79,7 +77,7 @@ export const command: Command = {
                             name: "〉〉〉〉〉〉〉〉〉〉"
                         },
                         title: "Next",
-                        description: `send \`${cc + incre}\``,
+                        description: `send \`${count + incre}\``,
                         footer: {
                             text: `or ${actions[Math.floor(Math.random() * actions.length)]}`
                         }

@@ -1,7 +1,7 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { Command, CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { CollectorFilter, MessageEmbed, TextChannel } from 'discord.js';
 
 export const command: Command = {
@@ -24,7 +24,7 @@ export const command: Command = {
                 }
                 const increment = await client.database?.getIncrement(message.guild?.id);
                 if (!increment) return;
-                if (parseInt(args.join(" "), 10) === increment.increment) {
+                if (parseInt(args.join(" "), 10) === increment) {
                     message.channel.send({
                         embed: {
                             color: process.env.WARN_COLOR,

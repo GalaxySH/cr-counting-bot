@@ -20,7 +20,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
 
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
-            if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
+            if (!await handleFoul(client, message, "talking out of turn", undefined, )) xlg.log("failed to handle foul: turn");
             return true;
         }
 
@@ -32,18 +32,17 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
 
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
-        let count = await client.database?.getCount(message.guild.id);
-        if (!count || !count.count) count = { guildID: message.guild.id, count: 0 };
+        const count = await client.database?.getCount(message.guild.id);
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
-        const cc = count.count || 0;
-        const incre = increment.increment || 1;
+        const cc = count || 0;
+        const incre = increment || 1;
         if (num !== cc + incre) {
             //const num = parseInt(message.content, 10);// would recommend BigInt, but I am ignoring all BigInt numbers
             /*if (num > Number.MAX_SAFE_INTEGER) {
                 num = Number.MAX_SAFE_INTEGER;
             }*/
-            if (!await handleFoul(client, message, "wrong number", num - (cc + incre))) xlg.log("failed to handle foul: number");
+            if (!await handleFoul(client, message, "wrong number", num - (cc + incre), (cc + incre))) xlg.log("failed to handle foul: number");
             return true;
         }
 
@@ -123,7 +122,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
     }
 }
 
-async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string, offBy?: number): Promise<boolean> {
+async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string, offBy?: number, curr?: number): Promise<boolean> {
     if (!client || !message || !message.guild) return false;
     if (!reason) reason = "Foul";
 
@@ -236,11 +235,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
         }
     }
     // auto mute handling
-    await handleMute(client, message, offBy);
+    await handleMute(client, message, offBy, curr);
 
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
-    const incre = increment.increment || 1;
+    const incre = increment || 1;
     message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
         embed: {
             color: process.env.INFO_COLOR,
@@ -255,26 +254,27 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
 }
 
 // NOTE: number > Number.MAX_SAFE_INTEGER
-async function handleMute(client: CommandClient, message: ExtMessage, offBy?: number): Promise<void> {
+async function handleMute(client: CommandClient, message: ExtMessage, offBy?: number, curr = 1): Promise<void> {
     if (!message.guild || message.channel.type !== "text" || !message.member) return;
     const ams = await client.database?.getAutoMuteSetting(message.guild?.id);
     if (!ams) return;
 
+    const currConv = Math.abs(curr) / 2;
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
     if (offBy && Math.abs(offBy) > 3) {// if the error was "wrong number" and they were off by more than 5
         if (offBy < Number.MAX_SAFE_INTEGER) {
-            muteLength = (Math.abs(offBy) + 5) * 2;
+            muteLength = (Math.abs(offBy) + 5) + currConv;
         } else {
             //muteLength = 60 * 24 * 2;// two days
             muteLength = 60 * 24 * 5;// five days
         }
-        if (muteLength > 60 * 24 * 5) {
+        if (muteLength > 60 * 24 * 5) {// if greater than five days
             muteLength = 60 * 24 * 5;
         }
-    } else if (!offBy) {
-        muteLength = 1;
-    } else {
-        muteLength = 0.5;
+    } else if (!offBy) {// if the error was "counting out of turn"
+        muteLength = 1 / 3 + (curr > 10 ? currConv : 0);// 20 seconds unless the count was above 10
+    } else {// if they were off by less than three
+        muteLength = currConv;
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 

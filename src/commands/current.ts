@@ -24,14 +24,12 @@ export const command: Command = {
                 return;
             }
             // get the current count from database
-            let count = await client.database?.getCount(message.guild?.id);
-            if (!count || !count.count) count = { count: 0 };
+            const count = await client.database?.getCount(message.guild?.id) || 0;
             const increment = await client.database?.getIncrement(message.guild?.id);
-            if (!increment) return;
-            message.channel.send({
+            await message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `Count: \`${count.count || 0}\`\nIncrement: \`${increment.increment || 1}\``
+                    description: `Count: \`${count}\`\nIncrement: \`${increment}\``
                 }
             });
             return;
