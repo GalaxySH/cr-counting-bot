@@ -10,13 +10,12 @@ try {
 }
 
 import xlg from './xlogger';
-import fs from "fs";
-import Discord, { TextChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 import counthandler from "./utils/counthandler";
-import { Command, CommandClient, ExtMessage } from './typings';
-import { Database } from "./utils/dbm";
-import { sendError, sendInfo, sendWarn } from './utils/messages';
+import { CommandClient, ExtMessage } from './typings';
+import { sendError } from './utils/messages';
 import { MutePoller } from './utils/mutepoller';
+import Client from './struct/Client';
 //import config from "./config.json";
 
 process.on('uncaughtException', function (e) {
@@ -42,28 +41,13 @@ export class Bot {
     }
 }
 
-const client: CommandClient = new Discord.Client();
-client.commands = new Discord.Collection<string, Command>();
-// ▼▲▼▲▼▲▼▲▼▲▼▲▼▲ for command handler
-async function loadCommands() {
-    const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
-    let commNumber = 1;
-    for (const file of commandFiles) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { command } = await import(`${__dirname}/commands/${file}`);
-        client.commands?.set(command.name, command);
-        let noName = '';
-        if (command.name === '' || command.name == null) {
-            noName = ' \x1b[33mWARNING: \x1b[32mthis command has no name, it may not be configured properly\x1b[0m';
-        }
-        console.log(`${commNumber} - %s$${command.name}%s has been loaded%s`, '\x1b[35m', '\x1b[0m', noName);
-        commNumber++;
-    }
-}
+// const client: CommandClient = new Discord.Client();
+const client = new Client();
 
 client.on("ready", async () => {
-    await loadCommands();
     // set db
+    await client.database.handleDb();
+    await client.loadCommands();
     //client.database = await require("./utils/dbm").createDatabase();
     //client.database?.collection("counts").insertOne({});
 
@@ -78,13 +62,6 @@ client.on("ready", async () => {
             status: 'online'
         }).catch(xlg.error)
     }, 20000);
-    // VV these are "possible undefined," and I don't know how to fix that
-    client.sendError = sendError;
-    client.sendWarn = sendWarn;
-    client.sendInfo = sendInfo;
-
-    // setting up db and attaching it to the client
-    client.database = await new Database().handleDb();
 
     const mutePoller = new MutePoller(client.database);
     Bot.init(client, mutePoller);
@@ -115,11 +92,8 @@ client.on("message", async (message: ExtMessage) => {
         
         //const now = Date.now();
         const chatting = await client.database?.getChatAllowed(message.guild?.id);
-        if (!chatting || (!chatting.chatAllowed && chatting.chatAllowed !== false)) {
-            message.chatting = true;
-        } else {
-            message.chatting = chatting.chatAllowed;
-        }
+        message.chatting = chatting;
+
         const countChannel = await client.database?.getChannel(message.guild?.id);
         if (countChannel && countChannel.countChannel) {
             message.countChannel = countChannel.countChannel;
