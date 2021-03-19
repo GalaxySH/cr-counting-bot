@@ -76,7 +76,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
 
         await client.database?.setLastUpdater(message.guild.id, message.author.id);// mark the sender as the last counter
         // THE COUNT UPDATE HAD BEEN HERE, I REMOVED IT BECAUSE I REALIZED THE DATABASE NEEDED TO BE UPDATED IMMEDIATELY AFTER CHECKING
-        await client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+        client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
         if (message.guesses !== 2) {
             client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
         }
@@ -84,7 +84,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             client.database?.incrementPogStat(message.guild.id);
             message.channel.send("nice");
         }
-        await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
+        client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
 
         // record role handling
         /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");

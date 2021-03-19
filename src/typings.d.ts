@@ -45,7 +45,7 @@ export interface ExtMessage extends Discord.Message {
 }
 
 export interface guildObject {// the information object assigned to every active guild
-    guildID?: string;// identifying snowflake
+    guildID: string;// identifying snowflake
     count?: number;// current count (the last number in the counting channel)
     increment?: number;// what the count should be increasing by
     countChannel?: string;// identifying snowflake of the channel the count takes place in

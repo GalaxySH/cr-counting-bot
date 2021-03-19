@@ -1,7 +1,8 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
-import { Command, CommandClient, ExtMessage } from '../typings';
-import { TextChannel } from 'discord.js';
+import { Command, CommandClient, ExtMessage, guildObject } from '../typings';
+import { Guild, MessageEmbedOptions, TextChannel } from 'discord.js';
+import { PaginationExecutor } from '../utils/pagination';
 
 export const command: Command = {
     name: "leaderboard",
@@ -12,33 +13,13 @@ export const command: Command = {
         try {
             // Retrieving the leaderboard from the database
             const guildsLb = await client.database?.getGuildsLeaderboard(message.guild?.id);
-            if (!guildsLb) return false;
-            // Initializing the array for the leaderboard display
-            const lbMap: Array<string> = [];
-            // Figuring the longest guild name
-            let longestNameLength = 0;
-            for (let i = 0; i < guildsLb.length; i++) {
-                const g = guildsLb[i];
-                if (g.guildID) {
-                    const gu = client.guilds.cache.get(g.guildID);
-                    if (gu) {
-                        if (longestNameLength < gu.name.length) longestNameLength = gu.name.length;
-                    }
-                }
+            if (!guildsLb) {
+                message.channel.send(`No servers to display.`);
+                return false;
             }
-            if (longestNameLength > 20) longestNameLength = 20;
-            // Getting the right spacing and length and adding the header row
-            const columnOneName = "Rank";
-            const columnTwoName = "Name";
-            let spaces = "";
-            for (let i = 0; i < (longestNameLength - columnTwoName.length); i++) {
-                spaces += " ";
-            }
-            lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
-            // Getting and adding the entries
-            const garray = [];
-            for (let i = 0; i < guildsLb.length; i++) {
-                const g = guildsLb[i];
+            // Getting and adding the guild entries
+            const garray: Guild[] = [];
+            for await (const g of guildsLb) {
                 if (g.guildID) {
                     try {
                         const gu = await client.guilds.fetch(g.guildID);
@@ -53,9 +34,47 @@ export const command: Command = {
                     }
                 }
             }
-            let displayIndex = 1
-            for (let i = 0; i < garray.length; i++) {
-                const g = garray[i];
+
+            // split the guilds into groups to display as pages
+            const groups: guildObject[][] = [];
+            while (guildsLb.length) {
+                groups.push(guildsLb.splice(0, 10));
+            }
+
+            if (!groups.length || !guildsLb.length) {
+                message.channel.send(`No servers to display.`);
+                return;
+            }
+
+            const pages: MessageEmbedOptions[] = [];
+            let pn = 0;
+            for (const page of groups) {
+                // Initializing the array for the leaderboard display
+                const lbMap: string[] = [];
+                // Figuring the longest guild name
+                let longestNameLength = 0;
+                for (const g of page) {
+                    if (g.guildID) {
+                        const gu = garray.find(x => x.id === g.guildID);
+                        if (gu) {
+                            if (longestNameLength < gu.name.length) longestNameLength = gu.name.length;
+                        }
+                    }
+                }
+                if (longestNameLength > 20) longestNameLength = 20;
+                // Getting the right spacing and length and adding the header row
+                const columnOneName = "Rank";
+                const columnTwoName = "Name";
+                let spaces = "";
+                for (let i = 0; i < (longestNameLength - columnTwoName.length); i++) {
+                    spaces += " ";
+                }
+                lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
+
+                let displayIndex = 1
+                for (const d of page) {
+                    const g = garray.find(x => x.id === d.guildID);
+                    if (g) {
                         let guildName = g.name;
                         if (guildName.length > 20) {
                             guildName = guildName.slice(0, 17) + "...";
@@ -70,35 +89,44 @@ export const command: Command = {
                         }
 
                         // ⫸
-                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${guildsLb[i].count}`);
+                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${d.count}`);
                         displayIndex++;
-            }
-            // Making a divider and adding in between the header and the entries
-            let divider = "";
-            let longestEntryLength = 0;
-            for (let i = 0; i < (lbMap.length); i++) {
-                const entry = lbMap[i];
-                if (entry.length > longestEntryLength) longestEntryLength = entry.length;
-            }
-            for (let i = 0; i < (longestEntryLength); i++) {
-                divider += "=";
-            }
-            lbMap.splice(1, 0, divider);
-            // Sending the leaderboard
-            while (`\`\`\`md\n${lbMap.join("\n")}\n\`\`\``.length > 2048) {
-                lbMap.pop();
-            }
-            message.channel.send({
-                embed: {
+                    }
+                }
+                // Making a divider and adding in between the header and the entries
+                let divider = "";
+                let longestEntryLength = 0;
+                for (let i = 0; i < (lbMap.length); i++) {
+                    const entry = lbMap[i];
+                    if (entry.length > longestEntryLength) longestEntryLength = entry.length;
+                }
+                for (let i = 0; i < (longestEntryLength); i++) {
+                    divider += "=";
+                }
+                lbMap.splice(1, 0, divider);
+                // Sending the leaderboard
+                while (`\`\`\`md\n${lbMap.join("\n")}\n\`\`\``.length > 2048) {
+                    lbMap.pop();
+                    const r = page.pop();
+                    if (r) {
+                        groups[pn + 1].push(r);
+                    }
+                }
+
+                const e: MessageEmbedOptions = {
                     color: process.env.INFO_COLOR,
-                    title: "Leaderboard of Guilds",
+                    title: "Leaderboard of Servers",
                     description: `\`\`\`md\n${lbMap.join("\n")}\n\`\`\``,
                     footer: {
                         iconURL: message.author.avatarURL() || "",
-                        text: `${message.author.tag} | Top Ten`
+                        text: `${message.author.tag} | Top 30`
                     }
-                }
-            });
+                };
+                pages.push(e);
+                pn++;
+            }
+
+            PaginationExecutor.createEmbed(message, pages);// creating pages or single lb embed
             return;
         } catch (error) {
             xlg.error(error);

@@ -179,7 +179,7 @@ export class Database {
         return result;
     }
 
-    async getGuildsLeaderboard(guildID: string | undefined): Promise<Array<guildObject> | false> {
+    async getGuildsLeaderboard(guildID: string | undefined): Promise<guildObject[] | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
@@ -192,7 +192,7 @@ export class Database {
         return result.toArray();
     }
 
-    async getRecordsLeaderboard(guildID: string | undefined): Promise<Array<guildObject> | false> {
+    async getRecordsLeaderboard(guildID: string | undefined): Promise<guildObject[] | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
