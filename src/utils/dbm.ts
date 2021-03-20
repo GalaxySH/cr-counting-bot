@@ -198,8 +198,14 @@ export class Database {
             "leaderboardEligible": 1,
             "guildID": { $nin: [""] },
             "recordNumber": { $gt: 0 },
-            "count": { $gt: 0 }
-        }, { projection: { "guildID": 1, "count": 1 } }).sort({ "recordNumber": -1 }).limit(30);
+            "count": { $gt: 0 },
+        }, {
+            projection: {
+                "guildID": 1,
+                "count": 1,
+                "recordNumber": 1,
+            }
+        }).sort({ "recordNumber": -1 }).limit(30);
         if (!result) return false;
         return result.toArray();
     }
