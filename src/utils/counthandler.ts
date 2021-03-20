@@ -16,7 +16,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
-        const count = await client.database?.getCount(message.guild.id) || 9;
+        const count = await client.database?.getCount(message.guild.id) || 0;
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
             if (!await handleFoul(client, message, "talking out of turn", undefined, count)) xlg.log("failed to handle foul: turn");
