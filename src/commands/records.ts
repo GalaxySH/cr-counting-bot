@@ -12,7 +12,7 @@ export const command: Command = {
     async execute(client: CommandClient, message: ExtMessage) {
         try {
             // Retrieving the leaderboard from the database
-            const guildsLb = await client.database.getGuildsLeaderboard();
+            const guildsLb = await client.database.getRecordsLeaderboard();
             if (!guildsLb) {
                 message.channel.send(`No servers to display`);
                 return false;
@@ -88,7 +88,7 @@ export const command: Command = {
                         }
 
                         // ⫸
-                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${d.count}`);
+                        lbMap.push(` ${rankSpaces}${displayIndex}. │ ${guildName} │ ${d.recordNumber}`);
                         displayIndex++;
                     }
                 }
