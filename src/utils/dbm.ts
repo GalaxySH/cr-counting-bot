@@ -186,7 +186,7 @@ export class Database {
             "leaderboardEligible": 1,
             "guildID": { $nin: [""] },
             "count": { $gt: 0 }
-        }).sort({ "count": -1 }).limit(30);
+        }, { projection: { "guildID": 1, "count": 1 } }).sort({ "count": -1 }).limit(30);
         if (!result) return false;
         return result.toArray();
     }
@@ -199,7 +199,7 @@ export class Database {
             "guildID": { $nin: [""] },
             "recordNumber": { $gt: 0 },
             "count": { $gt: 0 }
-        }).sort({ "recordNumber": -1 }).limit(30);
+        }, { projection: { "guildID": 1, "count": 1 } }).sort({ "recordNumber": -1 }).limit(30);
         if (!result) return false;
         return result.toArray();
     }
