@@ -2,8 +2,6 @@ import moment from "moment";
 import { CommandClient, CountTiming, ExtMessage } from "../typings";
 import xlg from "../xlogger";
 import { getFriendlyUptime } from "./time";
-//import { handleFoul } from "./foul";
-//import fs from "fs";
 
 const countTimings: Array<CountTiming> = [];
 
@@ -18,9 +16,10 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
+        const count = await client.database?.getCount(message.guild.id) || 9;
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
-            if (!await handleFoul(client, message, "talking out of turn")) xlg.log("failed to handle foul: turn");
+            if (!await handleFoul(client, message, "talking out of turn", undefined, count)) xlg.log("failed to handle foul: turn");
             return true;
         }
 
@@ -32,22 +31,19 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
 
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
-        let count = await client.database?.getCount(message.guild.id);
-        if (!count || !count.count) count = { guildID: message.guild.id, count: 0 };
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
-        const cc = count.count || 0;
-        const incre = increment.increment || 1;
-        if (num !== cc + incre) {
+        const incre = increment || 1;
+        if (num !== count + incre) {
             //const num = parseInt(message.content, 10);// would recommend BigInt, but I am ignoring all BigInt numbers
             /*if (num > Number.MAX_SAFE_INTEGER) {
                 num = Number.MAX_SAFE_INTEGER;
             }*/
-            if (!await handleFoul(client, message, "wrong number", num - (cc + incre))) xlg.log("failed to handle foul: number");
+            if (!await handleFoul(client, message, "wrong number", num - (count + incre), (count + incre))) xlg.log("failed to handle foul: number");
             return true;
         }
 
-        await client.database?.updateCount(message.guild.id, cc + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
+        await client.database?.updateCount(message.guild.id, count + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
 
         // handling count timing
         const timing = countTimings.find(t => t.guildID === message.guild?.id);
@@ -77,15 +73,15 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
 
         await client.database?.setLastUpdater(message.guild.id, message.author.id);// mark the sender as the last counter
         // THE COUNT UPDATE HAD BEEN HERE, I REMOVED IT BECAUSE I REALIZED THE DATABASE NEEDED TO BE UPDATED IMMEDIATELY AFTER CHECKING
-        await client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+        client.database?.setDelReminderShown(message.guild.id, false);// resets the status to no for whether the reminder for being delete-tricked had been sent
         if (message.guesses !== 2) {
             client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
         }
-        if (cc + incre === 69) {
+        if (count + incre === 69) {
             client.database?.incrementPogStat(message.guild.id);
             message.channel.send("nice");
         }
-        await client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
+        client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, count + incre);
 
         // record role handling
         /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
@@ -123,7 +119,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
     }
 }
 
-async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string, offBy?: number): Promise<boolean> {
+async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string, offBy?: number, curr?: number): Promise<boolean> {
     if (!client || !message || !message.guild) return false;
     if (!reason) reason = "Foul";
 
@@ -236,11 +232,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
         }
     }
     // auto mute handling
-    await handleMute(client, message, offBy);
+    await handleMute(client, message, offBy, curr);
 
     const increment = await client.database?.getIncrement(message.guild?.id);
     if (!increment) return false;
-    const incre = increment.increment || 1;
+    const incre = increment || 1;
     message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
         embed: {
             color: process.env.INFO_COLOR,
@@ -255,26 +251,27 @@ async function handleFoul(client: CommandClient, message: ExtMessage, reason?: s
 }
 
 // NOTE: number > Number.MAX_SAFE_INTEGER
-async function handleMute(client: CommandClient, message: ExtMessage, offBy?: number): Promise<void> {
+async function handleMute(client: CommandClient, message: ExtMessage, offBy?: number, curr = 1): Promise<void> {
     if (!message.guild || message.channel.type !== "text" || !message.member) return;
     const ams = await client.database?.getAutoMuteSetting(message.guild?.id);
     if (!ams) return;
 
+    const currConv = Math.abs(curr) / 2;
     let muteLength = parseInt(process.env.DEF_MUTE_LENGTH || "10");
     if (offBy && Math.abs(offBy) > 3) {// if the error was "wrong number" and they were off by more than 5
         if (offBy < Number.MAX_SAFE_INTEGER) {
-            muteLength = (Math.abs(offBy) + 5) * 2;
+            muteLength = (Math.abs(offBy) + 5) + currConv;
         } else {
             //muteLength = 60 * 24 * 2;// two days
             muteLength = 60 * 24 * 5;// five days
         }
-        if (muteLength > 60 * 24 * 5) {
+        if (muteLength > 60 * 24 * 5) {// if greater than five days
             muteLength = 60 * 24 * 5;
         }
-    } else if (!offBy) {
-        muteLength = 1;
-    } else {
-        muteLength = 0.5;
+    } else if (!offBy) {// if the error was "counting out of turn"
+        muteLength = 1 / 3 + (curr > 10 ? currConv : 0);// 20 seconds unless the count was above 10
+    } else {// if they were off by less than three
+        muteLength = currConv;
     }
     const aimDate = moment(new Date()).add(muteLength, "m").toDate();
 

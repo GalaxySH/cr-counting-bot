@@ -113,27 +113,28 @@ export class Database {
         banned: false,
         correctAccumulation: 0
     }
-    
-    async getCount(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID || !this.db) return false;
+
+    async getCount(guildID: string | undefined): Promise<number> {
+        if (!guildID || !this.db) return 0;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        return result;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "_id": 0, "count": 1 } }) || this.guildDefaults;
+        return result.count;
     }
 
-    async getIncrement(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID || !this.db) return false;
+    async getIncrement(guildID: string | undefined): Promise<number> {
+        if (!guildID || !this.db) return 0;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (!result) return false;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "_id": 0, "increment": 1 } }) || this.guildDefaults;
+        if (!result) return 0;
         if (!result.increment) {
             await this.setIncrement(guildID, 1);
+            result.increment = 1;
         }
-        return result;
+        return result.increment;
     }
-    
+
     async getChannel(guildID: string | undefined): Promise<guildObject | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
@@ -151,14 +152,14 @@ export class Database {
         if (!result) return false;
         return result;
     }
-    
-    async getChatAllowed(guildID: string | undefined): Promise<guildObject | false> {
+
+    async getChatAllowed(guildID: string | undefined): Promise<boolean> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (!result) return false;
-        return result;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "chatAllowed": 1 } }) || this.guildDefaults;
+        if (!result || !result.chatAllowed) return false;
+        return result.chatAllowed;
     }
     
     async getStats(guildID: string | undefined): Promise<guildObject | false> {
@@ -177,12 +178,28 @@ export class Database {
         if (!result.players) result.players = [];
         return result;
     }
-    
-    async getGuildsLeaderboard(guildID: string | undefined): Promise<Array<guildObject> | false> {
-        if (!guildID || !this.db) return false;
-        await this.maybeSetDefaults(guildID);
+
+    async getGuildsLeaderboard(): Promise<guildObject[] | false> {
+        if (!this.db) return false;
         const GuildData = this.db.collection("GuildData");
-        const result = GuildData.find({ "leaderboardEligible": 1, "guildID": { $nin: [""] }, "count": { $gt: 0 } }).sort({ "count": -1 }).limit(10);
+        const result = GuildData.find({
+            "leaderboardEligible": 1,
+            "guildID": { $nin: [""] },
+            "count": { $gt: 0 }
+        }).sort({ "count": -1 }).limit(30);
+        if (!result) return false;
+        return result.toArray();
+    }
+
+    async getRecordsLeaderboard(): Promise<guildObject[] | false> {
+        if (!this.db) return false;
+        const GuildData = this.db.collection("GuildData");
+        const result = GuildData.find({
+            "leaderboardEligible": 1,
+            "guildID": { $nin: [""] },
+            "recordNumber": { $gt: 0 },
+            "count": { $gt: 0 }
+        }).sort({ "recordNumber": -1 }).limit(30);
         if (!result) return false;
         return result.toArray();
     }
@@ -191,7 +208,7 @@ export class Database {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID });
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "saves": 1, "lastSaved": 1 } });
         if (!result) return false;
         let saves;
         if (isNaN(result.saves) || result.saves < 0) {
@@ -222,17 +239,17 @@ export class Database {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "failRole": 1 } }) || this.guildDefaults;
         if (!result) return false;
-        if (!result.failRole) return "";
+        if (!result.failRole || result.failRole.length !== 18) return "";
         return result.failRole;
     }
-    
+
     async getCommandChannel(guildID: string | undefined): Promise<string | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID });
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "commandChannel": 1 } });
         if (!result || !result.commandChannel || result.commandChannel.length !== 18) return "";
         return result.commandChannel;
     }
@@ -246,30 +263,30 @@ export class Database {
         return result;
     }
 
-    async getLastMessageID(guildID: string | undefined): Promise<string | false> {
-        if (!guildID || !this.db) return false;
+    async getLastMessageID(guildID: string | undefined): Promise<string> {
+        if (!guildID || !this.db) return "";
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID });
-        if (!result) return false;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "lastMessageID": 1 } });
+        if (!result) return "";
         if (!result.lastMessageID || result.lastMessageID.length !== 18) return "";
         return result.lastMessageID;
     }
 
-    async getDelReminderSent(guildID: string | undefined): Promise<string | false> {
+    async getDelReminderSent(guildID: string | undefined): Promise<boolean> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID });
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "deletedMessageReminder": 1 } });
         if (!result || !result.deletedMessageReminder) return false;
         return result.deletedMessageReminder;
     }
 
-    async getCourtesyChances(guildID: string | undefined): Promise<number | false> {
-        if (!guildID || !this.db) return false;
+    async getCourtesyChances(guildID: string | undefined): Promise<number> {
+        if (!guildID || !this.db) return 0;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID });
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "courtesyChances": 1 } });
         if (!result || !result.courtesyChances) return 0;
         return result.courtesyChances;
     }
@@ -370,15 +387,13 @@ export class Database {
         if (guild.recordNumber < value) {
             record = value;
         }*/
-        const inc = await this.getIncrement(guildID) || { increment: 1 };
+        const inc = await this.getIncrement(guildID);
         await GuildData.updateOne({
             "guildID": guildID,
         }, {
             $set: { "count": value, "lastMessageID": messageid },
-            $inc: { "numberOfCounts": 1, "totalCount": inc.increment },
+            $inc: { "numberOfCounts": 1, "totalCount": inc },
             $max: { "recordNumber": value }
-        }, {
-            upsert: true
         });
     }
 
@@ -391,8 +406,6 @@ export class Database {
         }, {
             $set: { "increment": value },
             $min: { "leaderboardEligible": (value !== 1) ? 0 : 1 }
-        }, {
-            upsert: true
         });
     }
 
@@ -404,8 +417,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "countChannel": channel }
-        }, {
-            upsert: true
         });
     }
 
@@ -417,8 +428,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "lastUpdatedID": id }
-        }, {
-            upsert: true
         });
     }
 
@@ -430,8 +439,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "chatAllowed": state }
-        }, {
-            upsert: true
         });
     }
 
@@ -443,8 +450,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $inc: { "numberOfErrors": 1 }
-        }, {
-            upsert: true
         });
     }
 
@@ -467,8 +472,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "failRole": role }
-        }, {
-            upsert: true
         });
     }
 
@@ -486,8 +489,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "commandChannel": channel }
-        }, {
-            upsert: true
         });
     }
 
@@ -510,8 +511,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "deletedMessageReminder": status }
-        }, {
-            upsert: true
         });
     }
 
@@ -523,8 +522,6 @@ export class Database {
             "guildID": guildID,
         }, {
                 $set: { "courtesyChances": left }
-        }, {
-            upsert: true
         });
     }
 
@@ -536,8 +533,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $inc: { "pogNumStat": 1 }
-        }, {
-            upsert: true
         });
     }
 
@@ -569,8 +564,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "players": guild.players }
-        }, {
-            upsert: true
         });
     }
 
@@ -582,8 +575,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "autoMute": state }
-        }, {
-            upsert: true
         });
     }
 
@@ -608,8 +599,6 @@ export class Database {
             "memberID": memberID
         }, {
             $set: mute
-        }, {
-            upsert: true
         });
     }
 
@@ -640,8 +629,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "recordRole": role }
-        }, {
-            upsert: true
         });
     }
 
@@ -653,8 +640,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "recordHolder": id }
-        }, {
-            upsert: true
         });
     }
 
@@ -666,8 +651,6 @@ export class Database {
             "guildID": guildID,
         }, {
             $set: { "foulPlayPrevention": state }
-        }, {
-            upsert: true
         });
     }
 
@@ -724,7 +707,7 @@ export class Database {
         }*/
         const guildDefaults: guildObject = Object.create(this.guildDefaults);
         const guild: guildObject = await GuildData.findOne({ "guildID": guildID }) || guildDefaults;
-        if (!guild.guildID) guild.guildID = guildID;
+        guild.guildID = guildID;
         if (typeof guild.count !== "number") guild.count = 0;
         if (typeof guild.increment !== "number") guild.increment = 1;
         if (typeof guild.leaderboardEligible !== "number") guild.leaderboardEligible = 1;
@@ -740,7 +723,7 @@ export class Database {
         if (!guild.autoMute && guild.autoMute !== false) guild.autoMute = false;
         //if (!guild.lastSaved) guild.lastSaved = new Date();
         await GuildData.updateOne(
-            { guildID },
+            { "guildID": guildID },
             { $set: guild },
             { upsert: true }
         );
