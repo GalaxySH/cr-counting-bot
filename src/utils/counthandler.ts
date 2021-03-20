@@ -2,8 +2,6 @@ import moment from "moment";
 import { CommandClient, CountTiming, ExtMessage } from "../typings";
 import xlg from "../xlogger";
 import { getFriendlyUptime } from "./time";
-//import { handleFoul } from "./foul";
-//import fs from "fs";
 
 const countTimings: Array<CountTiming> = [];
 
@@ -18,9 +16,10 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             return false;
         }
 
+        const count = await client.database?.getCount(message.guild.id) || 9;
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
         if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
-            if (!await handleFoul(client, message, "talking out of turn", undefined, )) xlg.log("failed to handle foul: turn");
+            if (!await handleFoul(client, message, "talking out of turn", undefined, count)) xlg.log("failed to handle foul: turn");
             return true;
         }
 
@@ -32,21 +31,19 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
 
         //const rmsgs = await message.channel.messages.fetch({ limit: 2 });
-        const count = await client.database?.getCount(message.guild.id);
         const increment = await client.database?.getIncrement(message.guild?.id);
         if (!increment) return false;
-        const cc = count || 0;
         const incre = increment || 1;
-        if (num !== cc + incre) {
+        if (num !== count + incre) {
             //const num = parseInt(message.content, 10);// would recommend BigInt, but I am ignoring all BigInt numbers
             /*if (num > Number.MAX_SAFE_INTEGER) {
                 num = Number.MAX_SAFE_INTEGER;
             }*/
-            if (!await handleFoul(client, message, "wrong number", num - (cc + incre), (cc + incre))) xlg.log("failed to handle foul: number");
+            if (!await handleFoul(client, message, "wrong number", num - (count + incre), (count + incre))) xlg.log("failed to handle foul: number");
             return true;
         }
 
-        await client.database?.updateCount(message.guild.id, cc + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
+        await client.database?.updateCount(message.guild.id, count + incre, message.id);// updating the count, this should take place before a bunch more db queries have to be processed
 
         // handling count timing
         const timing = countTimings.find(t => t.guildID === message.guild?.id);
@@ -80,11 +77,11 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (message.guesses !== 2) {
             client.database?.setCourtesyChances(message.guild.id, 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
         }
-        if (cc + incre === 69) {
+        if (count + incre === 69) {
             client.database?.incrementPogStat(message.guild.id);
             message.channel.send("nice");
         }
-        client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, cc + incre);
+        client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, count + incre);
 
         // record role handling
         /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
