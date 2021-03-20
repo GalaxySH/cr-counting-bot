@@ -5,14 +5,14 @@ import { Guild, MessageEmbedOptions, TextChannel } from 'discord.js';
 import { PaginationExecutor } from '../utils/pagination';
 
 export const command: Command = {
-    name: "leaderboard",
-    aliases: ["lb"],
-    description: "Get the global leaderboard",
+    name: "records",
+    aliases: ["rs"],
+    description: "Top servers by record held",
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {
             // Retrieving the leaderboard from the database
-            const guildsLb = await client.database?.getGuildsLeaderboard();
+            const guildsLb = await client.database?.getRecordsLeaderboard();
             if (!guildsLb) {
                 message.channel.send(`No servers to display`);
                 return false;
@@ -29,7 +29,6 @@ export const command: Command = {
                             await client.database?.deleteGuildEntry(g.guildID);
                         }
                     } catch (err) {
-                        //garray.push(new Guild(client, {id: g.guildID}))
                         xlg.log(`Leaderboard: Missing access for guild: ${g.guildID}`);
                     }
                 }
@@ -115,11 +114,11 @@ export const command: Command = {
 
                 const e: MessageEmbedOptions = {
                     color: process.env.INFO_COLOR,
-                    title: "Leaderboard of Servers",
+                    title: "Records",
                     description: `\`\`\`md\n${lbMap.join("\n")}\n\`\`\``,
                     footer: {
                         iconURL: message.author.avatarURL() || "",
-                        text: `${message.author.tag} | ${garray.length}`
+                        text: `${message.author.tag} | Top ${garray.length}`
                     }
                 };
                 pages.push(e);

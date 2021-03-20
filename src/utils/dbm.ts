@@ -179,9 +179,8 @@ export class Database {
         return result;
     }
 
-    async getGuildsLeaderboard(guildID: string | undefined): Promise<guildObject[] | false> {
-        if (!guildID || !this.db) return false;
-        await this.maybeSetDefaults(guildID);
+    async getGuildsLeaderboard(): Promise<guildObject[] | false> {
+        if (!this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = GuildData.find({
             "leaderboardEligible": 1,
@@ -192,9 +191,8 @@ export class Database {
         return result.toArray();
     }
 
-    async getRecordsLeaderboard(guildID: string | undefined): Promise<guildObject[] | false> {
-        if (!guildID || !this.db) return false;
-        await this.maybeSetDefaults(guildID);
+    async getRecordsLeaderboard(): Promise<guildObject[] | false> {
+        if (!this.db) return false;
         const GuildData = this.db.collection("GuildData");
         const result = GuildData.find({
             "leaderboardEligible": 1,
