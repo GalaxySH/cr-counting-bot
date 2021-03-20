@@ -12,7 +12,7 @@ export const command: Command = {
     async execute(client: CommandClient, message: ExtMessage) {
         try {
             // Retrieving the leaderboard from the database
-            const guildsLb = await client.database?.getGuildsLeaderboard();
+            const guildsLb = await client.database.getGuildsLeaderboard();
             if (!guildsLb) {
                 message.channel.send(`No servers to display`);
                 return false;
@@ -34,20 +34,20 @@ export const command: Command = {
                     }
                 }
             }
-
             // split the guilds into groups to display as pages
             const groups: guildObject[][] = [];
             while (guildsLb.length) {
                 groups.push(guildsLb.splice(0, 10));
             }
 
-            if (!groups.length || !guildsLb.length) {
+            if (!groups.length || !groups[0].length) {
                 message.channel.send(`No servers to display`);
                 return;
             }
 
-            const pages: MessageEmbedOptions[] = [];
             let pn = 0;
+            let displayIndex = 1
+            const pages: MessageEmbedOptions[] = [];
             for (const page of groups) {
                 // Initializing the array for the leaderboard display
                 const lbMap: string[] = [];
@@ -71,7 +71,6 @@ export const command: Command = {
                 }
                 lbMap.unshift(`${columnOneName} │ ${columnTwoName}${spaces} │ Count `);
 
-                let displayIndex = 1
                 for (const d of page) {
                     const g = garray.find(x => x.id === d.guildID);
                     if (g) {
@@ -119,7 +118,7 @@ export const command: Command = {
                     description: `\`\`\`md\n${lbMap.join("\n")}\n\`\`\``,
                     footer: {
                         iconURL: message.author.avatarURL() || "",
-                        text: `${message.author.tag} | ${garray.length}`
+                        text: `${message.author.tag} | Top ${garray.length}`
                     }
                 };
                 pages.push(e);

@@ -16,6 +16,7 @@ import { CommandClient, ExtMessage } from './typings';
 import { sendError } from './utils/messages';
 import { MutePoller } from './utils/mutepoller';
 import Client from './struct/Client';
+import { PaginationExecutor } from './utils/pagination';
 //import config from "./config.json";
 
 process.on('uncaughtException', function (e) {
@@ -65,11 +66,18 @@ client.on("ready", async () => {
 
     const mutePoller = new MutePoller(client.database);
     Bot.init(client, mutePoller);
-})
+});
 
 client.on("rateLimit", rateLimitInfo => {
     xlg.log('Ratelimited: ' + JSON.stringify(rateLimitInfo));
-})
+});
+
+client.on("messageReactionAdd", async (reaction, user) => {
+    if (user.partial) {
+        user = await user.fetch();
+    }
+    PaginationExecutor.paginate(reaction, user);
+});
 
 function delNoChat(msg: ExtMessage) {
     if (!msg.chatting && msg.channel.id === msg.countChannel) {
