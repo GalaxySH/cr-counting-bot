@@ -111,7 +111,11 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             }
         } */
 
-        message.react("☑️");// ✔
+        try {
+            message.react("☑️");// ✔
+        } catch (error) {
+            message.channel.send("\\✔")
+        }
         return true;
     } catch (error) {
         xlg.log(error);
