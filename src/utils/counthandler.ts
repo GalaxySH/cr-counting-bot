@@ -12,7 +12,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         if (message.channel.id !== message.countChannel) return false;
 
         const num = parseInt(message.content, 10);
-        if (!num || /[^0-9]+/.test(message.content)) {
+        if (!num || /[1-9]\d{0,9}/.test(message.content)) {
             return false;
         }
 
