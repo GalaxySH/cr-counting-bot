@@ -7,8 +7,7 @@ import { stringToChannel } from "../utils/parsers";
 
 export const command: Command = {
     name: "channel",
-    aliases: ["countchannel"],
-    description: "Set the counting channel to the current channel",
+    description: "Set the channel to count in",
     usage: "[#channel]",
     async execute(client, message, args) {
         try {
