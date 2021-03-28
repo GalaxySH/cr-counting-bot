@@ -143,14 +143,14 @@ export class Database {
         if (!result) return false;
         return result;
     }
-    
-    async getLastUpdater(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID || !this.db) return false;
+
+    async getLastUpdater(guildID: string | undefined): Promise<string> {
+        if (!guildID || !this.db) return "";
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (!result) return false;
-        return result;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "lastUpdatedID": 1 } }) || this.guildDefaults;
+        if (!result || !result.lastUpdatedID) return "";
+        return result.lastUpdatedID;
     }
 
     async getChatAllowed(guildID: string | undefined): Promise<boolean> {
@@ -332,8 +332,8 @@ export class Database {
         return true;
     }
 
-    async getRecordRole(guildID: string | undefined): Promise<string | false> {
-        if (!guildID || !this.db) return false;
+    async getRecordRole(guildID: string | undefined): Promise<string> {
+        if (!guildID || !this.db) return "";
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
@@ -364,7 +364,7 @@ export class Database {
     }
 
     async getGuildPlayer(guildID: string, userID: string): Promise<GuildPlayer | false> {
-        if (!this.db) return false;
+        if (!this.db || !guildID) return false;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
 
@@ -385,7 +385,7 @@ export class Database {
       ┗━━━━━━━━━┛*/
 
     async updateCount(guildID: string, value: number, messageid = ""): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         /*const guild = await GuildData.findOne({ "guildID": guildID });
@@ -416,7 +416,7 @@ export class Database {
     }
 
     async setChannel(guildID: string, channel: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -427,7 +427,7 @@ export class Database {
     }
 
     async setLastUpdater(guildID: string, id: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -438,7 +438,7 @@ export class Database {
     }
 
     async setChatAllowed(guildID: string, state: boolean): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -449,7 +449,7 @@ export class Database {
     }
 
     async incrementErrorCount(guildID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -460,7 +460,7 @@ export class Database {
     }
 
     async updateSaves(guildID: string, saves: number): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -471,7 +471,7 @@ export class Database {
     }
 
     async setFailRole(guildID: string, role: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -482,13 +482,13 @@ export class Database {
     }
 
     async deleteGuildEntry(guildID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         this.db.collection("GuildData").deleteOne({ "guildID": guildID });
     }
 
     async setCommandChannel(guildID: string, channel: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -499,7 +499,7 @@ export class Database {
     }
 
     async updatePlayerSaves(userID: string, saves: number): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !userID) return;
         await this.createUser(userID);
         const UserData = this.db.collection("UserData");
         await UserData.updateOne({
@@ -510,7 +510,7 @@ export class Database {
     }
 
     async setDelReminderShown(guildID: string, status: boolean): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -521,7 +521,7 @@ export class Database {
     }
 
     async setCourtesyChances(guildID: string, left: number): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -532,7 +532,7 @@ export class Database {
     }
 
     async incrementPogStat(guildID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -543,7 +543,7 @@ export class Database {
     }
 
     async incrementGuildPlayerStats(guildID: string, memberID: string, inerror = false, cnum = 0): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         
@@ -574,7 +574,7 @@ export class Database {
     }
 
     async setAutoMuting(guildID: string, state: boolean): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -585,7 +585,7 @@ export class Database {
     }
 
     async setMemberMute(guildID: string, memberID: string, until: Date): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const MuteData = this.db.collection("MuteSchedule");
         let mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
@@ -609,14 +609,14 @@ export class Database {
     }
 
     async clearMemberMutes(guildID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const MuteData = this.db.collection("MuteSchedule");
         await MuteData.deleteMany({ "guildID": guildID });
     }
     
     async unsetMemberMute(guildID: string, memberID: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const MuteData = this.db.collection("MuteSchedule");
         //const mute = await MuteData.findOne({ "guildID": guildID, "memberID": memberID });
@@ -628,7 +628,7 @@ export class Database {
     }
 
     async setRecordRole(guildID: string, role: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -639,7 +639,7 @@ export class Database {
     }
 
     async setRecordHolder(guildID: string, id: string): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -650,7 +650,7 @@ export class Database {
     }
 
     async setFoulPrevention(guildID: string, state: boolean): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !guildID) return;
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
         await GuildData.updateOne({
@@ -661,7 +661,7 @@ export class Database {
     }
 
     async setPlayerCorrect(userID: string, num?: number, incrementing = false): Promise<void> {
-        if (!this.db) return;
+        if (!this.db || !userID) return;
         await this.createUser(userID);
         const UserData = this.db.collection("UserData");
         if ((num || num === 0) && !incrementing) {
