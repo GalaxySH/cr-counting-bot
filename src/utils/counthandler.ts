@@ -5,21 +5,28 @@ import { getFriendlyUptime } from "./time";
 
 const countTimings: Array<CountTiming> = [];
 
+function checkNum(c: string): boolean {
+    return /^([+-]?(?=\.\d|\d)(?:\d+)(?:\.?\d*))(?:[eE]([+-]?\d+))?$/.test(c);
+}
+
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
         if (!message.guild || !client.database) return false;
-
+        
         if (message.channel.id !== message.countChannel) return false;
 
+        if (!checkNum(message.content)) {
+            return false;
+        }
         const num = parseInt(message.content, 10);
-        if (!num || /[^0-9]+/.test(message.content)) {
+        if (isNaN(num)) {
             return false;
         }
 
-        const count = await client.database?.getCount(message.guild.id) || 0;
+        const count = await client.database.getCount(message.guild.id);
         const lastUpdater = await client.database.getLastUpdater(message.guild.id);
-        if (lastUpdater && lastUpdater.lastUpdatedID === message.author.id) {
-            if (!await handleFoul(client, message, "talking out of turn", undefined, count)) xlg.log("failed to handle foul: turn");
+        if (lastUpdater === message.author.id) {
+            if (!await handleFoul(client, message, lastUpdater, "talking out of turn", undefined, count)) xlg.log("failed to handle foul: turn");
             return true;
         }
 
@@ -39,7 +46,7 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
             /*if (num > Number.MAX_SAFE_INTEGER) {
                 num = Number.MAX_SAFE_INTEGER;
             }*/
-            if (!await handleFoul(client, message, "wrong number", num - (count + incre), (count + incre))) xlg.log("failed to handle foul: number");
+            if (!await handleFoul(client, message, lastUpdater, "wrong number", num - (count + incre), (count + incre))) xlg.log("failed to handle foul: number");
             return true;
         }
 
@@ -83,34 +90,6 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
         client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, false, count + incre);
 
-        // record role handling
-        /* const recordRoleID = await client.database?.getRecordRole(message.guild?.id || "");
-        if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
-            const s = await client.database.getStats(message.guild.id);
-            if (s && s.recordNumber) {
-                if (cc + incre >= s.recordNumber) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
-                    const recordRole = message.guild?.roles.cache.get(recordRoleID);
-                    if (recordRole) {
-                        const members = await message.guild.members.fetch();
-                        // const rh = members.get(rhid);
-                        // if (rh) {
-                        //     rh.roles.remove(recordRole);
-                        // }
-                        try {
-                            members.filter((a) => a.roles.cache.has(recordRole.id)).forEach((m) => m.roles.remove(recordRole));
-                        } catch (error) {
-                            //
-                        }
-
-                        message.member?.roles.add(recordRole).catch(xlg.error);
-                        client.database.setRecordHolder(message.guild.id, message.author.id);
-                    } else {
-                        client.database?.setRecordRole(message.guild?.id || "", "");
-                    }
-                }
-            }
-        } */
-
         try {
             message.react("☑️");// ✔
         } catch (error) {
@@ -123,135 +102,170 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
     }
 }
 
-async function handleFoul(client: CommandClient, message: ExtMessage, reason?: string, offBy?: number, curr?: number): Promise<boolean> {
-    if (!client || !message || !message.guild) return false;
-    if (!reason) reason = "Foul";
+async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdater: string, reason?: string, offBy?: number, curr = 0): Promise<boolean> {
+    try {
+        if (!client || !message || !message.guild) return false;
+        if (!reason) reason = "Foul";
 
-    const timing = countTimings.find(t => t.guildID === message.guild?.id);
-    if (timing) {
-        const duration = moment.duration(moment(message.createdAt).diff(moment(timing.time)));
-        const ms = duration.asMilliseconds();
+        const timing = countTimings.find(t => t.guildID === message.guild?.id);
+        if (timing) {
+            const duration = moment.duration(moment(message.createdAt).diff(moment(timing.time)));
+            const ms = duration.asMilliseconds();
 
-        if (ms < timing.threshold) {
+            if (ms < timing.threshold) {
+                message.react("🟠");
+                message.channel.send(`${message.member} you were beaten`, {
+                    embed: {
+                        color: process.env.INFO_COLOR,
+                        title: `\`🟠\``,
+                        description: `You tried to count at the same time as *someone* else\nNumber was received within **${timing.threshold}ms** threshold`
+                    }
+                });
+                return true;
+            }
+        }
+
+        const fps = await client.database?.getFoulPrevention(message.guild?.id);
+        if (fps) {
+            const lastMessageID = await client.database.getLastMessageID(message.guild?.id);
+            if (lastMessageID && reason === "wrong number") {// will go here if someone messes up and the last message id has been logged and not reset
+                const lastMessage = message.channel.messages.cache.get(lastMessageID);
+                if (!lastMessage && message.guesses) {// if the message for the last count in the counting channel couldn't be found
+                    // if the guild has guesses for the number left, continue letting them guess
+                    message.react("🟣");
+                    const delReminder = await client.database.getDelReminderSent(message.guild?.id);
+                    if (!delReminder) {// if the message about being tricked hasn't been sent yet
+                        message.channel.send(`${message.member} you were tricked`, {
+                            embed: {
+                                color: process.env.INFO_COLOR,
+                                title: `\`🟣\` Previous Count Deleted`,
+                                description: `**The message that had the most recent count was deleted**\nThe server has **two** chances at redemption`
+                            }
+                        });
+                        client.database.setDelReminderShown(message.guild?.id || "", true);
+                        return true;
+                    } else {
+                        client.database.setCourtesyChances(message.guild?.id || "", message.guesses - 1);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        const player = await client.database?.getPlayerData(message.author.id);
+        let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
+        if (player && player.saves >= 1) {// if the user has individual saves left, stop
+            player.saves--;
+            client.database?.updatePlayerSaves(message.author.id, player.saves);
             message.react("🟠");
-            message.channel.send(`${message.member} you were beaten`, {
+            message.channel.send(`${message.member} you miscounted **and were saved**`, {
                 embed: {
                     color: process.env.INFO_COLOR,
-                    title: `\`🟠\``,
-                    description: `You tried to count at the same time as *someone* else\nNumber was received within **${timing.threshold}ms** threshold`
+                    title: `\`🟠\` ${reason}`,
+                    description: `**Docked one of your personal saves**\nPersonal Saves: **${player.saves}** -1\nGuild Saves: **${guildSaves || 0}**`,
+                    footer: {
+                        text: "c?help"
+                    }
                 }
-            }).catch(xlg.error);
+            });
             return true;
         }
-    }
 
-    const fps = await client.database?.getFoulPrevention(message.guild?.id);
-    if (fps) {
-        const lastMessageID = await client.database?.getLastMessageID(message.guild?.id);
-        if (lastMessageID && reason === "wrong number") {// will go here if someone messes up and the last message id has been logged and not reset
-            const lastMessage = message.channel.messages.cache.get(lastMessageID);
-            if (!lastMessage && message.guesses) {// if the message for the last count in the counting channel couldn't be found
-                // if the guild has guesses for the number left, continue letting them guess
-                message.react("🟣");
-                const delReminder = await client.database?.getDelReminderSent(message.guild?.id);
-                if (!delReminder) {// if the message about being tricked hasn't been sent yet
-                    message.channel.send(`${message.member} you were tricked`, {
-                        embed: {
-                            color: process.env.INFO_COLOR,
-                            title: `\`🟣\` Previous Count Deleted`,
-                            description: `**The message that had the most recent count was deleted**\nThe server has **two** chances at redemption`
+        if (guildSaves && guildSaves >= 1) {// if the guild has saves left, stop
+            guildSaves--;
+            client.database?.updateSaves(message.guild?.id || "", guildSaves);
+            message.react("🟠");
+            message.channel.send(`${message.member} you miscounted **and were saved**`, {
+                embed: {
+                    color: process.env.INFO_COLOR,
+                    title: `\`🟠\` ${reason}`,
+                    description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}** -1`,
+                    footer: {
+                        text: "c?help"
+                    }
+                }
+            });
+            return true;
+        }
+
+        // If all checks have failed, the numbers should be reset and the data logged
+        message.react("❌");
+        await client.database.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
+        await client.database.updateCount(message.guild?.id || "", 0);// reset the count
+        await client.database.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
+        client.database.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
+        client.database.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
+        await client.database.setPlayerCorrect(message.author.id, 0);// reset the number of correct counts the user has made
+        if (message.guesses !== 2) {
+            client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
+        }
+
+        // handling count timing
+        if (timing) {
+            countTimings.splice(countTimings.indexOf(timing), 1);
+        }
+
+        // fail role handling
+        const failroleid = await client.database.getFailRole(message.guild?.id || "");
+        if (failroleid && failroleid.length > 0) {// will check if a role needs to be given to the user who failed the count
+            const failrole = message.guild?.roles.cache.get(failroleid);
+            if (!failrole) {
+                client.database?.setFailRole(message.guild?.id || "", "");
+            } else {
+                message.member?.roles.add(failrole);
+            }
+        }
+        // auto mute handling
+        await handleMute(client, message, offBy, curr);
+
+        const increment = await client.database.getIncrement(message.guild?.id);
+        const incre = increment || 1;
+        message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
+            embed: {
+                color: process.env.INFO_COLOR,
+                title: `\`❌\` ${reason}`,
+                description: `**reset to 0**\nthe next number is \`${incre}\``,
+                footer: {
+                    text: "next time use c?c"
+                }
+            }
+        });
+
+        // record role handling
+        const recordRoleID = await client.database.getRecordRole(message.guild.id);
+        if (recordRoleID && recordRoleID.length > 0) {// will check if a role needs to be given to the user who failed the count
+            const s = await client.database.getStats(message.guild.id);
+            if (s && s.recordNumber) {
+                if (curr + incre >= s.recordNumber && message.guild.roles.cache.get(recordRoleID)) {// For someone reason this statement stopped working properly, which I realized was because of the updateCount above making the (cc + incre) give the current count, not the count that comes after the current in the DB. It worked before, I don't know when or why I changed it. But, the issue is that (cc + incre) wouldn't give a number greater than the recordNumber in the database, it would be equal.
+                    const recordRole = await message.guild.roles.fetch(recordRoleID);
+                    if (recordRole) {
+                        // const members = await message.guild.members.fetch();
+                        const members = recordRole.members;
+                        try {
+                            const withRole = members.array();
+                            for await (const m of withRole) {
+                                await m.roles.remove(recordRole);
+                            }
+                        } catch (error) {
+                            //
                         }
-                    }).catch(xlg.error);
-                    client.database?.setDelReminderShown(message.guild?.id || "", true);
-                    return true;
-                } else {
-                    client.database?.setCourtesyChances(message.guild?.id || "", message.guesses - 1);
-                    return true;
+
+                        const awardee = message.guild.members.cache.get(lastUpdater);
+                        if (awardee) {
+                            awardee.roles.add(recordRole);
+                            client.database.setRecordHolder(message.guild.id, lastUpdater);
+                        }
+                    } else {
+                        client.database.setRecordRole(message.guild?.id || "", "");
+                    }
                 }
             }
         }
-    }
-
-    const player = await client.database?.getPlayerData(message.author.id);
-    let guildSaves = await client.database?.getGuildSaves(message.guild?.id);
-    if (player && player.saves >= 1) {// if the user has individual saves left, stop
-        player.saves--;
-        client.database?.updatePlayerSaves(message.author.id, player.saves);
-        message.react("🟠");
-        message.channel.send(`${message.member} you miscounted, **but you were saved**`, {
-            embed: {
-                color: process.env.INFO_COLOR,
-                title: `\`🟠\` ${reason}`,
-                description: `**Docked one of your personal saves**\nPersonal Saves: **${player.saves}** -1\nGuild Saves: **${guildSaves || 0}**`,
-                footer: {
-                    text: "c?help"
-                }
-            }
-        }).catch(xlg.error);
         return true;
+    } catch (error) {
+        xlg.error(error);
+        return false;
     }
-
-    if (guildSaves && guildSaves >= 1) {// if the guild has saves left, stop
-        guildSaves--;
-        client.database?.updateSaves(message.guild?.id || "", guildSaves);
-        message.react("🟠");
-        message.channel.send(`${message.member} you miscounted, **but you were saved**`, {
-            embed: {
-                color: process.env.INFO_COLOR,
-                title: `\`🟠\` ${reason}`,
-                description: `**You had to use a guild save**\nPersonal Saves: **${player ? player.saves : 0}**\nGuild Saves: **${guildSaves || 0}** -1`,
-                footer: {
-                    text: "c?help"
-                }
-            }
-        }).catch(xlg.error);
-        return true;
-    }
-
-    // If all checks have failed, the numbers should be reset and the data logged
-    message.react("❌");
-    await client.database?.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
-    await client.database?.updateCount(message.guild?.id || "", 0);// reset the count
-    await client.database?.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
-    client.database?.incrementErrorCount(message.guild?.id || "");// adds to the total count of errors for the guild
-    client.database?.incrementGuildPlayerStats(message.guild?.id || "", message.author.id, true);
-    await client.database?.setPlayerCorrect(message.author.id, 0);// reset the number of correct counts the user has made
-    if (message.guesses !== 2) {
-        client.database?.setCourtesyChances(message.guild?.id || "", 2);// resets the chances given for the players to guess the number if they get it wrong under circums.
-    }
-
-    // handling count timing
-    if (timing) {
-        countTimings.splice(countTimings.indexOf(timing), 1);
-    }
-
-    // fail role handling
-    const failroleid = await client.database?.getFailRole(message.guild?.id || "");
-    if (failroleid && failroleid.length > 0) {// will check if a role needs to be given to the user who failed the count
-        const failrole = message.guild?.roles.cache.get(failroleid);
-        if (!failrole) {
-            client.database?.setFailRole(message.guild?.id || "", "");
-        } else {
-            message.member?.roles.add(failrole).catch(xlg.error);
-        }
-    }
-    // auto mute handling
-    await handleMute(client, message, offBy, curr);
-
-    const increment = await client.database?.getIncrement(message.guild?.id);
-    if (!increment) return false;
-    const incre = increment || 1;
-    message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
-        embed: {
-            color: process.env.INFO_COLOR,
-            title: `\`❌\` ${reason}`,
-            description: `**reset to 0**\nthe next number is \`${incre}\``,
-            footer: {
-                text: "next time use c?c"
-            }
-        }
-    }).catch(xlg.error);
-    return true;
 }
 
 // NOTE: number > Number.MAX_SAFE_INTEGER
@@ -266,7 +280,6 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
         if (offBy < Number.MAX_SAFE_INTEGER) {
             muteLength = (Math.abs(offBy) + 5) + currConv;
         } else {
-            //muteLength = 60 * 24 * 2;// two days
             muteLength = 60 * 24 * 5;// five days
         }
         if (muteLength > 60 * 24 * 5) {// if greater than five days
@@ -295,12 +308,8 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
             ttypes.splice(ttypes.indexOf("seconds"), 1);
         }
         const tt = [th, tm, ts].filter(x => x > 0).map((x, i, xt) => {
-            //ttypes.splice(0, ttypes.length - xt.length)
             return `${x} ${ttypes[i]}${i !== (xt.length - 1) ? (xt.length > 1 && xt.length - 2 === i ? `${xt.length > 2 ? "," : ""} and ` : ", ") : ""}`;
         });
-        /*if (tt.length > 1) {
-            tt.splice(tt.length - 2, 0, ", and")
-        }*/
         const joinedtt = tt.join("");
         await message.author.send(`Hello Person Who Cannot Count 👋
 

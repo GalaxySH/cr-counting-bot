@@ -103,14 +103,6 @@ export const command: Command = {
                     divider += "=";
                 }
                 lbMap.splice(1, 0, divider);
-                // Sending the leaderboard
-                while (`\`\`\`md\n${lbMap.join("\n")}\n\`\`\``.length > 2048) {
-                    lbMap.pop();
-                    const r = page.pop();
-                    if (r) {
-                        groups[pn + 1].push(r);
-                    }
-                }
 
                 const e: MessageEmbedOptions = {
                     color: process.env.INFO_COLOR,

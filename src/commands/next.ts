@@ -3,39 +3,32 @@ import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 //import checkAccess from '../utils/checkaccess';
 import { Command, CommandClient, ExtMessage } from '../typings';
-import { TextChannel } from 'discord.js';
+import { MessageEmbedOptions, TextChannel } from 'discord.js';
 
 const actions = [
-    "get yoinked",
-    "get smushed",
     "feel bad",
     "get yelled at",
     "get banned",
-    "get fired",
     "get kicked",
     "disappoint your family",
     "regret it",
     "face my wrath",
-    "pay your taxes",
+    "I will destroy you",
     "get anxiety",
-    "your computer will crash",
-    "never fit in",
+    "Discord will crash",
+    "leave this server",
     "be that one kid",
-    "get the f-role",
+    "I will give you the fail role",
+    "I will mute you",
     "I can't do anything to stop you",
     "lose your pension",
     "lose your prospects",
-    "you won't get that scholarship",
-    "you might die\nwith the same odds as always",
-    "you're bad",
-    "your phone will break",
-    "your keyboard will break",
-    "you will never see light again",
-    "lose the ability to feel heat",
-    "get an F",
-    "you will become infamous",
-    "you will only be able to play golf",
-    "god will exist, but only for you, and you will go to hell, and you will be the only one there...for eternity"
+    "I will henceforth refer to you as a pleb",
+    "I will break your keyboard",
+    "you will never see the light",
+    "I will give you an F",
+    "your punishment in hell will be playing golf",
+    "hell will exist,\nonly for you,\nand you will go to hell\n...for an eternity"
 ]
 
 export const command: Command = {
@@ -45,8 +38,8 @@ export const command: Command = {
     specialArgs: 0,
     async execute(client: CommandClient, message: ExtMessage) {
         try {
-            const count = await client.database?.getCount(message.guild?.id) || 0;
-            const increment = await client.database?.getIncrement(message.guild?.id);
+            const count = await client.database.getCount(message.guild?.id) || 0;
+            const increment = await client.database.getIncrement(message.guild?.id);
             if (!increment) return;
             const incre = increment || 1;
             // check for perms
@@ -55,38 +48,25 @@ export const command: Command = {
             // CHECK TO MAKE SURE THAT A CHANNEL IS SET, ABORT AND SEND EMBED IF THERE ISN"T ONE
 
             // CHECK IF THE SENDER WAS THE LAST PERSON TO COUNT, THEN SAY DON"T COUNT
-            const lastUpdater = await client.database?.getLastUpdater(message.guild?.id);
+            const lastUpdater = await client.database.getLastUpdater(message.guild?.id);
             
-            let embed = {};
-            if (lastUpdater) {
-                const last = lastUpdater?.lastUpdatedID || false;
+            let embed: MessageEmbedOptions = {};
+            if (typeof lastUpdater === "string") {
+                const last = lastUpdater || false;
 
-                if (last === message.author.id) {
-                    embed = {
-                        color: process.env.INFO_COLOR,
-                        title: "Next",
-                        description: `Don't send anything! You were the last to count.`,
-                        footer: {
-                            text: `else ${actions[Math.floor(Math.random() * actions.length)]}`
-                        }
-                    };
-                } else {
-                    embed = {
-                        color: process.env.INFO_COLOR,
-                        author: {
-                            name: "〉〉〉〉〉〉〉〉〉〉"
-                        },
-                        title: "Next",
-                        description: `send \`${count + incre}\``,
-                        footer: {
-                            text: `or ${actions[Math.floor(Math.random() * actions.length)]}`
-                        }
-                    };
-                }
+                embed = {
+                    color: process.env.INFO_COLOR,
+                    title: "Next",
+                    description: last === message.author.id ? `Don't send anything! You were the last to count.` : `send \`${count + incre}\``,
+                    footer: {
+                        text: `else ${actions[Math.floor(Math.random() * actions.length)]}`
+                    }
+                };
                 
             } else {
                 embed = {
-                    title: "No Data"
+                    color: process.env.WARN_COLOR,
+                    description: "No Data"
                 };
             }
             message.channel.send({ embed: embed });

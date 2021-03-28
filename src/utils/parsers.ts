@@ -1,7 +1,8 @@
 // THANK YOU BULLETBOT, A LOT OF THE BASE FOR THESE PARSERS CAME FROM THAT REPO, THEY ARE VERY HELPFUL
 // https://www.npmjs.com/package/string-similarity
 
-import { Channel, GuildMember, MessageEmbed, Role, User } from "discord.js";
+import { Guild, GuildChannel, GuildMember, MessageEmbed, Role, User } from "discord.js";
+import { CommandClient } from "../typings";
 
 /**
  * Returns similarity value based on Levenshtein distance.
@@ -62,11 +63,11 @@ function editDistance(s1: string, s2: string) {
 /**
  * Executes a RegExp on a string and returns last result of first search if successful
  *
- * @param {string} str String to search in
- * @param {RegExp} regex RegExp to search with
+ * @param str String to search in
+ * @param regex RegExp to search with
  * @returns
  */
-function extractString(str: any, regex: RegExp) {
+function extractString(str: string, regex: RegExp) {
     const result = regex.exec(str);
     if (!result)
         return undefined;
@@ -77,11 +78,11 @@ function extractString(str: any, regex: RegExp) {
  * Extracts the id from a string and the fetches the User
  *
  * @export
- * @param {object} client the client
- * @param {string} text Text to extract id from
+ * @param client the client
+ * @param text Text to extract id from
  * @returns User
  */
-export async function stringToUser(client: { users: { fetch: (arg0: any) => any; }; }, text: string): Promise<User | undefined> {
+export async function stringToUser(client: CommandClient, text: string): Promise<User | undefined> {
     text = extractString(text, /<@!?(\d*)>/) || text;
     try {
         return await client.users.fetch(text) || undefined;
@@ -120,15 +121,15 @@ export async function stringToUser(client: { users: { fetch: (arg0: any) => any;
  * - similar username
  *
  * @export
- * @param {Guild} guild guild where the member is in
- * @param {string} text string to parse
- * @param {boolean} [byUsername=true] if it should also search by username (default true)
- * @param {boolean} [byNickname=true] if it should also search by nickname (default true)
- * @param {boolean} [bySimilar=true] if it should also search by similar username (default true)
+ * @param guild guild where the member is in
+ * @param text string to parse
+ * @param [byUsername=true] if it should also search by username (default true)
+ * @param [byNickname=true] if it should also search by nickname (default true)
+ * @param [bySimilar=true] if it should also search by similar username (default true)
  * @returns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function stringToMember(guild: { members: { cache: { get: (arg0: any) => any; find: (arg0: { (x: any): boolean; (x: any): boolean; }) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; fetch: () => any; }; }, text: any, byUsername = true, byNickname = true, bySimilar = true): Promise<GuildMember | undefined> {
+export async function stringToMember(guild: Guild, text: string, byUsername = true, byNickname = true, bySimilar = true): Promise<GuildMember | undefined> {
     if (!text) return undefined;
     text = extractString(text, /<@!?(\d*)>/) || extractString(text, /([^#@:]{2,32})#\d{4}/) || text;
     guild.members.cache = await guild.members.fetch();
@@ -137,17 +138,17 @@ export async function stringToMember(guild: { members: { cache: { get: (arg0: an
     let member = guild.members.cache.get(text);
     if (!member && byUsername)
         // by username
-        member = guild.members.cache.find((x: { user: { username: any; }; }) => x.user.username == text);
+        member = guild.members.cache.find((x) => x.user.username == text);
     if (!member && byNickname)
         // by nickname
-        member = guild.members.cache.find((x: { nickname: any; }) => x.nickname == text);
+        member = guild.members.cache.find((x) => x.nickname == text);
 
     if (!member && bySimilar) {
         // closest matching username
-        member = guild.members.cache.reduce(function (prev: { user: { username: any; }; }, curr: { user: { username: any; }; }) {
-            return (stringSimilarity(curr.user.username, text) > stringSimilarity(prev.user.username, text) ? curr : prev);
+        member = <GuildMember>guild.members.cache.reduce((prev, curr) => {
+            return prev ? (stringSimilarity(curr.user.username, text) > stringSimilarity(prev.user.username, text) ? curr : prev) : curr;
         });
-        if (stringSimilarity(member.user.username, text) < 0.4) {
+        if (member && stringSimilarity(member.user.username, text) < 0.4) {
             member = undefined;
         }
     }
@@ -166,14 +167,14 @@ export async function stringToMember(guild: { members: { cache: { get: (arg0: an
  * - similar role name
  *
  * @export
- * @param {Guild} guild guild where the role is in
- * @param {string} text string to parse
- * @param {boolean} [byName=true] if it should also search by name (default true)
- * @param {boolean} [bySimilar=true] if it should also search by similar name (default true)
+ * @param guild guild where the role is in
+ * @param text string to parse
+ * @param [byName=true] if it should also search by name (default true)
+ * @param [bySimilar=true] if it should also search by similar name (default true)
  * @returns
  */
 
-export function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: string, byName = true, bySimilar = true): Role | string {
+export function stringToRole(guild: Guild, text: string, byName = true, bySimilar = true): Role | string | undefined {
 
     if (text == 'here' || text == '@here') {
         return '@here';
@@ -188,14 +189,14 @@ export function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any;
     let role = guild.roles.cache.get(text);
     if (!role && byName) {
         // by name
-        role = guild.roles.cache.find((x: { name: any; }) => x.name == text);
+        role = guild.roles.cache.find((x) => x.name == text);
     }
     if (!role && bySimilar) {
         // closest matching name
-        role = guild.roles.cache.reduce(function (prev: { name: any; }, curr: { name: any; }) {
-            return (stringSimilarity(curr.name, text) > stringSimilarity(prev.name, text) ? curr : prev);
+        role = <Role>guild.roles.cache.reduce((prev, curr) => {
+            return prev ? (stringSimilarity(curr.name, text) > stringSimilarity(prev.name, text) ? curr : prev) : curr;
         });
-        if (stringSimilarity(role.name, text) < 0.4) {
+        if (role && stringSimilarity(role.name, text) < 0.4) {
             role = undefined;
         }
     }
@@ -211,20 +212,20 @@ export function stringToRole(guild: { roles: { cache: { get: (arg0: any) => any;
  * - similar channel name
  *
  * @export
- * @param {Guild} guild guild where channel is in
- * @param {string} text string to parse
+ * @param guild guild where channel is in
+ * @param text string to parse
  * @returns
  */
-export function stringToChannel(guild: { channels: { cache: { get: (arg0: any) => any; find: (arg0: (x: any) => boolean) => any; reduce: (arg0: (prev: any, curr: any) => any) => any; }; }; }, text: any, byName = true, bySimilar = true): Channel | null {
-    if (!guild || !text) return null;
+export function stringToChannel(guild: Guild, text: string, byName = true, bySimilar = true): GuildChannel | undefined {
+    if (!guild || !text) return;
     text = extractString(text, /<#(\d*)>/) || text;
 
     let channel = guild.channels.cache.get(text);
-    if (!channel && byName) channel = guild.channels.cache.find((x: { name: string; }) => x.name == text);
+    if (!channel && byName) channel = guild.channels.cache.find((x) => x.name == text);
     if (!channel && bySimilar) {
         // closest matching name
-        channel = guild.channels.cache.reduce(function (prev: { name: string; }, curr: { name: string; }) {
-            return (stringSimilarity(curr.name, text) > stringSimilarity(prev.name, text) ? curr : prev);
+        channel = <GuildChannel>guild.channels.cache.reduce(function (prev, curr) {
+            return prev ? (stringSimilarity(curr.name, text) > stringSimilarity(prev.name, text) ? curr : prev) : curr;
         });
         if (stringSimilarity(channel.name, text) < 0.4) {
             channel = undefined;
@@ -237,7 +238,7 @@ export function stringToChannel(guild: { channels: { cache: { get: (arg0: any) =
  * Parses a string into a JSON object for Embed.
  *
  * @export
- * @param {string} text string to parse
+ * @param text string to parse
  * @returns
  */
 export function stringToEmbed(text: string): MessageEmbed | null {

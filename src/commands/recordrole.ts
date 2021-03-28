@@ -1,22 +1,34 @@
 import xlg from '../xlogger';
-import { sendError } from "../utils/messages";
+import { sendError, sendInfo, sendWarn } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { Command, CommandClient, ExtMessage } from '../typings';
-import { TextChannel } from 'discord.js';
+import { Command } from '../typings';
 import { stringToRole } from "../utils/parsers";
 
 export const command: Command = {
     name: "recordrole",
     aliases: ["rr"],
     usage: "<#role | none>",
-    args: true,
-    specialArgs: 1,
+    // args: true,
+    // specialArgs: 1,
     description: "Set the role given to record breakers",
     async execute(client, message, args) {
         try {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;
             if (!message.guild) return;
+
+            if (!args.length) {
+                const recordRoleID = await client.database.getRecordRole(message.guild.id);
+                if (recordRoleID && recordRoleID.length === 18) {
+                    const recordRole = message.guild.roles.cache.get(recordRoleID);
+                    if (recordRole) {
+                        sendInfo(message.channel, `The current record role is ${recordRole}`);
+                        return;
+                    }
+                }
+                sendWarn(message.channel, `No record role is set`);
+                return;
+            }
             
             const a = args.join(" ");
             if (a === "none") {
@@ -32,12 +44,11 @@ export const command: Command = {
 
             const target = stringToRole(message.guild, a);// getting role from args
             if (!target || typeof target === "string") {
-                if (!(message.channel instanceof TextChannel)) return false;
                 sendError(message.channel, "A valid role is required", true);
                 return false;
             }
 
-            await client.database?.setRecordRole(message.guild.id, target.id);// set the id of the recordrole for the guild in the db
+            await client.database.setRecordRole(message.guild.id, target.id);// set the id of the recordrole for the guild in the db
             message.channel.send({
                 embed: {
                     color: process.env.NAVY_COLOR,
@@ -47,7 +58,6 @@ export const command: Command = {
             return;
         } catch (error) {
             xlg.error(error);
-            if (!(message.channel instanceof TextChannel)) return;
             sendError(message.channel);
             return false;
         }
