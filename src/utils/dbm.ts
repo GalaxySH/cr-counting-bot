@@ -605,6 +605,8 @@ export class Database {
             "memberID": memberID
         }, {
             $set: mute
+        }, {
+            upsert: true
         });
     }
 

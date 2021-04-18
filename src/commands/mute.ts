@@ -1,12 +1,11 @@
 import xlg from '../xlogger';
 import { sendError } from "../utils/messages";
 import checkAccess from '../utils/checkaccess';
-import { Command, CommandClient, ExtMessage } from '../typings';
+import { Command } from '../typings';
 import { TextChannel } from 'discord.js';
 import { durationToString, stringToMember } from '../utils/parsers';
 import { stringToDuration } from '../utils/time';
 import moment from 'moment';
-//import { stringToChannel } from '../utils/parsers';
 
 export const command: Command = {
     name: "mute",
@@ -51,25 +50,25 @@ export const command: Command = {
             }
 
             const aimDate = moment(new Date()).add(time, "milliseconds").toDate();
-            
-            const mu = await client.database?.getMute(message.guild.id, target.id);
+
+            const mu = await client.database.getMute(message.guild.id, target.id);
             if (mu) {
                 if (!time && client.sendInfo) {
                     //client.sendWarn(message.channel, `${target} is already muted, and you did not adjust the length.`);
-                    await client.database?.setMemberMute(message.guild.id, target.id, moment(new Date()).add(5, "years").toDate())
+                    await client.database.setMemberMute(message.guild.id, target.id, moment(new Date()).add(5, "years").toDate())
                     client.sendInfo(message.channel, `Adjusted the mute of ${target} (${target.id}) to **5 years**.`);
                 } else if (client.sendInfo) {
-                    await client.database?.setMemberMute(message.guild.id, target.id, aimDate);
+                    await client.database.setMemberMute(message.guild.id, target.id, aimDate);
                     client.sendInfo(message.channel, `Adjusted the mute of ${target} (${target.id}) to ${dur}.`);
                 }
             } else {
                 if (!time) {
-                    await client.database?.setMemberMute(message.guild.id, target.id, moment(new Date()).add(5, "years").toDate())
+                    await client.database.setMemberMute(message.guild.id, target.id, moment(new Date()).add(5, "years").toDate())
                     if (client.sendInfo) {
                         client.sendInfo(message.channel, `Muted ${target} (${target.id}) for **5 years**.`);
                     }
                 } else {
-                    await client.database?.setMemberMute(message.guild.id, target.id, aimDate);
+                    await client.database.setMemberMute(message.guild.id, target.id, aimDate);
                     if (client.sendInfo) {
                         client.sendInfo(message.channel, `Muted ${target} (${target.id}) for ${dur}.`);
                     }
