@@ -334,7 +334,7 @@ Human`)
     await message.channel.updateOverwrite(message.member, {
         "SEND_MESSAGES": false
     }, `auto-muting ${message.author.tag} for ${muteLength}min`);
-    client.database?.setMemberMute(message.guild?.id, message.author.id, aimDate);
+    client.database.setMemberMute(message.guild?.id, message.author.id, aimDate);
 }
 
 // function userStatter(status: boolean, memberid: string, guildid: string, count?: number) {}
