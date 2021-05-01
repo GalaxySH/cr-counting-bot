@@ -313,7 +313,7 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
         const joinedtt = tt.join("");
         await message.author.send(`Hello Person Who Cannot Count 👋
 
-Your server admins have enable auto-muting.
+Your server admins have enabled auto-muting.
 
 You have been muted for **${joinedtt}.** Check how much time remains on your mute with the \` c?ms \` command.
 
