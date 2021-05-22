@@ -80,19 +80,23 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("guildMemberAdd", async (member) => {
-    const mute = await client.database?.getMute(member.guild.id, member.id);
-    if (mute) {
-        const channelId = await client.database?.getChannel(member.guild.id);
-        if (channelId) {
-            const channel = member.guild.channels.cache.get(channelId);
-            if (channel) {
-                if (channel.permissionsFor(member.client.user || "")?.has("MANAGE_CHANNELS")) {
-                    channel.updateOverwrite(member, { "SEND_MESSAGES": false }, `resetting mute for ${member.user.tag} (mute evasion recovery)`);
+    try {
+        const mute = await client.database?.getMute(member.guild.id, member.id);
+        if (mute) {
+            const channelId = await client.database.getChannel(member.guild.id);
+            if (channelId) {
+                const channel = member.guild.channels.cache.get(channelId);
+                if (channel) {
+                    // if (channel.permissionsFor(member.client.user || "")?.has("MANAGE_CHANNELS")) {
+                    // }
+                    await channel.updateOverwrite(member, { "SEND_MESSAGES": false }, `resetting mute for ${member.user.tag} (mute evasion recovery)`);
                 }
             }
         }
+    } catch (error) {
+        //
     }
-})
+});
 
 function delNoChat(msg: ExtMessage) {
     if (!msg.chatting && msg.channel.id === msg.countChannel) {
