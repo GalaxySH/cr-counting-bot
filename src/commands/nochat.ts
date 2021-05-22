@@ -26,13 +26,13 @@ export const command: Command = {
                 return false;
             }
             const state = (args[0] !== "true");
-            await client.database?.setChatAllowed(message.guild.id, state);// set desired chatAllowed state
-            const countChannel = await client.database?.getChannel(message.guild?.id);// get counting channel id
+            await client.database.setChatAllowed(message.guild.id, state);// set desired chatAllowed state
+            const countChannel = await client.database.getChannel(message.guild?.id);// get counting channel id
             if (!countChannel) return false;// IF A COUNT CHANNEL IS NOT FOUND
             message.channel.send({
                 embed: {
                     color: process.env.INFO_COLOR,
-                    description: `**${state ? "Allowed" : "Disallowed"}** Chatting In ${message.guild.channels.cache.get(countChannel.countChannel || "")}`
+                    description: `**${state ? "Allowed" : "Disallowed"}** Chatting In ${message.guild.channels.cache.get(countChannel)}`
                 }
             });
             return;

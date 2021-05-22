@@ -18,8 +18,8 @@ export const command: Command = {
             if (!(await checkAccess(message, { adminOnly: true }))) return;
 
             if (args.length === 1) {
-                if (/[^0-9]+/.test(args[0]) || parseInt(args[0], 10) > 75000 || parseInt(args[0], 10) < 1) {
-                    sendError(message.channel, "That is not a valid number\nNumber must be less than `75,000`");
+                if (/[^0-9]+/.test(args[0]) || parseInt(args[0], 10) > 75000 || parseInt(args[0], 10) < 1000) {
+                    sendError(message.channel, "That is not a valid number\nNumber must be less than `|75,000|`");
                     return false;
                 }
                 const increment = await client.database?.getIncrement(message.guild?.id);
@@ -34,7 +34,6 @@ export const command: Command = {
                     return false;
                 }
                 const ninc = parseInt(args[0], 10);// The increment to be set
-
 
                 const stats = await client.database?.getStats(message.guild?.id);
                 if (!stats) return false;

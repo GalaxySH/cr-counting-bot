@@ -9,7 +9,8 @@
     "start": "npx tsc && node dist/bot.js",
     "build:prod": "npx tsc -p tsconfig.prod.json",
     "run": "node dist/bot.js",
-    "watch": "concurrently \"tsc -w\" \"nodemon dist/bot.js\""
+    "watch": "concurrently \"tsc -w\" \"nodemon dist/bot.js\"",
+    "build:dev": "docker-compose -f .\\docker-compose.dev.yml up --build"
   },
   "keywords": [
     "discord",

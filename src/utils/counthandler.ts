@@ -11,7 +11,7 @@ function checkNum(c: string): boolean {
 
 export = async (client: CommandClient, message: ExtMessage): Promise<boolean> => {
     try {
-        if (!message.guild || !client.database) return false;
+        if (!message.guild) return false;
         
         if (message.channel.id !== message.countChannel) return false;
 
@@ -20,6 +20,16 @@ export = async (client: CommandClient, message: ExtMessage): Promise<boolean> =>
         }
         const num = parseInt(message.content, 10);
         if (isNaN(num)) {
+            return false;
+        }
+
+        const mute = await client.database?.getMute(message.guild.id, message.author.id);
+        if (mute) {
+            try {
+                await message.react("🔇");
+            } catch (error) {
+                //
+            }
             return false;
         }
 
@@ -113,8 +123,12 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
             const ms = duration.asMilliseconds();
 
             if (ms < timing.threshold) {
-                message.react("🟠");
-                message.channel.send(`${message.member} you were beaten`, {
+                try {
+                    await message.react("🟠");
+                } catch (error) {
+                    //
+                }
+                await message.channel.send(`${message.member} you were beaten`, {
                     embed: {
                         color: process.env.INFO_COLOR,
                         title: `\`🟠\``,
@@ -132,10 +146,14 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
                 const lastMessage = message.channel.messages.cache.get(lastMessageID);
                 if (!lastMessage && message.guesses) {// if the message for the last count in the counting channel couldn't be found
                     // if the guild has guesses for the number left, continue letting them guess
-                    message.react("🟣");
+                    try {
+                        await message.react("🟣");
+                    } catch (error) {
+                        //
+                    }
                     const delReminder = await client.database.getDelReminderSent(message.guild?.id);
                     if (!delReminder) {// if the message about being tricked hasn't been sent yet
-                        message.channel.send(`${message.member} you were tricked`, {
+                        await message.channel.send(`${message.member} you were tricked`, {
                             embed: {
                                 color: process.env.INFO_COLOR,
                                 title: `\`🟣\` Previous Count Deleted`,
@@ -157,8 +175,12 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
         if (player && player.saves >= 1) {// if the user has individual saves left, stop
             player.saves--;
             client.database?.updatePlayerSaves(message.author.id, player.saves);
-            message.react("🟠");
-            message.channel.send(`${message.member} you miscounted **and were saved**`, {
+            try {
+                await message.react("🟠");
+            } catch (error) {
+                //
+            }
+            await message.channel.send(`${message.member} you miscounted **and were saved**`, {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: `\`🟠\` ${reason}`,
@@ -174,8 +196,12 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
         if (guildSaves && guildSaves >= 1) {// if the guild has saves left, stop
             guildSaves--;
             client.database?.updateSaves(message.guild?.id || "", guildSaves);
-            message.react("🟠");
-            message.channel.send(`${message.member} you miscounted **and were saved**`, {
+            try {
+                await message.react("🟠");
+            } catch (error) {
+                //
+            }
+            await message.channel.send(`${message.member} you miscounted **and were saved**`, {
                 embed: {
                     color: process.env.INFO_COLOR,
                     title: `\`🟠\` ${reason}`,
@@ -189,7 +215,11 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
         }
 
         // If all checks have failed, the numbers should be reset and the data logged
-        message.react("❌");
+        try {
+            await message.react("❌");
+        } catch (error) {
+            //
+        }
         await client.database.setLastUpdater(message.guild?.id || "", "");// reset lastUpdater for a new count (anyone can send)
         await client.database.updateCount(message.guild?.id || "", 0);// reset the count
         await client.database.setDelReminderShown(message.guild?.id || "", false);// resets the status to no for whether the reminder for being delete-tricked had been sent
@@ -220,7 +250,7 @@ async function handleFoul(client: CommandClient, message: ExtMessage, lastUpdate
 
         const increment = await client.database.getIncrement(message.guild?.id);
         const incre = increment || 1;
-        message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
+        await message.channel.send(`${message.member} you messed up **with no saves left**`, {// gives the actual fail message
             embed: {
                 color: process.env.INFO_COLOR,
                 title: `\`❌\` ${reason}`,
@@ -313,20 +343,20 @@ async function handleMute(client: CommandClient, message: ExtMessage, offBy?: nu
         const joinedtt = tt.join("");
         await message.author.send(`Hello Person Who Cannot Count 👋
 
-Your server admins have enable auto-muting.
+Your server admins have enabled auto-muting.
 
-You have been muted for **${joinedtt}.** Check how much time remains on your mute with the \` c?ms \` command.
+You have been muted for **${joinedtt}** in ${message.guild}. Check how much time remains on your mute with the \` c?ms \` command.
 
 Remember:
     - **You can't count more than once in a row**
     - **You cannot count out of sequence**
     - After a fatal mistake is made, the count starts over
     - Your server gets one save per day
-    - Check the current count with the \` c?c \` command
-    - Of course, **other people may try to mess with you**
+    - Confirm the count with the \` c?c \` command
+    - Other people may try to mess with you
 
 Yours,
-Human`)
+Human`);
     } catch (e) {
         // ...just want errors to fizzle out
     }

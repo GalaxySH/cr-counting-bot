@@ -114,6 +114,9 @@ export class Database {
         correctAccumulation: 0
     }
 
+    /**
+     * Get the current count of a guild
+     */
     async getCount(guildID: string | undefined): Promise<number> {
         if (!guildID || !this.db) return 0;
         await this.maybeSetDefaults(guildID);
@@ -122,6 +125,9 @@ export class Database {
         return result.count;
     }
 
+    /**
+     * Get the counting increment for any guild. If one is not set, a default will be provided (1)
+     */
     async getIncrement(guildID: string | undefined): Promise<number> {
         if (!guildID || !this.db) return 0;
         await this.maybeSetDefaults(guildID);
@@ -135,13 +141,14 @@ export class Database {
         return result.increment;
     }
 
-    async getChannel(guildID: string | undefined): Promise<guildObject | false> {
-        if (!guildID || !this.db) return false;
+    async getChannel(guildID: string | undefined): Promise<string> {
+        if (!guildID || !this.db) return "";
         await this.maybeSetDefaults(guildID);
         const GuildData = this.db.collection("GuildData");
-        const result = await GuildData.findOne({ "guildID": guildID }) || this.guildDefaults;
-        if (!result) return false;
-        return result;
+        const result = await GuildData.findOne({ "guildID": guildID }, { projection: { "_id": 0, "countChannel": 1 } } ) || this.guildDefaults;
+        if (!result) return "";
+        if (!result.countChannel) return "";
+        return result.countChannel;
     }
 
     async getLastUpdater(guildID: string | undefined): Promise<string> {
@@ -161,7 +168,7 @@ export class Database {
         if (!result || !result.chatAllowed) return false;
         return result.chatAllowed;
     }
-    
+
     async getStats(guildID: string | undefined): Promise<guildObject | false> {
         if (!guildID || !this.db) return false;
         await this.maybeSetDefaults(guildID);

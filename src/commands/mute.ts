@@ -20,9 +20,12 @@ export const command: Command = {
             // check for perms
             if (!(await checkAccess(message, { adminOnly: true }))) return;
             if (!message.guild || message.channel.type !== "text") return;
-            const ccid = await client.database?.getChannel(message.guild.id);
-            if (!ccid || !ccid.countChannel) return;
-            const chan = message.guild.channels.cache.get(ccid.countChannel);
+            const ccid = await client.database.getChannel(message.guild.id);
+            if (!ccid) {
+                sendError(message.channel, `The counting channel has not been set. Please set it in order for me to mute this person.`);
+                return;
+            }
+            const chan = message.guild.channels.cache.get(ccid);
             if (!chan || !chan.id) {
                 sendError(message.channel, "The counting channel does not seem to exist");
                 return;
@@ -34,7 +37,7 @@ export const command: Command = {
                 return;
             }
 
-            chan.updateOverwrite(target, { "SEND_MESSAGES": false }, `manually setting mute of ${target.user.tag}`);
+            await chan.updateOverwrite(target, { "SEND_MESSAGES": false }, `${message.author.tag} manually setting mute of ${target.user.tag}`);
 
             //let mendm = "";// Taken from GreenMesa
             let time = 0;
