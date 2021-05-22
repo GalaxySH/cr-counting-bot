@@ -79,6 +79,21 @@ client.on("messageReactionAdd", async (reaction, user) => {
     PaginationExecutor.paginate(reaction, user);
 });
 
+client.on("guildMemberAdd", async (member) => {
+    const mute = await client.database?.getMute(member.guild.id, member.id);
+    if (mute) {
+        const channelId = await client.database?.getChannel(member.guild.id);
+        if (channelId) {
+            const channel = member.guild.channels.cache.get(channelId);
+            if (channel) {
+                if (channel.permissionsFor(member.client.user || "")?.has("MANAGE_CHANNELS")) {
+                    channel.updateOverwrite(member, { "SEND_MESSAGES": false }, `resetting mute for ${member.user.tag} (mute evasion recovery)`);
+                }
+            }
+        }
+    }
+})
+
 function delNoChat(msg: ExtMessage) {
     if (!msg.chatting && msg.channel.id === msg.countChannel) {
         msg.delete();
@@ -103,8 +118,8 @@ client.on("message", async (message: ExtMessage) => {
         message.chatting = chatting;
 
         const countChannel = await client.database?.getChannel(message.guild?.id);
-        if (countChannel && countChannel.countChannel) {
-            message.countChannel = countChannel.countChannel;
+        if (countChannel) {
+            message.countChannel = countChannel;
         } else {
             message.countChannel = "";
         }

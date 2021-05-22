@@ -22,16 +22,13 @@ export class MutePoller {
             if (!mc) return;
             mc.forEach(async (a: MuteData) => {
                 const g = Bot.client.guilds.cache.get(a.guildID);
-                const cc = await this.database.getChannel(a.guildID);
-                if (g && (cc && cc.countChannel)) {
+                const cc = await this.database.getChannel(a.guildID);// counting channel
+                if (g && cc) {
                     const m = g.members.cache.get(a.memberID);
-                    const c = g.channels.cache.get(cc.countChannel);
+                    const c = g.channels.cache.get(cc);
                     if (m && c) {
                         const o = c.permissionOverwrites.find(x => x.type === "member" && x.id === m.id);
                         if (o && !o.allow.has("SEND_MESSAGES")) {
-                            /*await o.update({
-                                "SEND_MESSAGES": true
-                            });*/
                             await o.delete(`unmuting ${m.user.tag} automatically`);
                         }
                     }
